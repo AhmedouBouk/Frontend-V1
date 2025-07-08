@@ -1,0 +1,123 @@
+<div class="filter-form-container">
+  <form [formGroup]="filterForm">
+    <!-- Section Prix -->
+    <div class="form-section">
+      <div class="section-header">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Filtre de prix
+        </h3>
+        <!-- Remplacer le toggle switch par un simple checkbox pour résoudre le problème de cliquabilité -->
+        <label class="toggle-switch" for="usePriceFilter">
+          <input type="checkbox" formControlName="usePriceFilter" id="usePriceFilter">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="section-content" *ngIf="filterForm.get('usePriceFilter')?.value">
+        <!-- Sélecteur exact / intervalle -->
+        <div class="price-mode-select">
+          <label>
+            <input type="radio" value="exact" formControlName="priceMode">
+            Montant exact
+          </label>
+          <label>
+            <input type="radio" value="interval" formControlName="priceMode">
+            Intervalle
+          </label>
+        </div>
+
+        <!-- Champ exact -->
+        <div *ngIf="filterForm.get('priceMode')?.value === 'exact'" class="form-group">
+          <label for="price">Montant (€)</label>
+          <input type="number" id="price" formControlName="price" placeholder="ex: 150000">
+        </div>
+
+        <!-- Champs intervalle -->
+        <div *ngIf="filterForm.get('priceMode')?.value === 'interval'" class="form-group">
+          <div class="input-group">
+            <div class="form-group">
+              <label for="minPrice">Min (€)</label>
+              <input type="number" id="minPrice" formControlName="minPrice" placeholder="ex: 100000">
+            </div>
+            <div class="form-group">
+              <label for="maxPrice">Max (€)</label>
+              <input type="number" id="maxPrice" formControlName="maxPrice" placeholder="ex: 300000">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section Date -->
+    <div class="form-section">
+      <div class="section-header">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Filtre de date
+        </h3>
+        <!-- Remplacer le toggle switch par un simple checkbox pour résoudre le problème de cliquabilité -->
+        <label class="toggle-switch" for="useDateFilter">
+          <input type="checkbox" formControlName="useDateFilter" id="useDateFilter">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="section-content" *ngIf="filterForm.get('useDateFilter')?.value">
+        <!-- Sélecteur exact / intervalle -->
+        <div class="price-mode-select">
+          <label>
+            <input type="radio" value="exact" formControlName="dateMode">
+            Date exacte
+          </label>
+          <label>
+            <input type="radio" value="interval" formControlName="dateMode">
+            Intervalle
+          </label>
+        </div>
+
+        <!-- Champ exact -->
+        <div *ngIf="filterForm.get('dateMode')?.value === 'exact'" class="form-group">
+          <label for="exactDate">Date</label>
+          <input type="date" id="exactDate" formControlName="exactDate">
+        </div>
+
+        <!-- Champs intervalle -->
+        <div *ngIf="filterForm.get('dateMode')?.value === 'interval'" class="form-group">
+          <div class="input-group">
+            <div class="form-group">
+              <label for="startDate">Date de début</label>
+              <input type="date" id="startDate" formControlName="startDate">
+            </div>
+            <div class="form-group">
+              <label for="endDate">Date de fin</label>
+              <input type="date" id="endDate" formControlName="endDate">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" 
+              class="btn btn-primary" 
+              (click)="search()"
+              [disabled]="!filterForm.get('usePriceFilter')?.value && !filterForm.get('useDateFilter')?.value"
+              [class.disabled]="!filterForm.get('usePriceFilter')?.value && !filterForm.get('useDateFilter')?.value">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Rechercher
+      </button>
+    </div>
+  </form>
+</div>
