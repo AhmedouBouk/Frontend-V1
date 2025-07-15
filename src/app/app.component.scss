@@ -1,222 +1,127 @@
-:host {
-  display: block;
-  width: 100%;
-  height: 100vh;
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  overflow: hidden;
-}
-
+/* ===== LAYOUT ===== */
 .app-container {
   display: flex;
   height: 100vh;
+  position: relative;
   overflow: hidden;
-  background-color: #f8fafc;
-  position: relative; /* Pour s'assurer que les éléments enfants positionnés correctement */
-  
-  @media (max-width: 480px) {
-    flex-direction: column;
-  }
 }
 
+/* ===== SIDEBAR ===== */
 .sidebar {
-  width: 380px;
-  background: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  width: var(--sidebar-width);
+  height: 100%;
+  background-color: var(--surface-color);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  z-index: 10;
-  transition: transform 0.3s ease, width 0.3s ease;
-  height: 100%; /* Assurer que la sidebar prend la hauteur complète */
-  
-  @media (max-width: 1024px) {
-    width: 340px;
-  }
-  
-  @media (max-width: 768px) {
-    position: fixed; /* Utiliser fixed au lieu de absolute pour éviter les problèmes de positionnement */
-    width: 320px; /* Fixed width for consistency */
-    max-width: 320px; /* Limiter la largeur maximale */
-    transform: translateX(-100%);
-    top: 0;
-    left: 0;
-    bottom: 0;
-    
-    &.open {
-      transform: translateX(0);
-    }
-  }
-  
-  @media (max-width: 480px) {
-    width: 280px; /* Slightly smaller but still fixed width on very small screens */
-    max-width: 280px;
-  }
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  z-index: 1000;
+  overflow: hidden;
 }
 
 .sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
-  @media (max-width: 768px) {
-    padding: 1.25rem;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 1rem;
-  }
-  
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    
-    @media (max-width: 768px) {
-      font-size: 1.25rem;
-    }
-    
-    @media (max-width: 480px) {
-      font-size: 1.125rem;
-    }
-    
-    .logo-icon {
-      color: #0ea5e9;
-    }
-  }
+  background-color: var(--surface-color);
+  min-height: var(--header-height);
+}
+
+.sidebar-header h1 {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.sidebar-header .logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  border-radius: var(--radius-xl);
+  color: white;
+  box-shadow: var(--shadow-md);
 }
 
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 1rem;
-  
-  @media (max-width: 480px) {
-    padding: 0 0.75rem;
-  }
+  padding: var(--space-lg);
 }
 
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: var(--surface-color);
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===== MAP CONTAINER ===== */
 .map-container {
   flex: 1;
   position: relative;
-  overflow: auto; /* Permettre le défilement */
-  padding: 1rem;
-  
-  @media (max-width: 768px) {
-    padding: 0.75rem;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 0.5rem;
-    height: calc(100vh - 50px); /* Adjust for mobile view when sidebar is collapsed */
-  }
+  height: 100%;
+  overflow: hidden;
 }
 
+/* ===== MAP CONTROLS ===== */
 .map-controls {
   position: absolute;
-  top: 1.5rem; /* Positioned at the top */
-  right: 1.5rem;
+  top: var(--space-xl);
+  right: var(--space-xl);
   z-index: 1000;
   display: flex;
-  flex-direction: row; /* Horizontal layout */
-  gap: 0.5rem;
-  
-  @media (max-width: 768px) {
-    top: 1.25rem; /* Adjusted for mobile */
-    right: 1.25rem;
-    gap: 0.4rem;
-  }
-  
-  @media (max-width: 480px) {
-    top: 1rem; /* Adjusted for smaller screens */
-    right: 1rem;
-    gap: 0.3rem;
-  }
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .control-button {
-  background: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  color: #64748b;
-  transition: all 0.2s ease;
-  
-  @media (max-width: 768px) {
-    width: 36px;
-    height: 36px;
-    border-radius: 6px;
-  }
-  
-  @media (max-width: 480px) {
-    width: 32px;
-    height: 32px;
-  }
-  
-  &:hover {
-    background: #f8fafc;
-    color: #0ea5e9;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  &.active {
-    background: #0ea5e9;
-    color: white;
-  }
-  
-  svg {
-    @media (max-width: 480px) {
-      width: 18px;
-      height: 18px;
-    }
-  }
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
 }
 
-.mobile-toggle {
-  display: none;
-  position: fixed; /* Utiliser fixed pour qu'il soit toujours visible */
-  top: 1.5rem; /* Déplacer vers le haut comme demandé */
-  left: 1.5rem;
-  z-index: 1001; /* Assurer qu'il est au-dessus de tout */
-  background: white;
-  border: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  color: #0f172a;
-  cursor: pointer;
-  
-  @media (max-width: 768px) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  @media (max-width: 480px) {
-    width: 42px;
-    height: 42px;
-    top: 1rem;
-    left: 1rem;
-    
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
+.control-button:hover {
+  background-color: var(--surface-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
-/* Ajouter un overlay pour les appareils mobiles */
+.control-button.active {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* ===== MOBILE STYLES ===== */
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -224,30 +129,67 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9;
-  
-  @media (max-width: 768px) {
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  transition: var(--transition-normal);
+}
+
+.mobile-toggle {
+  display: none;
+  position: absolute;
+  top: var(--space-xl);
+  left: var(--space-xl);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 900;
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+}
+
+.mobile-toggle:hover {
+  background-color: var(--surface-hover);
+  transform: scale(1.05);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 320px;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay.open {
     display: block;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    
-    &.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+  }
+
+  .mobile-toggle {
+    display: flex;
   }
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+@media (max-width: 480px) {
+  .sidebar-header {
+    padding: var(--space-lg);
+  }
+
+  .sidebar-header h1 {
+    font-size: 1.125rem;
+  }
 }

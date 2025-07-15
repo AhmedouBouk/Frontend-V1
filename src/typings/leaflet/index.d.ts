@@ -262,4 +262,8 @@ declare module 'leaflet' {
     getEvents(): { [name: string]: Function };
     getTileSize(): Point;
   }
+
+  export function icon(arg0: { iconUrl: string; iconRetinaUrl: string; shadowUrl: string; iconSize: number[]; iconAnchor: number[]; popupAnchor: number[]; tooltipAnchor: number[]; shadowSize: number[]; }) {
+    throw new Error("Function not implemented.");
+  }
 }

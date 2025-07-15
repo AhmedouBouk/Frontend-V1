@@ -1,6 +1,5 @@
 import { Component, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import { RouterOutlet } from "@angular/router"
 import { FormComponent } from "./components/form/form.component"
 import { MapService } from "./services/map.service"
 import { MapComponent } from "./components/map/map.component"
@@ -14,7 +13,7 @@ import { MapComponent } from "./components/map/map.component"
 })
 export class AppComponent {
   sidebarOpen = false
-  mapType = "street"
+  mapType: "street" | "satellite" | "cadastre" = "street" // Initialize mapType
 
   private readonly mapService = inject(MapService)
 

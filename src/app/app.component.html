@@ -12,7 +12,7 @@
             <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
-        DVF Explorer
+        The Explorer
       </h1>
     </div>
     <div class="sidebar-content">
@@ -22,7 +22,7 @@
   
   <div class="map-container">
     <div class="map-controls">
-      <button class="control-button" title="Centrer la carte" type="button" (click)="setMapType('cadastre')">
+      <button class="control-button" title="Centrer la carte" type="button" (click)="centerMap()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M12 8V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -48,11 +48,19 @@
         </svg>
         <span class="sr-only">Vue satellite</span>
       </button>
+      <button class="control-button" [class.active]="mapType === 'cadastre'" title="Vue cadastre" type="button" (click)="setMapType('cadastre')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3H21V21H3V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 9H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 21V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="sr-only">Vue cadastre</span>
+      </button>
     </div>
-    
+  
     <!-- Composant map -->
     <app-map></app-map>
-    
+  
     <!-- Bouton de toggle pour la sidebar mobile, désormais en haut à gauche -->
     <button class="mobile-toggle" type="button" (click)="toggleSidebar()">
       <svg *ngIf="!sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,4 +75,5 @@
       <span class="sr-only">Afficher/masquer le menu</span>
     </button>
   </div>
-</div>
+  </div>
+  

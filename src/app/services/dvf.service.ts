@@ -17,13 +17,23 @@ export class DvfService {
    * @param priceRange Plage de prix [min, max] ou null si désactivé
    * @param dateRange Plage de dates [début, fin] ou null si désactivé
    * @param exactDate Date exacte ou null si désactivé
+   * @param surfaceRange Plage de surface [min, max] ou null si désactivé
+   * @param exactSurface Surface exacte ou null si désactivé
+   * @param energyClassRange Plage de classes énergétiques [min, max] ou null si désactivé
+   * @param exactEnergyClass Classe énergétique exacte ou null si désactivé
+   * @param selectedEnergyClasses Liste des classes énergétiques sélectionnées ou null si désactivé
    */
   getDvfProperties(
     topLeft: [number, number],
     bottomRight: [number, number],
     priceRange: [number, number] | null,
     dateRange: [string, string] | null,
-    exactDate: string | null = null
+    exactDate: string | null = null,
+    surfaceRange: [number, number] | null = null,
+    exactSurface: number | null = null,
+    energyClassRange: [string, string] | null = null,
+    exactEnergyClass: string | null = null,
+    selectedEnergyClasses: string[] | null = null
   ): Observable<DvfProperty[]> {
     const params: any = {
       lat_min: bottomRight[0],
@@ -44,6 +54,24 @@ export class DvfService {
       // Sinon, utiliser l'intervalle de dates
       params.date_min = dateRange[0];
       params.date_max = dateRange[1];
+    }
+    
+    // Gestion du filtre de surface
+    if (exactSurface) {
+      params.surface_exacte = exactSurface;
+    } else if (surfaceRange) {
+      params.surface_min = surfaceRange[0];
+      params.surface_max = surfaceRange[1];
+    }
+    
+    // Gestion du filtre de classe énergétique
+    if (exactEnergyClass) {
+      params.energy_classe_exacte = exactEnergyClass;
+    } else if (energyClassRange) {
+      params.energy_classe_min = energyClassRange[0];
+      params.energy_classe_max = energyClassRange[1];
+    } else if (selectedEnergyClasses && selectedEnergyClasses.length > 0) {
+      params.energy_classes = selectedEnergyClasses;
     }
 
     const apiUrl = `${environment.apiUrl}/dvf/filtrer`;
