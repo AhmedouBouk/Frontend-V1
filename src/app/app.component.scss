@@ -14,9 +14,15 @@
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition: all var(--transition-normal);
   z-index: 1000;
   overflow: hidden;
+  transform: translateX(0);
+}
+
+.sidebar:not(.open) {
+  transform: translateX(-100%);
+  width: 0;
 }
 
 .sidebar-header {
@@ -29,7 +35,7 @@
   min-height: var(--header-height);
 }
 
-.sidebar-header h1 {
+.logo-button {
   font-size: 1.375rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -38,6 +44,28 @@
   display: flex;
   align-items: center;
   gap: var(--space-lg);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.logo-button:hover {
+  color: var(--primary-500);
+  transform: scale(1.02);
+}
+
+.logo-button:focus {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
+.logo-text {
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .sidebar-header .logo-icon {
@@ -121,6 +149,36 @@
   border-color: var(--primary-color);
 }
 
+/* ===== FIXED LOGO ===== */
+.fixed-logo {
+  position: absolute;
+  top: var(--space-xl);
+  left: var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  border-radius: var(--radius-xl);
+  width: 48px;
+  height: 48px;
+  border: none;
+  color: white;
+  box-shadow: var(--shadow-md);
+  z-index: 900;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fixed-logo:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.fixed-logo:focus {
+  outline: 2px solid var(--primary-300);
+  outline-offset: 2px;
+}
+
 /* ===== MOBILE STYLES ===== */
 .sidebar-overlay {
   display: none;
@@ -167,12 +225,12 @@
 
   .sidebar {
     position: fixed;
-    left: -100%;
     box-shadow: var(--shadow-xl);
   }
 
   .sidebar.open {
-    left: 0;
+    transform: translateX(0);
+    width: var(--sidebar-width);
   }
 
   .sidebar-overlay.open {
@@ -189,7 +247,7 @@
     padding: var(--space-lg);
   }
 
-  .sidebar-header h1 {
+  .logo-button {
     font-size: 1.125rem;
   }
 }

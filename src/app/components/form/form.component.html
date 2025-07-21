@@ -193,53 +193,27 @@
             <span class="radio-label">Sélection multiple</span>
           </label>
         </div>
-
-        <!-- Mode valeur exacte -->
-        <div class="energy-exact" *ngIf="filterForm.get('energyMode')?.value === 'exact'">
-          <div class="form-group">
-            <label for="exactEnergyClass">Classe énergétique</label>
-            <select id="exactEnergyClass" formControlName="exactEnergyClass" class="form-control">
-              <option value="">Sélectionner</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="E">E</option>
-              <option value="F">F</option>
-              <option value="G">G</option>
-            </select>
-          </div>
-        </div>
+<!-- Mode valeur exacte -->
+<div class="energy-exact" *ngIf="filterForm.get('energyMode')?.value === 'exact'">
+  <div class="form-group">
+    <label for="exactEnergyValue">Valeur énergétique (kWh/m²/an)</label>
+    <input type="number" id="exactEnergyValue" formControlName="exactEnergyValue" placeholder="ex: 150">
+  </div>
+</div>
 
         <!-- Mode intervalle -->
-        <div class="energy-interval" *ngIf="filterForm.get('energyMode')?.value === 'interval'">
-          <div class="input-row">
-            <div class="form-group">
-              <label for="minEnergyClass">Min</label>
-              <select id="minEnergyClass" formControlName="minEnergyClass" class="form-control">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="G">G</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="maxEnergyClass">Max</label>
-              <select id="maxEnergyClass" formControlName="maxEnergyClass" class="form-control">
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="G">G</option>
-              </select>
-            </div>
-          </div>
-        </div>
+<div class="energy-interval" *ngIf="filterForm.get('energyMode')?.value === 'interval'">
+  <div class="input-row">
+    <div class="form-group">
+      <label for="minEnergyValue">Min (kWh/m²/an)</label>
+      <input type="number" id="minEnergyValue" formControlName="minEnergyValue" placeholder="50">
+    </div>
+    <div class="form-group">
+      <label for="maxEnergyValue">Max (kWh/m²/an)</label>
+      <input type="number" id="maxEnergyValue" formControlName="maxEnergyValue" placeholder="300">
+    </div>
+  </div>
+</div>
 
         <!-- Mode sélection multiple -->
         <div class="energy-multiple" *ngIf="filterForm.get('energyMode')?.value === 'multiple'">

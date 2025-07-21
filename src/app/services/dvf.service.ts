@@ -33,13 +33,15 @@ export class DvfService {
     exactSurface: number | null = null,
     energyClassRange: [string, string] | null = null,
     exactEnergyClass: string | null = null,
-    selectedEnergyClasses: string[] | null = null
+    selectedEnergyClasses: string[] | null = null,
+    limit: number = 500 // Add pagination limit with default of 500 results
   ): Observable<DvfProperty[]> {
     const params: any = {
       lat_min: bottomRight[0],
       lat_max: topLeft[0],
       lon_min: topLeft[1],
-      lon_max: bottomRight[1]
+      lon_max: bottomRight[1],
+      limit: limit // Add pagination limit parameter
     };
 
     if (priceRange) {

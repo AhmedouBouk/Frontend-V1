@@ -1,0 +1,140 @@
+/* Styles pour le bouton de géolocalisation */
+.locate-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background-color: white;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-radius: 4px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  transition: background-color 0.2s ease;
+}
+
+.locate-button:hover {
+  background-color: #f4f4f4;
+}
+
+.locate-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.locate-button svg {
+  width: 18px;
+  height: 18px;
+  color: #333;
+}
+
+/* Styles pour le logo cliquable */
+.map-logo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.map-logo:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.map-logo:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.map-logo img {
+  height: 40px;
+  width: auto;
+}
+
+/* ===== LOADING OVERLAY ===== */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+}
+
+.loading-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.loading-spinner {
+  background-color: var(--surface-color);
+  padding: var(--space-2xl);
+  border-radius: var(--radius-2xl);
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+}
+
+.spinner-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-lg);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.spinner-icon svg {
+  font-size: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner p {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .map-logo img {
+    height: 30px;
+  }
+  
+  .locate-button {
+    top: 60px;
+  }
+}

@@ -1,0 +1,292 @@
+/* ===== RESULTS TABLE ===== */
+.property-list-container {
+  background-color: var(--surface-color);
+  border-top: 1px solid var(--border-color);
+  z-index: 900;
+  box-shadow: var(--shadow-xl);
+  transition: max-height var(--transition-normal) ease-out;
+  max-height: 40vh; /* Default max height when open */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Ensure content is clipped when collapsed */
+}
+
+.property-list-container.collapsed {
+  max-height: var(--header-height); /* Height of the header when collapsed */
+}
+
+.property-list-header {
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--surface-hover), var(--surface-color));
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.property-list-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.property-count {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.results-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.toggle-icon {
+  transition: transform var(--transition-fast);
+}
+
+.toggle-icon.collapsed {
+  transform: rotate(180deg);
+}
+
+/* ===== EXPORT DROPDOWN ===== */
+.export-dropdown {
+  position: relative;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, var(--success-500), var(--success-600));
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.export-btn:hover {
+  background: linear-gradient(135deg, var(--success-600), #047857);
+}
+
+.export-menu {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  right: 0;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  min-width: 140px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.export-dropdown.open .export-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.export-option:hover {
+  background-color: var(--surface-hover);
+}
+
+.export-option:first-child {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.export-option:last-child {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.property-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.property-table th,
+.property-table td {
+  padding: var(--space-lg) var(--space-xl);
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.property-table th {
+  background: linear-gradient(135deg, var(--surface-hover), var(--background-color));
+  font-weight: 600;
+  color: var(--text-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 0.875rem;
+}
+
+.property-table tbody tr {
+  transition: var(--transition-fast);
+}
+
+.property-table tbody tr:hover {
+  background-color: var(--surface-hover);
+}
+
+.property-table tbody tr.selected {
+  background: linear-gradient(135deg, var(--primary-50), var(--surface-color));
+}
+
+[data-theme="dark"] .property-table tbody tr.selected {
+  background: linear-gradient(135deg, var(--surface-hover), var(--surface-color));
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.no-results-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--surface-hover), var(--background-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-xl);
+}
+
+.no-results-icon svg {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.no-results h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.no-results p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* Energy rating styles for table */
+.energy-rating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0 var(--space-xs);
+  color: white;
+}
+
+.energy-rating.rating-a {
+  background-color: #00a651;
+}
+
+.energy-rating.rating-b {
+  background-color: #50b848;
+}
+
+.energy-rating.rating-c {
+  background-color: #aed136;
+  color: #333;
+}
+
+.energy-rating.rating-d {
+  background-color: #fff200;
+  color: #333;
+}
+
+.energy-rating.rating-e {
+  background-color: #fdb913;
+  color: #333;
+}
+
+.energy-rating.rating-f {
+  background-color: #f37021;
+}
+
+.energy-rating.rating-g {
+  background-color: #ed1c24;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .property-list-container {
+    max-height: 50vh; /* Adjust for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .property-list-header {
+    padding: var(--space-md);
+  }
+  
+  .property-list-header h3 {
+    font-size: 0.9rem;
+  }
+  
+  .property-table th,
+  .property-table td {
+    padding: var(--space-md);
+    font-size: 0.8rem;
+  }
+  
+  .export-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.7rem;
+  }
+}

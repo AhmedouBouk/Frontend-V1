@@ -69,39 +69,40 @@ export class FormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Exécution immédiate si l'utilisateur décoche un filtre
+    // Only clear filters when unchecked, but don't refresh map automatically
+    // User must click the search button to apply changes
     this.filterForm.get("usePriceFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearPriceFilter()
-        this.mapService.refreshMap()
+        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useDateFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearDateFilter()
-        this.mapService.refreshMap()
+        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useSurfaceFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearSurfaceFilter()
-        this.mapService.refreshMap()
+        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useEnergyFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearEnergyClassFilter()
-        this.mapService.refreshMap()
+        // Don't refresh map automatically
       }
     })
 
-    // Changement de source de données
+    // Update data source but don't refresh map automatically
     this.filterForm.get("dataSource")?.valueChanges.subscribe((source: DataSourceType) => {
       this.formService.setDataSource(source)
-      this.mapService.refreshMap()
+      // Don't refresh map automatically
     })
   }
 
@@ -191,8 +192,26 @@ export class FormComponent implements OnInit {
   search() {
     const values = this.filterForm.value
     
-    // Update data source
-    this.formService.setDataSource(values.dataSource)
+    // Déterminer automatiquement la source de données en fonction des filtres activés
+    let dataSource: DataSourceType = values.dataSource;
+    
+    // Si le filtre de surface est activé, utiliser automatiquement la source "parcelles"
+    if (values.useSurfaceFilter && !values.usePriceFilter && !values.useDateFilter && !values.useEnergyFilter) {
+      dataSource = 'parcelles';
+      console.log('🔄 Passage automatique à la source de données "parcelles" car filtre de surface activé');
+    }
+    // Si seul le filtre d'énergie est activé, utiliser automatiquement la source "dpe"
+    else if (values.useEnergyFilter && !values.usePriceFilter && !values.useDateFilter && !values.useSurfaceFilter) {
+      dataSource = 'dpe';
+      console.log('🔄 Passage automatique à la source de données "dpe" car filtre d\'énergie activé');
+    }
+    // Si filtre prix ou date, laisser la source par défaut à DVF
+    
+    // Mettre à jour la source de données dans le formulaire
+    this.filterForm.patchValue({ dataSource }, { emitEvent: false });
+    
+    // Update data source service
+    this.formService.setDataSource(dataSource);
     
     // Apply filters independently of data source
     this.applyPriceFilter(values)
@@ -219,15 +238,16 @@ export class FormComponent implements OnInit {
         maxPrice: 10000000 // 10 million euros as max
       })
       
-      // Apply filter immediately
+      // Apply filter to service but don't refresh map automatically
       this.formService.setPriceFilter(0, 10000000)
-      this.mapService.refreshMap()
+      console.log('💰 Price filter toggled ON - waiting for search button')
     } else {
       // Reset to default
       this.filterForm.patchValue({
         minPrice: null,
         maxPrice: null
       })
+      console.log('💰 Price filter toggled OFF - waiting for search button')
     }
   }
   
@@ -250,15 +270,16 @@ export class FormComponent implements OnInit {
         endDate
       })
       
-      // Apply filter immediately
+      // Apply filter to service but don't refresh map automatically
       this.formService.setDateFilter(startDate, endDate)
-      this.mapService.refreshMap()
+      console.log('📅 Date filter toggled ON - waiting for search button')
     } else {
       // Reset to default
       this.filterForm.patchValue({
         startDate: null,
         endDate: null
       })
+      console.log('📅 Date filter toggled OFF - waiting for search button')
     }
   }
   
@@ -277,15 +298,16 @@ export class FormComponent implements OnInit {
         maxSurface: 10000 // 10,000 m² as max
       })
       
-      // Apply filter immediately
+      // Apply filter to service but don't refresh map automatically
       this.formService.setSurfaceFilter(0, 10000)
-      this.mapService.refreshMap()
+      console.log('📐 Surface filter toggled ON - waiting for search button')
     } else {
       // Reset to default
       this.filterForm.patchValue({
         minSurface: null,
         maxSurface: null
       })
+      console.log('📐 Surface filter toggled OFF - waiting for search button')
     }
   }
   
@@ -308,13 +330,13 @@ export class FormComponent implements OnInit {
     })
     
     if (this.allEnergySelected) {
-      // Apply filter with all classes selected
+      // Apply filter with all classes selected but don't refresh map automatically
       this.formService.setSelectedEnergyClasses(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
-      this.mapService.refreshMap()
+      console.log('⚡ Energy filter toggled ON - waiting for search button')
     } else {
-      // Clear the energy filter
+      // Clear the energy filter but don't refresh map automatically
       this.formService.clearEnergyClassFilter()
-      this.mapService.refreshMap()
+      console.log('⚡ Energy filter toggled OFF - waiting for search button')
     }
   }
   
@@ -363,7 +385,7 @@ export class FormComponent implements OnInit {
     this.formService.clearEnergyClassFilter()
     this.formService.setDataSource("dvf")
 
-    // Déclencher le refresh de la carte
-    this.mapService.refreshMap()
+    // Don't trigger automatic refresh - user must click search button
+    console.log('🔄 Filters reset - waiting for search button to apply changes')
   }
 }

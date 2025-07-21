@@ -4,7 +4,7 @@
   
   <div class="sidebar" [class.open]="sidebarOpen">
     <div class="sidebar-header">
-      <h1>
+      <button (click)="toggleSidebar()" class="logo-button" aria-label="Afficher/masquer les filtres">
         <span class="logo-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -12,8 +12,8 @@
             <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
-        The Explorer
-      </h1>
+        <span class="logo-text">The Explorer</span>
+      </button>
     </div>
     <div class="sidebar-content">
       <app-form></app-form>
@@ -61,19 +61,30 @@
     <!-- Composant map -->
     <app-map></app-map>
   
-    <!-- Bouton de toggle pour la sidebar mobile, désormais en haut à gauche -->
-    <button class="mobile-toggle" type="button" (click)="toggleSidebar()">
-      <svg *ngIf="!sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 6H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Logo fixe qui reste visible quand la sidebar est cachée -->
+  <button class="fixed-logo" type="button" (click)="toggleSidebar()" *ngIf="!sidebarOpen">
+    <span class="logo-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <svg *ngIf="sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="sr-only">Afficher/masquer le menu</span>
-    </button>
-  </div>
-  </div>
+    </span>
+    <span class="sr-only">Afficher le menu</span>
+  </button>
   
+  <!-- Bouton de toggle pour la sidebar mobile, désormais en haut à gauche -->
+  <button class="mobile-toggle" type="button" (click)="toggleSidebar()">
+    <svg *ngIf="!sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 6H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <svg *ngIf="sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="sr-only">Afficher/masquer le menu</span>
+  </button>
+  </div>
+  </div>
