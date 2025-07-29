@@ -420,7 +420,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           this.visibleDpeProperties = []
           this.visibleParcelleProperties = []
           this.resultCount = 0
-          this.showAlert = false
           break
         default:
           console.error(`❌ Source de données inconnue: ${this.currentDataSource}`)
@@ -595,9 +594,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log("Received Parcelle data successfully:", properties.length, "properties")
         this.visibleParcelleProperties = properties
         
-        // Update alert state
+        // Update result count for automatic alert
         this.resultCount = properties.length
-        this.showAlert = properties.length >= this.maxResults
 
         setTimeout(() => {
           this.isLoading = false

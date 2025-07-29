@@ -1,4 +1,4 @@
-<div class="map-alert" [class.show]="show && resultCount > maxResults">
+<div class="map-alert" [class.show]="resultCount >= maxResults && !isManuallyHidden">
   <div class="alert-content">
     <div class="alert-icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -6,10 +6,15 @@
       </svg>
     </div>
     <div class="alert-message">
-      <strong>Plus de {{ maxResults }} résultats trouvés</strong>
-      <p>Vous pouvez zoomer sur la carte pour être plus précis et obtenir des résultats plus ciblés.</p>
+      <span class="desktop-message">
+        <strong>{{ resultCount }} résultats trouvés ({{ maxResults }}+ maximum)</strong>
+        <br>Zoomez sur la carte pour être plus précis et réduire le nombre de résultats.
+      </span>
+      <span class="mobile-message">
+        <strong>{{ resultCount }} résultats - Zoomez pour affiner</strong>
+      </span>
     </div>
-    <button class="alert-close" (click)="show = false" aria-label="Fermer l'alerte">
+    <button class="alert-close" (click)="closeAlert()" aria-label="Fermer l'alerte">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>

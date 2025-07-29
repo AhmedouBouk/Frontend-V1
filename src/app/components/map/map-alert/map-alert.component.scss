@@ -27,6 +27,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  position: relative;
   
   // Dark theme support
   [cds-theme="dark"] & {
@@ -71,6 +72,15 @@
     [cds-theme="dark"] & {
       color: var(--warning-300, #fbbf24);
     }
+  }
+  
+  // Default: show desktop message, hide mobile message
+  .desktop-message {
+    display: block;
+  }
+  
+  .mobile-message {
+    display: none;
   }
 }
 
@@ -128,6 +138,14 @@
     
     p {
       font-size: 12px;
+    }
+    
+    .desktop-message {
+      display: none;
+    }
+    
+    .mobile-message {
+      display: block;
     }
   }
 }

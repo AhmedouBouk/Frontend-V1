@@ -25,6 +25,8 @@ export class MapService {
   // Nouveaux subjects pour les fonctionnalités ajoutées
   private readonly mapTypeSubject = new Subject<"street" | "satellite" | "cadastre">()
   private readonly centerMapSubject = new Subject<void>()
+  private readonly locationSubject = new Subject<{lat: number, lon: number, name: string}>()
+  private readonly userLocationSubject = new Subject<{lat: number, lon: number, accuracy: number}>()
 
   constructor() {}
 
@@ -101,5 +103,33 @@ export class MapService {
    */
   getCenterMapObservable(): Observable<void> {
     return this.centerMapSubject.asObservable()
+  }
+
+  /**
+   * Définit une location spécifique sur la carte
+   */
+  setLocation(lat: number, lon: number, name: string): void {
+    this.locationSubject.next({ lat, lon, name })
+  }
+
+  /**
+   * Observable pour s'abonner aux changements de location
+   */
+  getLocationObservable(): Observable<{lat: number, lon: number, name: string}> {
+    return this.locationSubject.asObservable()
+  }
+
+  /**
+   * Définit la location de l'utilisateur
+   */
+  setUserLocation(lat: number, lon: number, accuracy: number): void {
+    this.userLocationSubject.next({ lat, lon, accuracy })
+  }
+
+  /**
+   * Observable pour s'abonner aux changements de location utilisateur
+   */
+  getUserLocationObservable(): Observable<{lat: number, lon: number, accuracy: number}> {
+    return this.userLocationSubject.asObservable()
   }
 }

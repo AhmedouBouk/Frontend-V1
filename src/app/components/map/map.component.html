@@ -1,7 +1,6 @@
 <div class="map-wrapper">
   <!-- Alert component for results > 500 -->
   <app-map-alert 
-    [show]="showAlert" 
     [resultCount]="resultCount" 
     [maxResults]="maxResults">
   </app-map-alert>
@@ -22,6 +21,7 @@
 
     <!-- Map search component -->
     <app-map-search
+      [sidebarOpen]="!tableCollapsed"
       (locationSelected)="onLocationSelected($event)"
       (userLocationRequested)="onUserLocationRequested()">
     </app-map-search>
