@@ -1,0 +1,67 @@
+<div class="map-search-container">
+  <!-- Boutons de contrôle -->
+  <div class="search-controls">
+    <!-- Bouton de recherche -->
+    <button 
+      class="search-toggle-btn"
+      (click)="toggleSearch()"
+      [class.active]="isSearchOpen"
+      title="Rechercher une ville">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Bouton de géolocalisation -->
+    <button 
+      class="location-btn"
+      (click)="requestUserLocation()"
+      title="Ma position">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Barre de recherche slide -->
+  <div class="search-bar" [class.open]="isSearchOpen">
+    <div class="search-input-container">
+      <input 
+        type="text"
+        class="search-input"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (keydown.enter)="onSearchSubmit()"
+        placeholder="Rechercher une ville en France..."
+        autocomplete="off">
+      
+      <div class="search-spinner" *ngIf="isSearching">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Résultats de recherche -->
+    <div class="search-results" *ngIf="showResults">
+      <div 
+        class="search-result-item"
+        *ngFor="let result of searchResults"
+        (click)="selectLocation(result)"
+        (keydown.enter)="selectLocation(result)"
+        tabindex="0"
+        role="button">
+        <div class="result-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="result-text">
+          {{ result.display_name }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

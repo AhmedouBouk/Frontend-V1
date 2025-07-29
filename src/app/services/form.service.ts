@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core"
 import { BehaviorSubject, type Observable } from "rxjs"
 
-// Type alias pour les sources de données
-type DataSourceType = 'dvf' | 'dpe' | 'parcelles'
+type DataSourceType = 'dvf' | 'dpe' | 'parcelles' | 'none'
 
 @Injectable({ providedIn: "root" })
 export class FormService {
@@ -20,8 +19,11 @@ export class FormService {
   private readonly exactEnergyClassSubject = new BehaviorSubject<string | null>(null)
   private readonly selectedEnergyClassesSubject = new BehaviorSubject<string[] | null>(null)
   
-  // Type alias pour les sources de données
-  private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('dvf')
+  // Filtres de consommation énergétique
+  private readonly consumptionFilterSubject = new BehaviorSubject<[number, number] | null>(null)
+  private readonly exactConsumptionSubject = new BehaviorSubject<number | null>(null)
+  
+  private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('none')
 
   getPriceFilterObservable(): Observable<[number, number] | null> {
     return this.priceFilterSubject.asObservable()
@@ -39,7 +41,6 @@ export class FormService {
     return this.exactSurfaceSubject.asObservable()
   }
 
-  // Nouveaux observables pour la classe énergétique
   getExactEnergyClassObservable(): Observable<string | null> {
     return this.exactEnergyClassSubject.asObservable()
   }
@@ -50,6 +51,15 @@ export class FormService {
   
   getSelectedEnergyClassesObservable(): Observable<string[] | null> {
     return this.selectedEnergyClassesSubject.asObservable()
+  }
+
+  // Nouveaux observables pour la consommation
+  getConsumptionFilterObservable(): Observable<[number, number] | null> {
+    return this.consumptionFilterSubject.asObservable()
+  }
+
+  getExactConsumptionObservable(): Observable<number | null> {
+    return this.exactConsumptionSubject.asObservable()
   }
 
   getDataSourceObservable(): Observable<DataSourceType> {
@@ -64,7 +74,6 @@ export class FormService {
     this.dateFilterSubject.next([startDate, endDate])
   }
 
-  // Méthodes pour les filtres de surface
   setSurfaceFilter(minSurface: number, maxSurface: number): void {
     this.surfaceFilterSubject.next([minSurface, maxSurface])
     this.exactSurfaceSubject.next(null)
@@ -75,7 +84,6 @@ export class FormService {
     this.surfaceFilterSubject.next(null)
   }
 
-  // Méthodes pour définir les filtres de classe énergétique
   setExactEnergyClass(energyClass: string): void {
     this.exactEnergyClassSubject.next(energyClass)
     this.energyClassRangeSubject.next(null)
@@ -92,6 +100,17 @@ export class FormService {
     this.selectedEnergyClassesSubject.next(energyClasses)
     this.exactEnergyClassSubject.next(null)
     this.energyClassRangeSubject.next(null)
+  }
+
+  // Nouvelles méthodes pour la consommation
+  setConsumptionFilter(minConsumption: number, maxConsumption: number): void {
+    this.consumptionFilterSubject.next([minConsumption, maxConsumption])
+    this.exactConsumptionSubject.next(null)
+  }
+
+  setExactConsumption(consumption: number): void {
+    this.exactConsumptionSubject.next(consumption)
+    this.consumptionFilterSubject.next(null)
   }
 
   setDataSource(source: DataSourceType): void {
@@ -115,5 +134,10 @@ export class FormService {
     this.exactEnergyClassSubject.next(null)
     this.energyClassRangeSubject.next(null)
     this.selectedEnergyClassesSubject.next(null)
+  }
+
+  clearConsumptionFilter(): void {
+    this.consumptionFilterSubject.next(null)
+    this.exactConsumptionSubject.next(null)
   }
 }

@@ -12,7 +12,7 @@ import type { ParcelleProperty } from "../../../models/parcelle.model"
   styleUrls: ["./map-results.component.scss"],
 })
 export class MapResultsComponent {
-  @Input() currentDataSource = "dvf"
+  @Input() currentDataSource = ""
   @Input() visibleDvfProperties: DvfProperty[] = []
   @Input() visibleDpeProperties: DpeProperty[] = []
   @Input() visibleParcelleProperties: ParcelleProperty[] = []
@@ -21,7 +21,7 @@ export class MapResultsComponent {
   @Input() isLoading = false
 
   @Output() propertySelected = new EventEmitter<{ index: number; property: any }>()
-  @Output() tableToggled = new EventEmitter<void>()
+  @Output() tableToggled = new EventEmitter<boolean>()
   @Output() mapSizeInvalidated = new EventEmitter<void>()
 
   public exportDropdownOpen = false
@@ -30,7 +30,7 @@ export class MapResultsComponent {
 
   toggleTable(): void {
     this.tableCollapsed = !this.tableCollapsed
-    this.tableToggled.emit()
+    this.tableToggled.emit(this.tableCollapsed)
 
     // Force map resize after animation completes
     setTimeout(() => {

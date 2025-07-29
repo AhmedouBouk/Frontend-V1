@@ -1,7 +1,7 @@
 /* ===== FORM SECTIONS ===== */
 .filter-form-container {
   padding: var(--space-lg);
-  width: 350px; /* Juste cette ligne pour une largeur fixe */
+  width: 350px;
 }
 
 .brand-header {
@@ -85,50 +85,19 @@
   gap: var(--space-md);
 }
 
-.section-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--primary-color);
-  font-size: 1.125rem;
-}
-
-.icon-button {
+/* Updated icon styles for PNG images - MADE THEM EVEN BIGGER */
+.icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
-  outline: none;
-  position: relative;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 40px;  /* Increased from 32px */
+  height: 40px; /* Increased from 32px */
 }
 
-.icon-button:hover {
-  transform: scale(1.1);
-}
-
-.icon-button:focus-visible {
-  box-shadow: 0 0 0 2px var(--primary-300);
-}
-
-.icon-button.active .section-icon {
-  color: var(--success-500);
-}
-
-.icon-button.active::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: var(--success-500);
-  border-radius: 50%;
-  bottom: 0;
-  right: 0;
+.section-icon-img {
+  width: 36px;  /* Increased from 28px */
+  height: 36px; /* Increased from 28px */
+  object-fit: contain;
 }
 
 .section-title h3 {
@@ -194,7 +163,7 @@ input:checked + .slider:before {
 /* ===== FORM CONTROLS ===== */
 .form-group {
   margin-bottom: var(--space-lg);
-  min-width: 0; /* Allow shrinking */
+  min-width: 0;
 }
 
 .form-group:last-child {
@@ -209,11 +178,10 @@ input:checked + .slider:before {
   color: var(--text-secondary);
 }
 
-/* Fix for input row spacing and overflow */
 .input-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md); /* Reduced gap to prevent overflow */
+  gap: var(--space-md);
   width: 100%;
 }
 
@@ -222,7 +190,7 @@ input[type="number"],
 input[type="date"],
 select {
   width: 100%;
-  min-width: 0; /* Allow shrinking */
+  min-width: 0;
   padding: var(--space-md) var(--space-lg);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -489,19 +457,6 @@ select {
   }
 }
 
-/* Additional responsive fix for very small containers */
-@media (max-width: 480px) {
-  .input-row {
-    grid-template-columns: 1fr;
-  }
-
-  .section-content {
-    padding: var(--space-md);
-  }
-}
-
-/* Note: Radio group styles are already defined above */
-
 @media (max-width: 600px) {
   .radio-group {
     flex-direction: column;
@@ -509,7 +464,6 @@ select {
   }
 }
 
-/* Amélioration des champs de date */
 input[type="date"] {
   width: 100%;
   min-width: 130px;

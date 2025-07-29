@@ -23,11 +23,13 @@ import { ParcelleService } from "../../services/parcelle.service"
 import { MapDisplayComponent } from "./map-display/map-display.component"
 import { MapControlsComponent } from "./map-controls/map-controls.component"
 import { MapResultsComponent } from "./map-results/map-results.component"
+import { MapAlertComponent } from "./map-alert/map-alert.component"
+import { MapSearchComponent } from "./map-search/map-search.component"
 
 @Component({
   selector: "app-map",
   standalone: true,
-  imports: [CommonModule, MapDisplayComponent, MapControlsComponent, MapResultsComponent],
+  imports: [CommonModule, MapDisplayComponent, MapControlsComponent, MapResultsComponent, MapAlertComponent, MapSearchComponent],
   styleUrls: ["./map.component.scss"],
   templateUrl: "./map.component.html",
 })
@@ -62,10 +64,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   public visibleDpeProperties: DpeProperty[] = []
   public visibleParcelleProperties: ParcelleProperty[] = []
   public selectedPropertyIndex: number | null = null
-  public tableCollapsed = false
+  public tableCollapsed = false // Sidebar ouvert par défaut
   public isLoading = false
   public dateMode = "exact"
   public exactDate = ""
+  
+  // Alert properties
+  public showAlert = false
+  public resultCount = 0
+  public maxResults = 500
 
   // Services
   private readonly mapService = inject(MapService)
@@ -133,6 +140,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.minPrice = 0
             this.maxPrice = 0
             console.log('💰 Price filter cleared')
+            // Clear displayed properties when filter is disabled
+            if (this.currentDataSource === 'dvf') {
+              this.visibleDvfProperties = []
+              this.cdr.detectChanges()
+            }
           }
         }),
 
@@ -151,6 +163,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.endDate = ""
             this.exactDate = ""
             console.log('📅 Date filter cleared')
+            // Clear displayed properties when filter is disabled
+            if (this.currentDataSource === 'dvf') {
+              this.visibleDvfProperties = []
+              this.cdr.detectChanges()
+            }
           }
         }),
 
@@ -169,6 +186,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.minSurface = 0
             this.maxSurface = 0
             console.log('🏠 Surface filter cleared')
+            // Clear displayed properties when filter is disabled
+            if (this.currentDataSource === 'parcelles') {
+              this.visibleParcelleProperties = []
+              this.cdr.detectChanges()
+            } else if (this.currentDataSource === 'dvf') {
+              this.visibleDvfProperties = []
+              this.cdr.detectChanges()
+            }
           }
         }),
 
@@ -188,6 +213,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.useEnergyFilter = false
             this.energyClasses = []
             console.log('⚡ No energy classes selected - filter disabled')
+            // Clear displayed properties when filter is disabled
+            if (this.currentDataSource === 'dpe') {
+              this.visibleDpeProperties = []
+              this.cdr.detectChanges()
+            }
           }
         }),
 
@@ -221,6 +251,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.useEnergyFilter = false
             this.energyClasses = []
             console.log('⚡ Energy class range filter cleared')
+            // Clear displayed properties when filter is disabled
+            if (this.currentDataSource === 'dpe') {
+              this.visibleDpeProperties = []
+              this.cdr.detectChanges()
+            }
           }
         }),
     )
@@ -232,16 +267,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.mapMoveTimeout) clearTimeout(this.mapMoveTimeout)
   }
 
-  // Handle map movement events - DISABLED to prevent infinite loop
+  // Handle map movement events with debouncing
   onMapMoved(): void {
-    console.log('🗺️ Map moved - but data fetching is disabled to prevent infinite loop')
-    // Temporarily disable automatic data fetching on map movement
-    // User must use the search button to fetch data
+    console.log('🗺️ Map moved - scheduling data refresh...')
     
-    // Clear any existing timeout to prevent pending requests
+    // Clear any existing timeout to prevent multiple requests
     if (this.mapMoveTimeout) {
       clearTimeout(this.mapMoveTimeout)
     }
+    
+    // Debounce the data fetching to avoid too many requests
+    this.mapMoveTimeout = setTimeout(() => {
+      console.log('🔄 Auto-refreshing data after map movement')
+      this.fetchData()
+    }, 1000) // Wait 1 second after user stops moving/zooming
   }
 
   // Handle geolocation
@@ -314,13 +353,33 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Handle table toggle
-  onTableToggled(): void {
-    // Table toggle is handled by the results component
+  onTableToggled(collapsed: boolean): void {
+    this.tableCollapsed = collapsed
+    console.log('📊 Sidebar toggled:', collapsed ? 'fermé' : 'ouvert')
   }
 
   // Handle map size invalidation
   onMapSizeInvalidated(): void {
     this.mapDisplay.invalidateSize()
+  }
+
+  // Handle location search from search component
+  onLocationSelected(location: {lat: number, lon: number, name: string}): void {
+    console.log('📍 Location selected:', location)
+    
+    // Center map on selected location
+    this.mapDisplay.setMapView(location.lat, location.lon, 14)
+    
+    // Optionally fetch data for the new location
+    setTimeout(() => {
+      this.fetchData()
+    }, 500)
+  }
+
+  // Handle user location request from search component
+  onUserLocationRequested(): void {
+    console.log('📍 User location requested')
+    this.onLocateUser()
   }
 
   private fetchData(): void {
@@ -352,6 +411,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           break
         case "parcelles":
           this.loadParcelleData()
+          break
+        case "none":
+          console.log('🚫 Aucune source de données sélectionnée - pas de chargement')
+          this.isLoading = false
+          // Clear all data when no source is selected
+          this.visibleDvfProperties = []
+          this.visibleDpeProperties = []
+          this.visibleParcelleProperties = []
+          this.resultCount = 0
+          this.showAlert = false
           break
         default:
           console.error(`❌ Source de données inconnue: ${this.currentDataSource}`)
@@ -398,20 +467,25 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.dvfService
-      .getDvfProperties(topLeft, bottomRight, priceRange, dateRange, exactDate, surfaceRange, null, null, null, null, 500) // Add 500 as the limit parameter
+      .getDvfProperties(topLeft, bottomRight, priceRange, dateRange, exactDate, surfaceRange, null, null, null, null, 500)
       .subscribe({
         next: (properties: DvfProperty[]) => {
           console.log("Received DVF data successfully:", properties.length, "properties")
           this.visibleDvfProperties = properties
+          
+          // Update alert state
+          this.resultCount = properties.length
+          this.showAlert = properties.length >= this.maxResults
 
           setTimeout(() => {
             this.isLoading = false
             this.cdr.detectChanges()
           }, 0)
 
-          if (properties.length > 0) {
-            this.mapDisplay.fitToMarkers()
-          }
+          // DISABLED: Automatic fit to markers to prevent infinite loop
+          // if (properties.length > 0) {
+          //   this.mapDisplay.fitToMarkers()
+          // }
         },
         error: (error: any) => {
           console.error("Error fetching DVF data:", error)
@@ -475,6 +549,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (properties: DpeProperty[]) => {
           console.log("Received DPE data successfully:", properties.length, "properties")
           this.visibleDpeProperties = properties
+          
+          // Update alert state
+          this.resultCount = properties.length
+          this.showAlert = properties.length >= this.maxResults
 
           setTimeout(() => {
             this.isLoading = false
@@ -516,15 +594,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (properties: ParcelleProperty[]) => {
         console.log("Received Parcelle data successfully:", properties.length, "properties")
         this.visibleParcelleProperties = properties
+        
+        // Update alert state
+        this.resultCount = properties.length
+        this.showAlert = properties.length >= this.maxResults
 
         setTimeout(() => {
           this.isLoading = false
           this.cdr.detectChanges()
         }, 0)
 
-        if (properties.length > 0) {
-          this.mapDisplay.fitToMarkers()
-        }
+        // DISABLED: Automatic fit to markers to prevent infinite loop
+        // if (properties.length > 0) {
+        //   this.mapDisplay.fitToMarkers()
+        // }
       },
       error: (error: any) => {
         console.error("Error fetching parcelle data:", error)

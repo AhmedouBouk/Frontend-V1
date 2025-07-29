@@ -5,13 +5,10 @@
     <div class="form-section">
       <div class="section-header">
         <div class="section-title">
-          <button type="button" class="icon-button" [class.active]="allPriceSelected" (click)="toggleAllPriceOptions()" aria-label="Sélectionner tous les filtres de prix">
-            <svg class="section-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <h3>Filtre de prix</h3>
+          <div class="icon-container">
+            <img src="assets/icons/house-plus.png" alt="Prix" class="section-icon-img">
+          </div>
+          <h3>Ventes passées</h3>
         </div>
         <label class="toggle-switch" for="usePriceFilter">
           <input type="checkbox" formControlName="usePriceFilter" id="usePriceFilter">
@@ -57,15 +54,10 @@
     <div class="form-section">
       <div class="section-header">
         <div class="section-title">
-          <button type="button" class="icon-button" [class.active]="allDateSelected" (click)="toggleAllDateOptions()" aria-label="Sélectionner tous les filtres de date">
-            <svg class="section-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 4H5C3.89543 4 3 4.89543 3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6C21 4.89543 20.1046 4 19 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M16 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <h3>Filtre de date</h3>
+          <div class="icon-container">
+            <img src="assets/icons/clock-icon.png" alt="Période" class="section-icon-img">
+          </div>
+          <h3>Période</h3>
         </div>
         <label class="toggle-switch" for="useDateFilter">
           <input type="checkbox" formControlName="useDateFilter" id="useDateFilter">
@@ -111,14 +103,10 @@
     <div class="form-section">
       <div class="section-header">
         <div class="section-title">
-          <button type="button" class="icon-button" [class.active]="allSurfaceSelected" (click)="toggleAllSurfaceOptions()" aria-label="Sélectionner toutes les surfaces">
-            <svg class="section-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 3H21V21H3V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 9H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9 21V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <h3>Filtre de surface</h3>
+          <div class="icon-container">
+            <img src="assets/icons/m2-icon.png" alt="Taille du terrain" class="section-icon-img">
+          </div>
+          <h3>Taille du terrain</h3>
         </div>
         <label class="toggle-switch" for="useSurfaceFilter">
           <input type="checkbox" formControlName="useSurfaceFilter" id="useSurfaceFilter">
@@ -164,12 +152,9 @@
     <div class="form-section">
       <div class="section-header">
         <div class="section-title">
-          <button type="button" class="icon-button" [class.active]="allEnergySelected" (click)="toggleAllEnergyOptions()" aria-label="Sélectionner toutes les classes énergétiques">
-            <svg class="section-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 22V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+          <div class="icon-container">
+            <img src="assets/icons/energy-class-icon.png" alt="Classe énergétique" class="section-icon-img">
+          </div>
           <h3>Classe énergétique</h3>
         </div>
         <label class="toggle-switch" for="useEnergyFilter">
@@ -179,73 +164,83 @@
       </div>
   
       <div class="section-content" *ngIf="filterForm.get('useEnergyFilter')?.value">
+        <div class="energy-ratings">
+          <label class="energy-rating rating-a">
+            <input type="checkbox" formControlName="energyClassA">
+            <span class="rating-letter">A</span>
+          </label>
+          <label class="energy-rating rating-b">
+            <input type="checkbox" formControlName="energyClassB">
+            <span class="rating-letter">B</span>
+          </label>
+          <label class="energy-rating rating-c">
+            <input type="checkbox" formControlName="energyClassC">
+            <span class="rating-letter">C</span>
+          </label>
+          <label class="energy-rating rating-d">
+            <input type="checkbox" formControlName="energyClassD">
+            <span class="rating-letter">D</span>
+          </label>
+          <label class="energy-rating rating-e">
+            <input type="checkbox" formControlName="energyClassE">
+            <span class="rating-letter">E</span>
+          </label>
+          <label class="energy-rating rating-f">
+            <input type="checkbox" formControlName="energyClassF">
+            <span class="rating-letter">F</span>
+          </label>
+          <label class="energy-rating rating-g">
+            <input type="checkbox" formControlName="energyClassG">
+            <span class="rating-letter">G</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Consommation -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="icon-container">
+            <img src="assets/icons/kwh-icon.png" alt="Consommation" class="section-icon-img">
+          </div>
+          <h3>Consommation</h3>
+        </div>
+        <label class="toggle-switch" for="useConsumptionFilter">
+          <input type="checkbox" formControlName="useConsumptionFilter" id="useConsumptionFilter">
+          <span class="slider"></span>
+        </label>
+      </div>
+  
+      <div class="section-content" *ngIf="filterForm.get('useConsumptionFilter')?.value">
         <div class="radio-group">
           <label class="radio-item">
-            <input type="radio" value="exact" formControlName="energyMode">
+            <input type="radio" value="exact" formControlName="consumptionMode">
             <span class="radio-label">Valeur exacte</span>
           </label>
           <label class="radio-item">
-            <input type="radio" value="interval" formControlName="energyMode">
+            <input type="radio" value="interval" formControlName="consumptionMode">
             <span class="radio-label">Intervalle</span>
           </label>
-          <label class="radio-item">
-            <input type="radio" value="multiple" formControlName="energyMode">
-            <span class="radio-label">Sélection multiple</span>
-          </label>
         </div>
-<!-- Mode valeur exacte -->
-<div class="energy-exact" *ngIf="filterForm.get('energyMode')?.value === 'exact'">
-  <div class="form-group">
-    <label for="exactEnergyValue">Valeur énergétique (kWh/m²/an)</label>
-    <input type="number" id="exactEnergyValue" formControlName="exactEnergyValue" placeholder="ex: 150">
-  </div>
-</div>
 
-        <!-- Mode intervalle -->
-<div class="energy-interval" *ngIf="filterForm.get('energyMode')?.value === 'interval'">
-  <div class="input-row">
-    <div class="form-group">
-      <label for="minEnergyValue">Min (kWh/m²/an)</label>
-      <input type="number" id="minEnergyValue" formControlName="minEnergyValue" placeholder="50">
-    </div>
-    <div class="form-group">
-      <label for="maxEnergyValue">Max (kWh/m²/an)</label>
-      <input type="number" id="maxEnergyValue" formControlName="maxEnergyValue" placeholder="300">
-    </div>
-  </div>
-</div>
+        <div class="consumption-exact" *ngIf="filterForm.get('consumptionMode')?.value === 'exact'">
+          <div class="form-group">
+            <label for="exactConsumption">Consommation (kWh/m²/an)</label>
+            <input type="number" id="exactConsumption" formControlName="exactConsumption" placeholder="ex: 150">
+          </div>
+        </div>
 
-        <!-- Mode sélection multiple -->
-        <div class="energy-multiple" *ngIf="filterForm.get('energyMode')?.value === 'multiple'">
-          <div class="energy-ratings">
-            <label class="energy-rating rating-a">
-              <input type="checkbox" formControlName="energyClassA">
-              <span class="rating-letter">A</span>
-            </label>
-            <label class="energy-rating rating-b">
-              <input type="checkbox" formControlName="energyClassB">
-              <span class="rating-letter">B</span>
-            </label>
-            <label class="energy-rating rating-c">
-              <input type="checkbox" formControlName="energyClassC">
-              <span class="rating-letter">C</span>
-            </label>
-            <label class="energy-rating rating-d">
-              <input type="checkbox" formControlName="energyClassD">
-              <span class="rating-letter">D</span>
-            </label>
-            <label class="energy-rating rating-e">
-              <input type="checkbox" formControlName="energyClassE">
-              <span class="rating-letter">E</span>
-            </label>
-            <label class="energy-rating rating-f">
-              <input type="checkbox" formControlName="energyClassF">
-              <span class="rating-letter">F</span>
-            </label>
-            <label class="energy-rating rating-g">
-              <input type="checkbox" formControlName="energyClassG">
-              <span class="rating-letter">G</span>
-            </label>
+        <div class="consumption-interval" *ngIf="filterForm.get('consumptionMode')?.value === 'interval'">
+          <div class="input-row">
+            <div class="form-group">
+              <label for="minConsumption">Min (kWh/m²/an)</label>
+              <input type="number" id="minConsumption" formControlName="minConsumption" placeholder="50">
+            </div>
+            <div class="form-group">
+              <label for="maxConsumption">Max (kWh/m²/an)</label>
+              <input type="number" id="maxConsumption" formControlName="maxConsumption" placeholder="300">
+            </div>
           </div>
         </div>
       </div>
@@ -256,7 +251,7 @@
       <button type="button"
               class="btn btn-primary"
               (click)="search()"
-              [disabled]="!filterForm.get('usePriceFilter')?.value && !filterForm.get('useDateFilter')?.value && !filterForm.get('useSurfaceFilter')?.value && !filterForm.get('useEnergyFilter')?.value">
+              [disabled]="!filterForm.get('usePriceFilter')?.value && !filterForm.get('useDateFilter')?.value && !filterForm.get('useSurfaceFilter')?.value && !filterForm.get('useEnergyFilter')?.value && !filterForm.get('useConsumptionFilter')?.value">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -274,5 +269,4 @@
       </button>
     </div>
   </form>
-  </div>
-  
+</div>

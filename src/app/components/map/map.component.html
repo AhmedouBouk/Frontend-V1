@@ -1,4 +1,10 @@
 <div class="map-wrapper">
+  <!-- Alert component for results > 500 -->
+  <app-map-alert 
+    [show]="showAlert" 
+    [resultCount]="resultCount" 
+    [maxResults]="maxResults">
+  </app-map-alert>
   <!-- Map display component -->
   <div class="map-inner-container">
     <app-map-display
@@ -13,6 +19,12 @@
       (mapMoved)="onMapMoved()"
       (propertySelected)="onPropertySelected($event)">
     </app-map-display>
+
+    <!-- Map search component -->
+    <app-map-search
+      (locationSelected)="onLocationSelected($event)"
+      (userLocationRequested)="onUserLocationRequested()">
+    </app-map-search>
 
     <!-- Map controls component -->
     <app-map-controls
@@ -32,7 +44,7 @@
     [tableCollapsed]="tableCollapsed"
     [isLoading]="isLoading"
     (propertySelected)="onPropertySelected($event)"
-    (tableToggled)="onTableToggled()"
+    (tableToggled)="onTableToggled($event)"
     (mapSizeInvalidated)="onMapSizeInvalidated()">
   </app-map-results>
 </div>

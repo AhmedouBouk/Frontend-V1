@@ -299,9 +299,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       markerContent += `${markerContent ? "<br>" : ""}<span class="surface">${property.surface} m²</span>`
     }
 
-    if (!markerContent) {
-      markerContent = `<span class="default">Propriété DVF</span>`
-    }
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
@@ -338,14 +335,14 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const energyClass = property.energyClass
+    const gesClass = property.gesClass // Utiliser la Classe GES pour l'affichage
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: "custom-marker",
         html: `
-          <div class="marker-label rating-${energyClass.toLowerCase()}">
-            <span>${energyClass}</span>
+          <div class="marker-label rating-${gesClass.toLowerCase()}">
+            <span>${gesClass}</span>
           </div>
         `,
         iconSize: [40, 40],
@@ -355,7 +352,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>DPE ${energyClass}</h3>
+        <h3>DPE - Classe GES ${gesClass}</h3>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Classe énergie:</strong> ${property.energyClass}</p>
         <p><strong>Classe GES:</strong> ${property.gesClass}</p>
@@ -380,7 +377,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         className: "custom-marker",
         html: `
           <div class="marker-label">
-            <span class="number">${property.number}</span>
+            <span class="surface">${surface} m²</span>
           </div>
         `,
         iconSize: [60, 40],

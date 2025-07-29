@@ -24,6 +24,7 @@ export class FormComponent implements OnInit {
   allDateSelected = false
   allSurfaceSelected = false
   allEnergySelected = false
+  allConsumptionSelected = false
 
   constructor() {
     this.filterForm = this.fb.group({
@@ -51,13 +52,8 @@ export class FormComponent implements OnInit {
       minSurface: [null],
       maxSurface: [null],
 
-      // Classe énergie (DPE)
+      // Classe énergie (DPE) - Seulement les classes A-G
       useEnergyFilter: [false],
-      energyMode: ["multiple"],  // Nouveau mode: exact, interval, multiple
-      exactEnergyClass: [""],    // Pour le mode exact
-      minEnergyClass: ["A"],     // Pour le mode intervalle
-      maxEnergyClass: ["G"],     // Pour le mode intervalle
-      // Pour le mode multiple (cases à cocher)
       energyClassA: [false],
       energyClassB: [false],
       energyClassC: [false],
@@ -65,50 +61,56 @@ export class FormComponent implements OnInit {
       energyClassE: [false],
       energyClassF: [false],
       energyClassG: [false],
+
+      // Consommation énergétique (DPE) - Valeurs kWh/m²/an
+      useConsumptionFilter: [false],
+      consumptionMode: ["interval"],
+      exactConsumption: [null],
+      minConsumption: [null],
+      maxConsumption: [null],
     })
   }
 
   ngOnInit(): void {
     // Only clear filters when unchecked, but don't refresh map automatically
-    // User must click the search button to apply changes
     this.filterForm.get("usePriceFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearPriceFilter()
-        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useDateFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearDateFilter()
-        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useSurfaceFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearSurfaceFilter()
-        // Don't refresh map automatically
       }
     })
 
     this.filterForm.get("useEnergyFilter")?.valueChanges.subscribe((enabled: boolean) => {
       if (!enabled) {
         this.formService.clearEnergyClassFilter()
-        // Don't refresh map automatically
+      }
+    })
+
+    this.filterForm.get("useConsumptionFilter")?.valueChanges.subscribe((enabled: boolean) => {
+      if (!enabled) {
+        this.formService.clearConsumptionFilter()
       }
     })
 
     // Update data source but don't refresh map automatically
     this.filterForm.get("dataSource")?.valueChanges.subscribe((source: DataSourceType) => {
       this.formService.setDataSource(source)
-      // Don't refresh map automatically
     })
   }
 
   /**
    * Handle price filter application
-   * @param values The form values
    */
   private applyPriceFilter(values: any): void {
     if (!values.usePriceFilter) {
@@ -128,7 +130,6 @@ export class FormComponent implements OnInit {
   
   /**
    * Handle date filter application
-   * @param values The form values
    */
   private applyDateFilter(values: any): void {
     if (!values.useDateFilter) {
@@ -145,7 +146,6 @@ export class FormComponent implements OnInit {
   
   /**
    * Handle surface filter application
-   * @param values The form values
    */
   private applySurfaceFilter(values: any): void {
     if (!values.useSurfaceFilter) {
@@ -165,7 +165,6 @@ export class FormComponent implements OnInit {
   
   /**
    * Handle energy class filter application
-   * @param values The form values
    */
   private applyEnergyFilter(values: any): void {
     if (!values.useEnergyFilter) {
@@ -185,6 +184,25 @@ export class FormComponent implements OnInit {
     
     this.formService.setSelectedEnergyClasses(selectedClasses)
   }
+
+  /**
+   * Handle consumption filter application
+   */
+  private applyConsumptionFilter(values: any): void {
+    if (!values.useConsumptionFilter) {
+      this.formService.clearConsumptionFilter()
+      return
+    }
+    
+    if (values.consumptionMode === "exact") {
+      const val = Number(values.exactConsumption)
+      this.formService.setConsumptionFilter(val, val)
+    } else {
+      const min = Number(values.minConsumption)
+      const max = Number(values.maxConsumption)
+      this.formService.setConsumptionFilter(min, max)
+    }
+  }
   
   /**
    * Apply all filters and refresh the map
@@ -196,16 +214,15 @@ export class FormComponent implements OnInit {
     let dataSource: DataSourceType = values.dataSource;
     
     // Si le filtre de surface est activé, utiliser automatiquement la source "parcelles"
-    if (values.useSurfaceFilter && !values.usePriceFilter && !values.useDateFilter && !values.useEnergyFilter) {
+    if (values.useSurfaceFilter && !values.usePriceFilter && !values.useDateFilter && !values.useEnergyFilter && !values.useConsumptionFilter) {
       dataSource = 'parcelles';
       console.log('🔄 Passage automatique à la source de données "parcelles" car filtre de surface activé');
     }
-    // Si seul le filtre d'énergie est activé, utiliser automatiquement la source "dpe"
-    else if (values.useEnergyFilter && !values.usePriceFilter && !values.useDateFilter && !values.useSurfaceFilter) {
+    // Si seul le filtre d'énergie ou consommation est activé, utiliser automatiquement la source "dpe"
+    else if ((values.useEnergyFilter || values.useConsumptionFilter) && !values.usePriceFilter && !values.useDateFilter && !values.useSurfaceFilter) {
       dataSource = 'dpe';
-      console.log('🔄 Passage automatique à la source de données "dpe" car filtre d\'énergie activé');
+      console.log('🔄 Passage automatique à la source de données "dpe" car filtre d\'énergie/consommation activé');
     }
-    // Si filtre prix ou date, laisser la source par défaut à DVF
     
     // Mettre à jour la source de données dans le formulaire
     this.filterForm.patchValue({ dataSource }, { emitEvent: false });
@@ -218,6 +235,7 @@ export class FormComponent implements OnInit {
     this.applyDateFilter(values)
     this.applySurfaceFilter(values)
     this.applyEnergyFilter(values)
+    this.applyConsumptionFilter(values)
     
     // Refresh map with new filters
     this.mapService.refreshMap()
@@ -230,19 +248,15 @@ export class FormComponent implements OnInit {
     this.allPriceSelected = !this.allPriceSelected
     
     if (this.allPriceSelected) {
-      // Enable price filter with wide interval
       this.filterForm.patchValue({
         usePriceFilter: true,
         priceMode: 'interval',
         minPrice: 0,
-        maxPrice: 10000000 // 10 million euros as max
+        maxPrice: 10000000
       })
-      
-      // Apply filter to service but don't refresh map automatically
       this.formService.setPriceFilter(0, 10000000)
       console.log('💰 Price filter toggled ON - waiting for search button')
     } else {
-      // Reset to default
       this.filterForm.patchValue({
         minPrice: null,
         maxPrice: null
@@ -258,23 +272,18 @@ export class FormComponent implements OnInit {
     this.allDateSelected = !this.allDateSelected
     
     if (this.allDateSelected) {
-      // Get current date and 10 years ago for wide range
-      const endDate = new Date().toISOString().split('T')[0] // Today
-      const startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split('T')[0] // 10 years ago
+      const endDate = new Date().toISOString().split('T')[0]
+      const startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString().split('T')[0]
       
-      // Enable date filter with wide interval
       this.filterForm.patchValue({
         useDateFilter: true,
         dateMode: 'interval',
         startDate,
         endDate
       })
-      
-      // Apply filter to service but don't refresh map automatically
       this.formService.setDateFilter(startDate, endDate)
       console.log('📅 Date filter toggled ON - waiting for search button')
     } else {
-      // Reset to default
       this.filterForm.patchValue({
         startDate: null,
         endDate: null
@@ -290,19 +299,15 @@ export class FormComponent implements OnInit {
     this.allSurfaceSelected = !this.allSurfaceSelected
     
     if (this.allSurfaceSelected) {
-      // Enable surface filter with wide interval
       this.filterForm.patchValue({
         useSurfaceFilter: true,
         surfaceMode: 'interval',
         minSurface: 0,
-        maxSurface: 10000 // 10,000 m² as max
+        maxSurface: 10000
       })
-      
-      // Apply filter to service but don't refresh map automatically
       this.formService.setSurfaceFilter(0, 10000)
       console.log('📐 Surface filter toggled ON - waiting for search button')
     } else {
-      // Reset to default
       this.filterForm.patchValue({
         minSurface: null,
         maxSurface: null
@@ -317,7 +322,6 @@ export class FormComponent implements OnInit {
   toggleAllEnergyOptions(): void {
     this.allEnergySelected = !this.allEnergySelected
     
-    // Set all energy classes
     this.filterForm.patchValue({
       useEnergyFilter: true,
       energyClassA: this.allEnergySelected,
@@ -330,13 +334,37 @@ export class FormComponent implements OnInit {
     })
     
     if (this.allEnergySelected) {
-      // Apply filter with all classes selected but don't refresh map automatically
       this.formService.setSelectedEnergyClasses(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
       console.log('⚡ Energy filter toggled ON - waiting for search button')
     } else {
-      // Clear the energy filter but don't refresh map automatically
       this.formService.clearEnergyClassFilter()
       console.log('⚡ Energy filter toggled OFF - waiting for search button')
+    }
+  }
+
+  /**
+   * Toggle all consumption filter options
+   */
+  toggleAllConsumptionOptions(): void {
+    this.allConsumptionSelected = !this.allConsumptionSelected
+    
+    if (this.allConsumptionSelected) {
+      this.filterForm.patchValue({
+        useConsumptionFilter: true,
+        consumptionMode: 'interval',
+        minConsumption: 0,
+        maxConsumption: 500
+      })
+      this.formService.setConsumptionFilter(0, 500)
+      console.log('🔋 Consumption filter toggled ON - waiting for search button')
+    } else {
+      this.filterForm.patchValue({
+        useConsumptionFilter: false,
+        minConsumption: null,
+        maxConsumption: null
+      })
+      this.formService.clearConsumptionFilter()
+      console.log('🔋 Consumption filter toggled OFF - waiting for search button')
     }
   }
   
@@ -346,30 +374,26 @@ export class FormComponent implements OnInit {
     this.allDateSelected = false
     this.allSurfaceSelected = false
     this.allEnergySelected = false
+    this.allConsumptionSelected = false
     
     this.filterForm.patchValue({
       dataSource: "dvf",
-
       usePriceFilter: false,
       priceMode: "interval",
       price: null,
       minPrice: null,
       maxPrice: null,
-
       useDateFilter: false,
       dateMode: "interval",
       exactDate: null,
       startDate: null,
       endDate: null,
-
       useSurfaceFilter: false,
       surfaceMode: "interval",
       surface: null,
       minSurface: null,
       maxSurface: null,
-
       useEnergyFilter: false,
-      energyFilterMode: "class",
       energyClassA: false,
       energyClassB: false,
       energyClassC: false,
@@ -377,15 +401,20 @@ export class FormComponent implements OnInit {
       energyClassE: false,
       energyClassF: false,
       energyClassG: false,
+      useConsumptionFilter: false,
+      consumptionMode: "interval",
+      exactConsumption: null,
+      minConsumption: null,
+      maxConsumption: null,
     })
 
     this.formService.clearPriceFilter()
     this.formService.clearDateFilter()
     this.formService.clearSurfaceFilter()
     this.formService.clearEnergyClassFilter()
+    this.formService.clearConsumptionFilter()
     this.formService.setDataSource("dvf")
 
-    // Don't trigger automatic refresh - user must click search button
     console.log('🔄 Filters reset - waiting for search button to apply changes')
   }
 }
