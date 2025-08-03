@@ -45,10 +45,12 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild("map") private readonly mapContainer!: ElementRef
 
   @Input() currentDataSource = "dvf"
+  @Input() activeDataSources: string[] = []
   @Input() usePriceFilter = false
   @Input() useDateFilter = false
   @Input() useSurfaceFilter = false
   @Input() useEnergyFilter = false
+  @Input() markersVisible = true
   @Input() visibleDvfProperties: DvfProperty[] = []
   @Input() visibleDpeProperties: DpeProperty[] = []
   @Input() visibleParcelleProperties: ParcelleProperty[] = []
@@ -226,9 +228,10 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     // Add user marker
     const userMarker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "user-location-marker",
-        html: `<div class="user-marker-inner"></div>`,
-        iconSize: [20, 20],
+        className: "compact-marker user-marker",
+        html: `<div class="compact-marker user-marker">📍 Vous</div>`,
+        iconSize: [60, 24],
+        iconAnchor: [30, 12],
       }),
     }).addTo(this.map)
 
@@ -237,9 +240,9 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     const accuracyMarker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: "accuracy-circle",
-        html: `<div class="accuracy-circle-inner" style="width: ${accuracyRadius / 50}px; height: ${accuracyRadius / 50}px;"></div>`,
-        iconSize: [accuracyRadius / 25, accuracyRadius / 25],
-        iconAnchor: [accuracyRadius / 50, accuracyRadius / 50],
+        html: `<div class="accuracy-circle-inner" style="width: ${Math.max(accuracyRadius / 25, 40)}px; height: ${Math.max(accuracyRadius / 25, 40)}px;"></div>`,
+        iconSize: [Math.max(accuracyRadius / 25, 40), Math.max(accuracyRadius / 25, 40)],
+        iconAnchor: [Math.max(accuracyRadius / 50, 20), Math.max(accuracyRadius / 50, 20)],
       }),
     }).addTo(this.map)
   }
@@ -254,19 +257,41 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   private updateMarkers(): void {
     this.clearMarkers()
 
-    if (this.currentDataSource === "dvf") {
+    // Déterminer quelles sources afficher
+    const sourcesToShow = this.activeDataSources.length > 0 ? this.activeDataSources : [this.currentDataSource]
+    
+    console.log('🎯 Updating markers for sources:', sourcesToShow)
+    console.log('📊 Data counts:', {
+      dvf: this.visibleDvfProperties.length,
+      dpe: this.visibleDpeProperties.length,
+      parcelles: this.visibleParcelleProperties.length
+    })
+
+    // Afficher les marqueurs DVF si la source est active
+    if (sourcesToShow.includes('dvf') && this.visibleDvfProperties.length > 0) {
+      console.log('🏠 Adding', this.visibleDvfProperties.length, 'DVF markers')
       this.visibleDvfProperties.forEach((property) => {
         this.addDvfMarker(property)
       })
-    } else if (this.currentDataSource === "dpe") {
+    }
+
+    // Afficher les marqueurs DPE si la source est active
+    if (sourcesToShow.includes('dpe') && this.visibleDpeProperties.length > 0) {
+      console.log('⚡ Adding', this.visibleDpeProperties.length, 'DPE markers')
       this.visibleDpeProperties.forEach((property) => {
         this.addDpeMarker(property)
       })
-    } else if (this.currentDataSource === "parcelles") {
+    }
+
+    // Afficher les marqueurs Parcelles si la source est active
+    if (sourcesToShow.includes('parcelles') && this.visibleParcelleProperties.length > 0) {
+      console.log('📐 Adding', this.visibleParcelleProperties.length, 'Parcelle markers')
       this.visibleParcelleProperties.forEach((property) => {
         this.addParcelleMarker(property)
       })
     }
+
+    console.log('✅ Total markers added:', this.markers.length)
   }
 
   private clearMarkers(): void {
@@ -283,39 +308,20 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const price = property.valeur_fonciere.toLocaleString()
-
-    let markerContent = ""
-
-    if (this.usePriceFilter) {
-      markerContent += `<span class="price">${price} €</span>`
-    }
-
-    if (this.useDateFilter && property.date_mutation) {
-      markerContent += `${markerContent ? "<br>" : ""}<span class="date">${property.date_mutation}</span>`
-    }
-
-    if (this.useSurfaceFilter && property.surface) {
-      markerContent += `${markerContent ? "<br>" : ""}<span class="surface">${property.surface} m²</span>`
-    }
-
+    const price = this.formatPrice(property.valeur_fonciere)
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "custom-marker",
-        html: `
-          <div class="marker-label red-x">
-            ${markerContent}
-          </div>
-        `,
-        iconSize: [120, 80],
-        iconAnchor: [60, 40],
+        className: "compact-marker dvf-marker",
+        html: `<div class="compact-marker dvf-marker">💰 ${price}</div>`,
+        iconSize: [price.length * 8 + 30, 24], // Dynamic width based on text length
+        iconAnchor: [(price.length * 8 + 30) / 2, 12],
       }),
     }).addTo(this.featureGroup)
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>${price} €</h3>
+        <h3>💰 ${property.valeur_fonciere.toLocaleString()} €</h3>
         <p><strong>Date:</strong> ${property.date_mutation || "Non spécifiée"}</p>
         ${property.surface ? `<p><strong>Surface:</strong> ${property.surface} m²</p>` : ""}
         ${property.surface_terrain ? `<p><strong>Surface terrain:</strong> ${property.surface_terrain} m²</p>` : ""}
@@ -335,24 +341,20 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const gesClass = property.gesClass // Utiliser la Classe GES pour l'affichage
+    const gesClass = property.gesClass
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "custom-marker",
-        html: `
-          <div class="marker-label rating-${gesClass.toLowerCase()}">
-            <span>${gesClass}</span>
-          </div>
-        `,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        className: `compact-marker dpe-marker rating-${gesClass.toLowerCase()}`,
+        html: `<div class="compact-marker dpe-marker rating-${gesClass.toLowerCase()}">⚡ ${gesClass}</div>`,
+        iconSize: [45, 24],
+        iconAnchor: [22.5, 12],
       }),
     }).addTo(this.featureGroup)
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>DPE - Classe GES ${gesClass}</h3>
+        <h3>⚡ DPE - Classe GES ${gesClass}</h3>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Classe énergie:</strong> ${property.energyClass}</p>
         <p><strong>Classe GES:</strong> ${property.gesClass}</p>
@@ -370,31 +372,45 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const surface = property.surface.toLocaleString()
+    const surface = this.formatSurface(property.surface)
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "custom-marker",
-        html: `
-          <div class="marker-label">
-            <span class="surface">${surface} m²</span>
-          </div>
-        `,
-        iconSize: [60, 40],
-        iconAnchor: [30, 20],
+        className: "compact-marker parcelle-marker",
+        html: `<div class="compact-marker parcelle-marker">📐 ${surface}</div>`,
+        iconSize: [surface.length * 8 + 35, 24], // Dynamic width based on text length
+        iconAnchor: [(surface.length * 8 + 35) / 2, 12],
       }),
     }).addTo(this.featureGroup)
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>Parcelle ${property.number}</h3>
-        <p><strong>Surface:</strong> ${surface} m²</p>
+        <h3>📐 Parcelle ${property.number}</h3>
+        <p><strong>Surface:</strong> ${property.surface.toLocaleString()} m²</p>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Commune:</strong> ${property.city}</p>
       </div>
     `)
 
     this.markers.push(marker)
+  }
+
+  private formatPrice(price: number): string {
+    if (price >= 1000000) {
+      return `${(price / 1000000).toFixed(1)}M€`
+    } else if (price >= 1000) {
+      return `${(price / 1000).toFixed(0)}k€`
+    }
+    return `${price}€`
+  }
+
+  private formatSurface(surface: number): string {
+    if (surface >= 10000) {
+      return `${(surface / 10000).toFixed(1)}ha`
+    } else if (surface >= 1000) {
+      return `${(surface / 1000).toFixed(1)}k m²`
+    }
+    return `${surface}m²`
   }
 
   /**

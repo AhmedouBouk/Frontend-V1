@@ -2,16 +2,19 @@
   <!-- Alert component for results > 500 -->
   <app-map-alert 
     [resultCount]="resultCount" 
-    [maxResults]="maxResults">
+    [maxResults]="maxResults"
+    [activeFilters]="activeFilters">
   </app-map-alert>
   <!-- Map display component -->
   <div class="map-inner-container">
     <app-map-display
       [currentDataSource]="currentDataSource"
+      [activeDataSources]="activeDataSources"
       [usePriceFilter]="usePriceFilter"
       [useDateFilter]="useDateFilter"
       [useSurfaceFilter]="useSurfaceFilter"
       [useEnergyFilter]="useEnergyFilter"
+      [markersVisible]="markersVisible"
       [visibleDvfProperties]="visibleDvfProperties"
       [visibleDpeProperties]="visibleDpeProperties"
       [visibleParcelleProperties]="visibleParcelleProperties"

@@ -25,6 +25,7 @@ export class MapResultsComponent {
   @Output() mapSizeInvalidated = new EventEmitter<void>()
 
   public exportDropdownOpen = false
+  public selectedDataSource = ""
 
   private readonly cdr = inject(ChangeDetectorRef)
 
@@ -183,5 +184,58 @@ export class MapResultsComponent {
     link.click()
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
+  }
+
+  // Nouvelles méthodes pour la gestion multi-sources
+  getTotalResults(): number {
+    return this.visibleDvfProperties.length + this.visibleDpeProperties.length + this.visibleParcelleProperties.length
+  }
+
+  hasMultipleSources(): boolean {
+    const activeSources = [
+      this.visibleDvfProperties.length > 0,
+      this.visibleDpeProperties.length > 0,
+      this.visibleParcelleProperties.length > 0,
+    ].filter(Boolean)
+    return activeSources.length > 1
+  }
+
+  selectDataSource(source: string): void {
+    this.selectedDataSource = source
+    console.log("📊 Selected data source:", source)
+  }
+
+  getSelectedDataSource(): string {
+    // Si aucune source sélectionnée, choisir la première source disponible
+    if (!this.selectedDataSource) {
+      if (this.visibleDvfProperties.length > 0) {
+        this.selectedDataSource = "dvf"
+      } else if (this.visibleDpeProperties.length > 0) {
+        this.selectedDataSource = "dpe"
+      } else if (this.visibleParcelleProperties.length > 0) {
+        this.selectedDataSource = "parcelles"
+      } else {
+        this.selectedDataSource = this.currentDataSource || "dvf"
+      }
+    }
+
+    // Vérifier que la source sélectionnée a des données
+    const hasData = {
+      dvf: this.visibleDvfProperties.length > 0,
+      dpe: this.visibleDpeProperties.length > 0,
+      parcelles: this.visibleParcelleProperties.length > 0,
+    }
+
+    if (!hasData[this.selectedDataSource as keyof typeof hasData]) {
+      // Basculer vers la première source disponible
+      for (const [source, hasDataForSource] of Object.entries(hasData)) {
+        if (hasDataForSource) {
+          this.selectedDataSource = source
+          break
+        }
+      }
+    }
+
+    return this.selectedDataSource
   }
 }

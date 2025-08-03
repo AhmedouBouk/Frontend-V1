@@ -1,21 +1,19 @@
 <div class="map-alert" [class.show]="resultCount >= maxResults && !isManuallyHidden">
   <div class="alert-content">
     <div class="alert-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="alert-message">
-      <span class="desktop-message">
-        <strong>{{ resultCount }} résultats trouvés ({{ maxResults }}+ maximum)</strong>
-        <br>Zoomez sur la carte pour être plus précis et réduire le nombre de résultats.
+      <strong>{{ resultCount }}+ résultats trouvés</strong>
+      <span class="filter-info" *ngIf="activeFilters.length > 0">
+        avec {{ getFilterText() }}
       </span>
-      <span class="mobile-message">
-        <strong>{{ resultCount }} résultats - Zoomez pour affiner</strong>
-      </span>
+      - Zoomez pour affiner
     </div>
     <button class="alert-close" (click)="closeAlert()" aria-label="Fermer l'alerte">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>

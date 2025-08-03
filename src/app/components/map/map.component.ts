@@ -41,24 +41,36 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private fetchDataTimeout: any
 
-  // Source de données courante
-  currentDataSource = "dvf"
+  // Sources de données actives (peut être multiple maintenant)
+  activeDataSources: string[] = []
+  currentDataSource = "dvf" // Gardé pour compatibilité
 
-  // Activation des filtres
+  // Filter flags
   usePriceFilter = false
   useDateFilter = false
   useSurfaceFilter = false
   useEnergyFilter = false
+  markersVisible = true // Track if markers should be visible
 
-  public minPrice = 0
-  public maxPrice = 2000000
-  public startDate = "2020-01-01"
-  public endDate = "2023-12-31"
-  public minSurface = 0
-  public maxSurface = 10000
-  public energyClasses: string[] = []
-  public energyExactClass: string | null = null
-  public energyClassRange: [string, string] | null = null
+  // DVF filter properties
+  minPrice = 0
+  maxPrice = 2000000
+  
+  // Filter toggle states - these track UI toggle state
+  isPriceToggleActive = false
+  isDateToggleActive = false
+  isSurfaceToggleActive = false
+  isEnergyToggleActive = false
+  isConsumptionToggleActive = false
+
+  // Date properties
+  startDate = "2020-01-01"
+  endDate = "2023-12-31"
+  minSurface = 0
+  maxSurface = 10000
+  energyClasses: string[] = []
+  energyExactClass: string | null = null
+  energyClassRange: [string, string] | null = null
 
   public visibleDvfProperties: DvfProperty[] = []
   public visibleDpeProperties: DpeProperty[] = []
@@ -67,12 +79,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   public tableCollapsed = false // Sidebar ouvert par défaut
   public isLoading = false
   public dateMode = "exact"
-  public exactDate = ""
+  public exactDate: string | null = null
   
-  // Alert properties
+  // Alert properties - maintenant par source de données
   public showAlert = false
   public resultCount = 0
   public maxResults = 500
+  public alertMessages: {[key: string]: {count: number, show: boolean}} = {
+    dvf: { count: 0, show: false },
+    dpe: { count: 0, show: false },
+    parcelles: { count: 0, show: false }
+  }
 
   // Services
   private readonly mapService = inject(MapService)
@@ -86,6 +103,39 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isFilterActive(): boolean {
     return this.usePriceFilter || this.useDateFilter || this.useSurfaceFilter || this.useEnergyFilter
+  }
+  
+  get activeFilters(): string[] {
+    const filters: string[] = []
+    
+    if (this.usePriceFilter) {
+      filters.push('prix')
+    }
+    if (this.useDateFilter) {
+      filters.push('période')
+    }
+    if (this.useSurfaceFilter) {
+      filters.push('surface')
+    }
+    if (this.useEnergyFilter) {
+      filters.push('classe énergétique')
+    }
+    
+    // Check for consumption filter
+    let hasConsumptionFilter = false
+    this.formService.getExactConsumptionObservable().subscribe(value => {
+      if (value !== null) hasConsumptionFilter = true
+    }).unsubscribe()
+    
+    this.formService.getConsumptionFilterObservable().subscribe(value => {
+      if (value !== null) hasConsumptionFilter = true
+    }).unsubscribe()
+    
+    if (hasConsumptionFilter) {
+      filters.push('consommation')
+    }
+    
+    return filters
   }
 
   private checkAndFetchIfNeeded(): void {
@@ -105,11 +155,50 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Initialize subscriptions to form service events
+    // Subscribe to toggle states
+    this.subscriptions.push(
+      this.formService.getPriceToggleObservable().subscribe(active => {
+        this.isPriceToggleActive = active;
+        console.log(`🔄 Price toggle state updated: ${active}`);
+      }),
+      
+      this.formService.getDateToggleObservable().subscribe(active => {
+        this.isDateToggleActive = active;
+        console.log(`🔄 Date toggle state updated: ${active}`);
+      }),
+      
+      this.formService.getSurfaceToggleObservable().subscribe(active => {
+        this.isSurfaceToggleActive = active;
+        console.log(`🔄 Surface toggle state updated: ${active}`);
+      }),
+      
+      this.formService.getEnergyToggleObservable().subscribe(active => {
+        this.isEnergyToggleActive = active;
+        console.log(`🔄 Energy toggle state updated: ${active}`);
+      }),
+      
+      this.formService.getConsumptionToggleObservable().subscribe(active => {
+        this.isConsumptionToggleActive = active;
+        console.log(`🔄 Consumption toggle state updated: ${active}`);
+      })
+    );
   }
 
   ngAfterViewInit(): void {
     this.subscriptions.push(
+      // Listen for markers visibility changes
+      this.formService.getMarkersVisibleObservable().subscribe((visible) => {
+        this.markersVisible = visible
+        console.log(`🔍 Markers visibility changed: ${visible}`)
+        if (!visible) {
+          // Clear all displayed properties when markers are hidden
+          this.visibleDvfProperties = []
+          this.visibleDpeProperties = []
+          this.visibleParcelleProperties = []
+          this.cdr.detectChanges()
+        }
+      }),
+
       // Re-enable map refresh for search button functionality
       this.mapService.getRefreshObservable().subscribe(() => {
         console.log('🔄 Map refresh requested - triggering fetchData')
@@ -203,22 +292,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         .subscribe((classes: string[] | null) => {
           console.log('⚡ Energy classes filter updated:', classes)
           if (classes && classes.length > 0) {
-            // Always activate filter when classes are selected
-            this.useEnergyFilter = true
             this.energyClasses = classes
             this.energyClassRange = ["",""]
             this.energyExactClass = null
             console.log('⚡ Energy filter activated with classes:', classes)
           } else {
-            this.useEnergyFilter = false
             this.energyClasses = []
-            console.log('⚡ No energy classes selected - filter disabled')
-            // Clear displayed properties when filter is disabled
-            if (this.currentDataSource === 'dpe') {
-              this.visibleDpeProperties = []
-              this.cdr.detectChanges()
-            }
+            console.log('⚡ Energy classes cleared')
           }
+          this.updateEnergyFilterState()
         }),
 
       // DPE filters - Exact class
@@ -226,7 +308,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         .getExactEnergyClassObservable()
         .subscribe((exactClass: string | null) => {
           if (exactClass) {
-            this.useEnergyFilter = true
             this.energyExactClass = exactClass
             this.energyClasses = []
             this.energyClassRange = ["",""]
@@ -235,6 +316,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
             this.energyExactClass = null
             console.log('⚡ Exact energy class filter cleared')
           }
+          this.updateEnergyFilterState()
         }),
 
       // DPE filters - Class range
@@ -242,23 +324,42 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         .getEnergyClassRangeObservable()
         .subscribe((range: [string, string] | null) => {
           if (range) {
-            this.useEnergyFilter = true
             this.energyClassRange = range
             this.energyClasses = []
             this.energyExactClass = null
             console.log('⚡ Energy class range filter updated:', range)
           } else {
-            this.useEnergyFilter = false
-            this.energyClasses = []
+            this.energyClassRange = ["",""]
             console.log('⚡ Energy class range filter cleared')
-            // Clear displayed properties when filter is disabled
-            if (this.currentDataSource === 'dpe') {
-              this.visibleDpeProperties = []
-              this.cdr.detectChanges()
-            }
           }
+          this.updateEnergyFilterState()
         }),
     )
+  }
+
+  // Méthode pour mettre à jour l'état du filtre d'énergie
+  private updateEnergyFilterState(): void {
+    const hasEnergyClasses = this.energyClasses && this.energyClasses.length > 0
+    const hasExactClass = !!(this.energyExactClass && this.energyExactClass.length > 0)
+    const hasClassRange = !!(this.energyClassRange && this.energyClassRange.length === 2 && 
+                          this.energyClassRange[0] && this.energyClassRange[1])
+    
+    const wasActive = this.useEnergyFilter
+    this.useEnergyFilter = hasEnergyClasses || hasExactClass || hasClassRange
+    
+    console.log('⚡ Energy filter state updated:', {
+      hasEnergyClasses,
+      hasExactClass, 
+      hasClassRange,
+      useEnergyFilter: this.useEnergyFilter
+    })
+    
+    // Si le filtre est désactivé et qu'on était sur DPE, effacer les résultats
+    if (wasActive && !this.useEnergyFilter && this.currentDataSource === 'dpe') {
+      this.visibleDpeProperties = []
+      this.cdr.detectChanges()
+      console.log('⚡ Energy filter disabled - clearing DPE results')
+    }
   }
 
   ngOnDestroy(): void {
@@ -383,48 +484,98 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private fetchData(): void {
+    this.isLoading = true
+    this.cdr.detectChanges()
+
+    // Clear previous timeout
     if (this.fetchDataTimeout) {
       clearTimeout(this.fetchDataTimeout)
     }
 
-    setTimeout(() => {
-      this.isLoading = true
-      this.cdr.detectChanges()
-    }, 0)
-
+    // Add a small delay to prevent too many rapid API calls
     this.fetchDataTimeout = setTimeout(() => {
-      if (!this.mapDisplay) {
-        console.error("Map display not initialized")
-        setTimeout(() => {
-          this.isLoading = false
-          this.cdr.detectChanges()
-        }, 0)
+      // Check if markers should be visible
+      if (!this.markersVisible) {
+        console.log('🚫 Markers are hidden - skipping data fetch')
+        this.isLoading = false
+        this.cdr.detectChanges()
         return
       }
 
-      switch (this.currentDataSource) {
-        case "dvf":
-          this.loadDvfData()
-          break
-        case "dpe":
-          this.loadDpeData()
-          break
-        case "parcelles":
-          this.loadParcelleData()
-          break
-        case "none":
-          console.log('🚫 Aucune source de données sélectionnée - pas de chargement')
-          this.isLoading = false
-          // Clear all data when no source is selected
-          this.visibleDvfProperties = []
-          this.visibleDpeProperties = []
-          this.visibleParcelleProperties = []
-          this.resultCount = 0
-          break
-        default:
-          console.error(`❌ Source de données inconnue: ${this.currentDataSource}`)
-          this.isLoading = false
+      console.log('🔄 Fetching data for multiple sources')
+      console.log('Active filters:', {
+        price: this.usePriceFilter,
+        date: this.useDateFilter,
+        surface: this.useSurfaceFilter,
+        energy: this.useEnergyFilter,
+        markersVisible: this.markersVisible
+      })
+
+      // Déterminer quelles sources de données charger selon les filtres actifs
+      const sourcesToLoad: string[] = []
+      
+      // Utilisez directement les propriétés de classe maintenues à jour par les subscriptions
+      console.log('🔍 Active toggles:', {
+        price: this.isPriceToggleActive,
+        date: this.isDateToggleActive,
+        surface: this.isSurfaceToggleActive,
+        energy: this.isEnergyToggleActive,
+        consumption: this.isConsumptionToggleActive
+      })
+      
+      // DVF si filtres prix ou date actifs (ou leurs toggles)
+      if (this.isPriceToggleActive || this.isDateToggleActive) {
+        sourcesToLoad.push('dvf')
       }
+      
+      // DPE si filtre énergie ou consommation actif
+      if (this.isEnergyToggleActive || this.isConsumptionToggleActive) {
+        sourcesToLoad.push('dpe')
+      }
+      
+      // Parcelles si filtre surface actif
+      if (this.isSurfaceToggleActive) {
+        sourcesToLoad.push('parcelles')
+      }
+      
+      // Si aucun filtre actif, charger selon currentDataSource pour compatibilité
+      if (sourcesToLoad.length === 0) {
+        sourcesToLoad.push(this.currentDataSource)
+      }
+      
+      this.activeDataSources = sourcesToLoad
+      console.log('📊 Loading data sources:', sourcesToLoad)
+      
+      // Charger toutes les sources nécessaires en parallèle
+      const loadPromises: Promise<void>[] = []
+      
+      if (sourcesToLoad.includes('dvf')) {
+        loadPromises.push(this.loadDvfDataAsync())
+      } else {
+        this.visibleDvfProperties = []
+        this.alertMessages['dvf'] = { count: 0, show: false }
+      }
+      
+      if (sourcesToLoad.includes('dpe')) {
+        loadPromises.push(this.loadDpeDataAsync())
+      } else {
+        this.visibleDpeProperties = []
+        this.alertMessages['dpe'] = { count: 0, show: false }
+      }
+      
+      if (sourcesToLoad.includes('parcelles')) {
+        loadPromises.push(this.loadParcelleDataAsync())
+      } else {
+        this.visibleParcelleProperties = []
+        this.alertMessages['parcelles'] = { count: 0, show: false }
+      }
+      
+      // Attendre que toutes les données soient chargées
+      Promise.all(loadPromises).finally(() => {
+        this.isLoading = false
+        this.updateGlobalAlert()
+        this.cdr.detectChanges()
+      })
     }, 300)
   }
 
@@ -615,5 +766,227 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         }, 0)
       },
     })
+  }
+
+  // Nouvelles méthodes async pour le chargement parallèle
+  private async loadDvfDataAsync(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.usePriceFilter && !this.useDateFilter) {
+        this.visibleDvfProperties = []
+        this.alertMessages['dvf'] = { count: 0, show: false }
+        resolve()
+        return
+      }
+
+      const bounds = this.mapDisplay?.getMapBounds()
+      if (!bounds) {
+        resolve()
+        return
+      }
+
+      const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
+      const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
+
+      let priceRange: [number, number] | null = null
+      if (this.usePriceFilter && this.minPrice !== 0 && this.maxPrice !== 0) {
+        priceRange = [this.minPrice, this.maxPrice]
+      }
+
+      let dateRange: [string, string] | null = null
+      if (this.useDateFilter) {
+        if (this.dateMode === "exact" && this.exactDate) {
+          dateRange = [this.exactDate, this.exactDate]
+        } else {
+          dateRange = [this.startDate, this.endDate]
+        }
+      }
+
+      this.dvfService.getDvfProperties(topLeft, bottomRight, priceRange, dateRange).subscribe({
+        next: (properties: DvfProperty[]) => {
+          console.log("DVF data loaded:", properties.length, "properties")
+          this.visibleDvfProperties = properties
+          this.alertMessages['dvf'] = { 
+            count: properties.length, 
+            show: properties.length >= this.maxResults 
+          }
+          resolve()
+        },
+        error: (error: any) => {
+          console.error("Error fetching DVF data:", error)
+          this.alertMessages['dvf'] = { count: 0, show: false }
+          reject(error)
+        }
+      })
+    })
+  }
+
+  private async loadDpeDataAsync(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if either energy or consumption filter is active
+      let useConsumptionFilter = false;
+      
+      // We need to check the latest values from the form service
+      this.formService.getExactConsumptionObservable().subscribe(value => {
+        if (value !== null) useConsumptionFilter = true;
+      }).unsubscribe();
+      
+      this.formService.getConsumptionFilterObservable().subscribe(value => {
+        if (value !== null) useConsumptionFilter = true;
+      }).unsubscribe();
+      
+      if (!this.useEnergyFilter && !useConsumptionFilter) {
+        this.visibleDpeProperties = []
+        this.alertMessages['dpe'] = { count: 0, show: false }
+        resolve()
+        return
+      }
+
+      const bounds = this.mapDisplay?.getMapBounds()
+      if (!bounds) {
+        resolve()
+        return
+      }
+
+      const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
+      const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
+
+      // Extract energy filter data based on active filters
+      const getEnergyFilterData = (): { filter: string[] | number | [number, number] | null, mode: 'exact' | 'interval' | 'class' } => {
+        // Default values
+        let filter: string[] | number | [number, number] | null = null;
+        let mode: 'exact' | 'interval' | 'class' = 'class';
+        
+        // Check for consumption filters first (they take precedence)
+        let exactConsumption: number | null = null;
+        let consumptionRange: [number, number] | null = null;
+        
+        this.formService.getExactConsumptionObservable().subscribe(value => {
+          exactConsumption = value;
+        }).unsubscribe();
+        
+        this.formService.getConsumptionFilterObservable().subscribe(value => {
+          consumptionRange = value;
+        }).unsubscribe();
+        
+        if (exactConsumption !== null) {
+          return { filter: exactConsumption, mode: 'exact' };
+        } 
+        
+        if (consumptionRange !== null) {
+          return { filter: consumptionRange, mode: 'interval' };
+        }
+        
+        // If no consumption filters, check energy class filters
+        if (this.useEnergyFilter) {
+          if (this.energyClasses && this.energyClasses.length > 0) {
+            return { filter: this.energyClasses, mode: 'class' };
+          } 
+          
+          if (this.energyExactClass) {
+            return { filter: [this.energyExactClass], mode: 'class' };
+          } 
+          
+          if (this.energyClassRange && this.energyClassRange.length === 2) {
+            const classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+            const startIndex = classes.indexOf(this.energyClassRange[0]);
+            const endIndex = classes.indexOf(this.energyClassRange[1]);
+            
+            if (startIndex !== -1 && endIndex !== -1) {
+              return { filter: classes.slice(startIndex, endIndex + 1), mode: 'class' };
+            }
+          }
+        }
+        
+        return { filter, mode };
+      };
+      
+      // Get energy filter data
+      const filterData = getEnergyFilterData();
+
+      const surfaceRange: [number, number] = this.useSurfaceFilter 
+        ? [this.minSurface, this.maxSurface] 
+        : [0, 10000]
+
+      this.dpeService.getDpeProperties(topLeft, bottomRight, filterData.filter, filterData.mode, surfaceRange).subscribe({
+        next: (properties: DpeProperty[]) => {
+          console.log("DPE data loaded:", properties.length, "properties")
+          this.visibleDpeProperties = properties
+          this.alertMessages['dpe'] = { 
+            count: properties.length, 
+            show: properties.length >= this.maxResults 
+          }
+          resolve()
+        },
+        error: (error: any) => {
+          console.error("Error fetching DPE data:", error)
+          this.alertMessages['dpe'] = { count: 0, show: false }
+          reject(error)
+        }
+      })
+    })
+  }
+
+  private async loadParcelleDataAsync(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.useSurfaceFilter) {
+        this.visibleParcelleProperties = []
+        this.alertMessages['parcelles'] = { count: 0, show: false }
+        resolve()
+        return
+      }
+
+      const bounds = this.mapDisplay?.getMapBounds()
+      if (!bounds) {
+        resolve()
+        return
+      }
+
+      const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
+      const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
+
+      this.parcelleService.getParcelleProperties(topLeft, bottomRight, [this.minSurface, this.maxSurface]).subscribe({
+        next: (properties: ParcelleProperty[]) => {
+          console.log("Parcelle data loaded:", properties.length, "properties")
+          this.visibleParcelleProperties = properties
+          this.alertMessages['parcelles'] = { 
+            count: properties.length, 
+            show: properties.length >= this.maxResults 
+          }
+          resolve()
+        },
+        error: (error: any) => {
+          console.error("Error fetching parcelle data:", error)
+          this.alertMessages['parcelles'] = { count: 0, show: false }
+          reject(error)
+        }
+      })
+    })
+  }
+
+  // Méthode pour mettre à jour l'alerte globale selon les sources actives
+  private updateGlobalAlert(): void {
+    let totalCount = 0
+    let hasAlert = false
+    let alertSources: string[] = []
+
+    // Vérifier chaque source active
+    for (const source of this.activeDataSources) {
+      const alert = this.alertMessages[source]
+      if (alert) {
+        totalCount += alert.count
+        if (alert.show) {
+          hasAlert = true
+          alertSources.push(source.toUpperCase())
+        }
+      }
+    }
+
+    // Mettre à jour les propriétés globales pour l'alerte
+    this.resultCount = totalCount
+    this.showAlert = hasAlert
+    
+    if (hasAlert) {
+      console.log(`🚨 Alert: ${alertSources.join(', ')} sources have 500+ results`)
+    }
   }
 }

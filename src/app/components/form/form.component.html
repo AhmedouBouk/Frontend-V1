@@ -10,17 +10,22 @@
           </div>
           <h3>Ventes passées</h3>
         </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="priceExpanded"
+             (click)="togglePriceExpanded()">
         <label class="toggle-switch" for="usePriceFilter">
           <input type="checkbox" formControlName="usePriceFilter" id="usePriceFilter">
           <span class="slider"></span>
         </label>
       </div>
   
-      <div class="section-content" *ngIf="filterForm.get('usePriceFilter')?.value">
-        <div class="radio-group">
+      <div class="section-content" *ngIf="priceExpanded">
+        <div class="radio-group-inline">
           <label class="radio-item">
             <input type="radio" value="exact" formControlName="priceMode">
-            <span class="radio-label">Montant exact</span>
+            <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
             <input type="radio" value="interval" formControlName="priceMode">
@@ -36,7 +41,7 @@
         </div>
   
         <div class="price-interval" *ngIf="filterForm.get('priceMode')?.value === 'interval'">
-          <div class="input-row">
+          <div class="input-row-compact">
             <div class="form-group">
               <label for="minPrice">Min (€)</label>
               <input type="number" id="minPrice" formControlName="minPrice" placeholder="100000">
@@ -59,17 +64,22 @@
           </div>
           <h3>Période</h3>
         </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="dateExpanded"
+             (click)="toggleDateExpanded()">
         <label class="toggle-switch" for="useDateFilter">
           <input type="checkbox" formControlName="useDateFilter" id="useDateFilter">
           <span class="slider"></span>
         </label>
       </div>
   
-      <div class="section-content" *ngIf="filterForm.get('useDateFilter')?.value">
-        <div class="radio-group">
+      <div class="section-content" *ngIf="dateExpanded">
+        <div class="radio-group-inline">
           <label class="radio-item">
             <input type="radio" value="exact" formControlName="dateMode">
-            <span class="radio-label">Date exacte</span>
+            <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
             <input type="radio" value="interval" formControlName="dateMode">
@@ -85,13 +95,13 @@
         </div>
   
         <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'interval'">
-          <div class="input-row">
+          <div class="input-row-compact">
             <div class="form-group">
-              <label for="startDate">Date de début</label>
+              <label for="startDate">Début</label>
               <input type="date" id="startDate" formControlName="startDate">
             </div>
             <div class="form-group">
-              <label for="endDate">Date de fin</label>
+              <label for="endDate">Fin</label>
               <input type="date" id="endDate" formControlName="endDate">
             </div>
           </div>
@@ -108,17 +118,22 @@
           </div>
           <h3>Taille du terrain</h3>
         </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="surfaceExpanded"
+             (click)="toggleSurfaceExpanded()">
         <label class="toggle-switch" for="useSurfaceFilter">
           <input type="checkbox" formControlName="useSurfaceFilter" id="useSurfaceFilter">
           <span class="slider"></span>
         </label>
       </div>
   
-      <div class="section-content" *ngIf="filterForm.get('useSurfaceFilter')?.value">
-        <div class="radio-group">
+      <div class="section-content" *ngIf="surfaceExpanded">
+        <div class="radio-group-inline">
           <label class="radio-item">
             <input type="radio" value="exact" formControlName="surfaceMode">
-            <span class="radio-label">Surface exacte</span>
+            <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
             <input type="radio" value="interval" formControlName="surfaceMode">
@@ -134,7 +149,7 @@
         </div>
   
         <div class="surface-interval" *ngIf="filterForm.get('surfaceMode')?.value === 'interval'">
-          <div class="input-row">
+          <div class="input-row-compact">
             <div class="form-group">
               <label for="minSurface">Min (m²)</label>
               <input type="number" id="minSurface" formControlName="minSurface" placeholder="100">
@@ -157,13 +172,18 @@
           </div>
           <h3>Classe énergétique</h3>
         </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="energyExpanded"
+             (click)="toggleEnergyExpanded()">
         <label class="toggle-switch" for="useEnergyFilter">
           <input type="checkbox" formControlName="useEnergyFilter" id="useEnergyFilter">
           <span class="slider"></span>
         </label>
       </div>
   
-      <div class="section-content" *ngIf="filterForm.get('useEnergyFilter')?.value">
+      <div class="section-content" *ngIf="energyExpanded">
         <div class="energy-ratings">
           <label class="energy-rating rating-a">
             <input type="checkbox" formControlName="energyClassA">
@@ -206,17 +226,22 @@
           </div>
           <h3>Consommation</h3>
         </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="consumptionExpanded"
+             (click)="toggleConsumptionExpanded()">
         <label class="toggle-switch" for="useConsumptionFilter">
           <input type="checkbox" formControlName="useConsumptionFilter" id="useConsumptionFilter">
           <span class="slider"></span>
         </label>
       </div>
   
-      <div class="section-content" *ngIf="filterForm.get('useConsumptionFilter')?.value">
-        <div class="radio-group">
+      <div class="section-content" *ngIf="consumptionExpanded">
+        <div class="radio-group-inline">
           <label class="radio-item">
             <input type="radio" value="exact" formControlName="consumptionMode">
-            <span class="radio-label">Valeur exacte</span>
+            <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
             <input type="radio" value="interval" formControlName="consumptionMode">
@@ -232,7 +257,7 @@
         </div>
 
         <div class="consumption-interval" *ngIf="filterForm.get('consumptionMode')?.value === 'interval'">
-          <div class="input-row">
+          <div class="input-row-compact">
             <div class="form-group">
               <label for="minConsumption">Min (kWh/m²/an)</label>
               <input type="number" id="minConsumption" formControlName="minConsumption" placeholder="50">
@@ -246,27 +271,5 @@
       </div>
     </div>
   
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button"
-              class="btn btn-primary"
-              (click)="search()"
-              [disabled]="!filterForm.get('usePriceFilter')?.value && !filterForm.get('useDateFilter')?.value && !filterForm.get('useSurfaceFilter')?.value && !filterForm.get('useEnergyFilter')?.value && !filterForm.get('useConsumptionFilter')?.value">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Rechercher</span>
-      </button>
-      <button type="button"
-              class="btn btn-secondary"
-              (click)="resetFilters()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M23 20V14H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Réinitialiser</span>
-      </button>
-    </div>
   </form>
 </div>

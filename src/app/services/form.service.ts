@@ -23,6 +23,16 @@ export class FormService {
   private readonly consumptionFilterSubject = new BehaviorSubject<[number, number] | null>(null)
   private readonly exactConsumptionSubject = new BehaviorSubject<number | null>(null)
   
+  // État de visibilité des marqueurs
+  private readonly markersVisibleSubject = new BehaviorSubject<boolean>(true)
+  
+  // États des toggles de filtres
+  private readonly priceToggleSubject = new BehaviorSubject<boolean>(false)
+  private readonly dateToggleSubject = new BehaviorSubject<boolean>(false)
+  private readonly surfaceToggleSubject = new BehaviorSubject<boolean>(false)
+  private readonly energyToggleSubject = new BehaviorSubject<boolean>(false)
+  private readonly consumptionToggleSubject = new BehaviorSubject<boolean>(false)
+
   private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('none')
 
   getPriceFilterObservable(): Observable<[number, number] | null> {
@@ -64,6 +74,31 @@ export class FormService {
 
   getDataSourceObservable(): Observable<DataSourceType> {
     return this.dataSourceSubject.asObservable()
+  }
+
+  getMarkersVisibleObservable(): Observable<boolean> {
+    return this.markersVisibleSubject.asObservable()
+  }
+
+  // Toggle state observables
+  getPriceToggleObservable(): Observable<boolean> {
+    return this.priceToggleSubject.asObservable()
+  }
+
+  getDateToggleObservable(): Observable<boolean> {
+    return this.dateToggleSubject.asObservable()
+  }
+
+  getSurfaceToggleObservable(): Observable<boolean> {
+    return this.surfaceToggleSubject.asObservable()
+  }
+
+  getEnergyToggleObservable(): Observable<boolean> {
+    return this.energyToggleSubject.asObservable()
+  }
+
+  getConsumptionToggleObservable(): Observable<boolean> {
+    return this.consumptionToggleSubject.asObservable()
   }
 
   setPriceFilter(minPrice: number, maxPrice: number): void {
@@ -115,6 +150,31 @@ export class FormService {
 
   setDataSource(source: DataSourceType): void {
     this.dataSourceSubject.next(source)
+  }
+
+  setMarkersVisible(visible: boolean): void {
+    this.markersVisibleSubject.next(visible)
+  }
+
+  // Toggle state setters
+  setPriceToggle(active: boolean): void {
+    this.priceToggleSubject.next(active)
+  }
+
+  setDateToggle(active: boolean): void {
+    this.dateToggleSubject.next(active)
+  }
+
+  setSurfaceToggle(active: boolean): void {
+    this.surfaceToggleSubject.next(active)
+  }
+
+  setEnergyToggle(active: boolean): void {
+    this.energyToggleSubject.next(active)
+  }
+
+  setConsumptionToggle(active: boolean): void {
+    this.consumptionToggleSubject.next(active)
   }
 
   clearPriceFilter(): void {

@@ -509,3 +509,14 @@
 .search-results::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted, #9ca3af);
 }
+
+/* ===== VARIABLES CSS POUR LA STABILITÉ ===== */
+:root {
+  --sidebar-width: 350px;
+  --header-height: 80px;
+  --transition-normal: 0.3s ease;
+  --transition-fast: 0.2s ease;
+}
+
+
+
