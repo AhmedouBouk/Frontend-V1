@@ -308,20 +308,45 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const price = this.formatPrice(property.valeur_fonciere)
+    
+    // Determine what to display on the marker based on active filters
+    let markerText: string
+    let markerIcon: string
+    let popupTitle: string
+    
+    if (this.useDateFilter && !this.usePriceFilter) {
+      // Date filter is active, price filter is not - show date
+      const date = property.date_mutation || "Non spécifiée"
+      markerText = date
+      markerIcon = "📅"
+      popupTitle = `📅 ${date}`
+    } else if (this.usePriceFilter && !this.useDateFilter) {
+      // Price filter is active, date filter is not - show price
+      const price = this.formatPrice(property.valeur_fonciere)
+      markerText = price
+      markerIcon = "💰"
+      popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
+    } else {
+      // Both filters active or neither active - show price (default)
+      const price = this.formatPrice(property.valeur_fonciere)
+      markerText = price
+      markerIcon = "💰"
+      popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
+    }
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: "compact-marker dvf-marker",
-        html: `<div class="compact-marker dvf-marker">💰 ${price}</div>`,
-        iconSize: [price.length * 8 + 30, 24], // Dynamic width based on text length
-        iconAnchor: [(price.length * 8 + 30) / 2, 12],
+        html: `<div class="compact-marker dvf-marker">${markerIcon} ${markerText}</div>`,
+        iconSize: [markerText.length * 8 + 30, 24], // Dynamic width based on text length
+        iconAnchor: [(markerText.length * 8 + 30) / 2, 12],
       }),
     }).addTo(this.featureGroup)
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>💰 ${property.valeur_fonciere.toLocaleString()} €</h3>
+        <h3>${popupTitle}</h3>
+        <p><strong>Prix:</strong> ${property.valeur_fonciere.toLocaleString()} €</p>
         <p><strong>Date:</strong> ${property.date_mutation || "Non spécifiée"}</p>
         ${property.surface ? `<p><strong>Surface:</strong> ${property.surface} m²</p>` : ""}
         ${property.surface_terrain ? `<p><strong>Surface terrain:</strong> ${property.surface_terrain} m²</p>` : ""}

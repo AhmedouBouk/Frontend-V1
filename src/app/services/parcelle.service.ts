@@ -120,10 +120,7 @@ export class ParcelleService {
     if (surfaceRange) {
       const surfaceParam = `${surfaceRange[0]},${surfaceRange[1]}`;
       params = params.set('surface', surfaceParam);
-    } else {
-      // Valeurs par defaut si aucun filtre de surface
-      params = params.set('surface', '0,10000000');
-    }
+    } 
     
     console.log('Parametres envoyes au backend:', {
       topLeft: topLeftParam,

@@ -369,44 +369,84 @@
   }
   
   .property-list-header {
-    flex-direction: column;
-    gap: var(--space-md);
-    align-items: stretch;
+    // Keep everything on one line in mobile
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
+    align-items: center;
+    padding: var(--space-md);
   }
   
-  .header-left,
-  .header-center,
-  .header-right {
-    flex: none;
+  .header-left {
+    flex: 0 0 auto; // Don't grow, don't shrink
+    min-width: 0;
+  }
+  
+  .header-left h3 {
+    font-size: 0.85rem;
+    gap: var(--space-xs);
+  }
+  
+  .property-count {
+    font-size: 0.75rem;
   }
   
   .header-center {
-    order: 2;
+    flex: 1; // Take remaining space
+    min-width: 0;
+    margin: 0 var(--space-xs);
   }
   
   .header-right {
-    order: 1;
-    justify-content: space-between;
+    flex: 0 0 auto; // Don't grow, don't shrink
   }
   
   .results-navbar-inline {
-    width: 100%;
-    justify-content: center;
+    padding: 2px;
+    gap: 2px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.08);
   }
   
   .navbar-tab-inline {
-    flex: 1;
-    justify-content: center;
+    font-size: 0.7rem;
+    padding: var(--space-xs) var(--space-sm);
+    gap: 2px;
+    min-width: 0;
+  }
+  
+  .navbar-tab-inline .tab-icon {
+    font-size: 0.8rem;
+  }
+  
+  .navbar-tab-inline .tab-label {
+    display: none; // Hide labels on mobile to save space
+  }
+  
+  .navbar-tab-inline .tab-count {
+    font-size: 0.6rem;
+    padding: 1px var(--space-xs);
+    min-width: 16px;
+  }
+  
+  .export-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.7rem;
+    gap: var(--space-xs);
+  }
+  
+  .export-btn span {
+    display: none; // Hide "Exporter" text on mobile
   }
 }
 
 @media (max-width: 480px) {
   .property-list-header {
-    padding: var(--space-md);
+    padding: var(--space-sm);
   }
   
-  .property-list-header h3 {
-    font-size: 0.9rem;
+  .header-left h3 {
+    font-size: 0.8rem;
   }
   
   .property-table th,
@@ -415,18 +455,30 @@
     font-size: 0.8rem;
   }
   
-  .export-btn {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: 0.7rem;
-  }
-  
   .navbar-tab-inline {
-    font-size: 0.75rem;
-    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.65rem;
+    padding: 4px var(--space-xs);
   }
   
   .navbar-tab-inline .tab-count {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    min-width: 14px;
+  }
+  
+  .export-btn {
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .export-btn svg:first-child {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .export-btn svg:last-child {
+    display: none; // Hide dropdown arrow on very small screens
   }
 }
 

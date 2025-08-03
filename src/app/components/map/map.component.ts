@@ -334,6 +334,117 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.updateEnergyFilterState()
         }),
+
+      // Consumption filters
+      this.formService
+        .getConsumptionFilterObservable()
+        .subscribe((filter) => {
+          if (filter) {
+            const [min, max] = filter
+            console.log('🔥 Consumption filter updated:', min, 'to', max)
+            // Consumption filtering is handled in DPE service
+          } else {
+            console.log('🔥 Consumption filter cleared')
+            // Clear DPE properties when consumption filter is disabled
+            this.visibleDpeProperties = []
+            this.alertMessages['dpe'] = { count: 0, show: false }
+            this.cdr.detectChanges()
+          }
+        }),
+
+      this.formService
+        .getExactConsumptionObservable()
+        .subscribe((consumption) => {
+          if (consumption !== null) {
+            console.log('🔥 Exact consumption filter updated:', consumption)
+            // Consumption filtering is handled in DPE service
+          } else {
+            console.log('🔥 Exact consumption filter cleared')
+          }
+        }),
+
+      // Toggle state subscriptions - CRITICAL: These were missing!
+      this.formService
+        .getPriceToggleObservable()
+        .subscribe((active) => {
+          this.isPriceToggleActive = active
+          console.log('💰 Price toggle state:', active)
+          if (!active) {
+            // Clear DVF properties when price toggle is disabled
+            // Only clear if date toggle is also inactive
+            if (!this.isDateToggleActive) {
+              this.visibleDvfProperties = []
+              this.alertMessages['dvf'] = { count: 0, show: false }
+              this.updateGlobalAlert()
+              this.cdr.detectChanges()
+            }
+          }
+        }),
+
+      this.formService
+        .getDateToggleObservable()
+        .subscribe((active) => {
+          this.isDateToggleActive = active
+          console.log('📅 Date toggle state:', active)
+          if (!active) {
+            // Clear DVF properties when date toggle is disabled
+            // Only clear if price toggle is also inactive
+            if (!this.isPriceToggleActive) {
+              this.visibleDvfProperties = []
+              this.alertMessages['dvf'] = { count: 0, show: false }
+              this.updateGlobalAlert()
+              this.cdr.detectChanges()
+            }
+          }
+        }),
+
+      this.formService
+        .getSurfaceToggleObservable()
+        .subscribe((active) => {
+          this.isSurfaceToggleActive = active
+          console.log('📐 Surface toggle state:', active)
+          if (!active) {
+            // Clear parcelle properties when surface toggle is disabled
+            this.visibleParcelleProperties = []
+            this.alertMessages['parcelles'] = { count: 0, show: false }
+            this.updateGlobalAlert()
+            this.cdr.detectChanges()
+          }
+        }),
+
+      this.formService
+        .getEnergyToggleObservable()
+        .subscribe((active) => {
+          this.isEnergyToggleActive = active
+          console.log('⚡ Energy toggle state:', active)
+          if (!active) {
+            // Clear DPE properties when energy toggle is disabled
+            // Only clear if consumption toggle is also inactive
+            if (!this.isConsumptionToggleActive) {
+              this.visibleDpeProperties = []
+              this.alertMessages['dpe'] = { count: 0, show: false }
+              this.updateGlobalAlert()
+              this.cdr.detectChanges()
+            }
+          }
+        }),
+
+      this.formService
+        .getConsumptionToggleObservable()
+        .subscribe((active) => {
+          this.isConsumptionToggleActive = active
+          console.log('🔥 Consumption toggle state:', active)
+          if (!active) {
+            // Clear DPE properties when consumption toggle is disabled
+            // Only clear if energy toggle is also inactive
+            if (!this.isEnergyToggleActive) {
+              this.visibleDpeProperties = []
+              this.alertMessages['dpe'] = { count: 0, show: false }
+              this.updateGlobalAlert()
+              this.cdr.detectChanges()
+            }
+          }
+        }),
     )
   }
 
@@ -597,8 +708,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     // Only set price range if the filter is explicitly enabled
     // This prevents sending extreme values (0 to 10,000,000) when no filter is applied
     let priceRange: [number, number] | null = null
-    if (this.usePriceFilter && this.minPrice !== 0 && this.maxPrice !== 0) {
+    if (this.usePriceFilter) {
       priceRange = [this.minPrice, this.maxPrice]
+      console.log('💰 DVF price range applied:', priceRange)
     }
 
     let dateRange: [string, string] | null = null

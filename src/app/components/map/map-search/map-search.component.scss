@@ -221,12 +221,12 @@
     left: 20px;
     z-index: 999;
     
-    // Default position: just above the collapsed sidebar (bottom)
-    bottom: 80px; // Space for collapsed sidebar
+    // Move higher up to avoid covering map results
+    bottom: calc(50vh + 80px); // Moved much higher
     
     // When sidebar is open, position above it
     &.with-sidebar {
-      bottom: calc(40vh + 20px); // Just above the open sidebar
+      bottom: calc(40vh + 80px); // Higher when sidebar is open
     }
     
     // Keep vertical layout on mobile
@@ -265,11 +265,11 @@
   .map-search-container {
     left: 10px;
     
-    // Default position for small screens
-    bottom: 70px;
+    // Higher position for small screens to avoid covering results
+    bottom: calc(50vh + 70px);
     
     &.with-sidebar {
-      bottom: calc(40vh + 15px); // Just above sidebar with smaller margin
+      bottom: calc(40vh + 70px);
     }
   }
   

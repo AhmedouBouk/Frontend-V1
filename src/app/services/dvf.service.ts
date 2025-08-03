@@ -47,6 +47,12 @@ export class DvfService {
     if (priceRange) {
       params.prix_min = priceRange[0];
       params.prix_max = priceRange[1];
+      console.log('💰 DVF Service: Price range parameters added:', {
+        prix_min: params.prix_min,
+        prix_max: params.prix_max
+      });
+    } else {
+      console.log('💰 DVF Service: No price range provided');
     }
 
     if (exactDate) {
