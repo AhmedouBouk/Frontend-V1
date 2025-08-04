@@ -4,73 +4,50 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
 import { ParcelleProperty } from '../models/parcelle.model';
 import { environment } from '../../environments/environment';
+import { CoordinateConversionService } from './coordinate-conversion.service';
 
 @Injectable({ providedIn: 'root' })
 export class ParcelleService {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly coordService: CoordinateConversionService
+  ) {}
 
   /**
-   * Convertit des coordonnees lat/lon (WGS84) en coordonnees Lambert 93 approximatives
-   * Cette conversion est adaptee pour la base de donnees parcelles francaises
+   * Convertit des coordonnees lat/lon (WGS84) en coordonnees Lambert 93 avec haute precision
+   * Utilise la transformation officielle IGN pour la base de donnees parcelles francaises
    * @param latLon [latitude, longitude] en degres
    * @returns [y_projected, x_projected] coordonnees Lambert 93 en metres
    */
   private convertLatLonToProjected(latLon: [number, number]): [number, number] {
     const [lat, lon] = latLon;
     
-    // Clamp des coordonnees pour la France metropolitaine
-    const clampedLat = Math.max(41, Math.min(52, lat));
-    const clampedLon = Math.max(-5, Math.min(10, lon));
+    // Validation des coordonnees pour la France (incluant DOM-TOM)
+    if (!this.coordService.isValidFrenchCoordinates(lat, lon)) {
+      console.warn(`⚠️ Parcelles - Coordonnees potentiellement hors France metropolitaine: [${lat}, ${lon}]`);
+    }
     
-    // Formule calibree pour la conversion WGS84 vers Lambert93 realiste
-    // Basee sur les vraies donnees de la base parcelles et les specifications Lambert93
+    // Conversion precise WGS84 → Lambert93
+    const [x_projected, y_projected] = this.coordService.wgs84ToLambert93(lat, lon);
     
-    // Parametres officiels Lambert93 (RGF93)
-    const lon0 = 3.0; // Meridien central Lambert93
-    const lat0 = 46.5; // Latitude de reference
-    
-    // Facteurs d'echelle et offsets calibres pour la France
-    // Lambert93: X0=700000, Y0=6600000 (specifications officielles)
-    const X0 = 700000; // False Easting (offset X)
-    const Y0 = 6600000; // False Northing (offset Y)
-    
-    // Facteurs d'echelle ajustes pour correspondre aux donnees reelles
-    // 1 degre ≈ 111320m, mais ajuste pour la projection conique
-    const scaleX = 111320 * Math.cos(lat * Math.PI / 180); // Ajuste selon la latitude
-    const scaleY = 111320; // metres par degre de latitude
-    
-    // Calcul des coordonnees Lambert93 approximatives
-    const x_projected = X0 + (clampedLon - lon0) * scaleX;
-    const y_projected = Y0 + (clampedLat - lat0) * scaleY;
-    
-    console.log(`Conversion detaillee: [${lat}, ${lon}] vers Lambert93 approx: [${y_projected}, ${x_projected}]`);
+    console.log(`🎯 Parcelles Conversion precise: [${lat}, ${lon}] → Lambert93: [${y_projected.toFixed(2)}, ${x_projected.toFixed(2)}]`);
     
     return [y_projected, x_projected];
   }
 
   /**
-   * Convertit des coordonnees Lambert 93 approximatives vers lat/lon (WGS84)
-   * Fonction inverse de convertLatLonToProjected
+   * Convertit des coordonnees Lambert 93 vers lat/lon (WGS84) avec haute precision
+   * Utilise la transformation inverse officielle IGN
    * @param projected [y_projected, x_projected] coordonnees Lambert 93 en metres
    * @returns [latitude, longitude] en degres
    */
   private convertProjectedToLatLon(projected: [number, number]): [number, number] {
     const [y_projected, x_projected] = projected;
     
-    // Constantes de la projection inverse (coherentes avec convertLatLonToProjected)
-    const lon0 = 3.0; // Meridien central Lambert93
-    const lat0 = 46.5; // Latitude de reference
-    const X0 = 700000; // False Easting
-    const Y0 = 6600000; // False Northing
+    // Conversion precise Lambert93 → WGS84
+    const [lat, lon] = this.coordService.lambert93ToWgs84(x_projected, y_projected);
     
-    // Estimation de la latitude pour le calcul du facteur d'echelle
-    const lat_approx = lat0 + (y_projected - Y0) / 111320;
-    const scaleX = 111320 * Math.cos(lat_approx * Math.PI / 180);
-    const scaleY = 111320;
-    
-    // Calcul inverse
-    const lon = lon0 + (x_projected - X0) / scaleX;
-    const lat = lat0 + (y_projected - Y0) / scaleY;
+    console.log(`🎯 Parcelles Conversion inverse precise: Lambert93 [${x_projected.toFixed(2)}, ${y_projected.toFixed(2)}] → WGS84: [${lat}, ${lon}]`);
     
     return [lat, lon];
   }

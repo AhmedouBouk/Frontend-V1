@@ -309,37 +309,27 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     const lat = property.latitude
     const lng = property.longitude
     
-    // Determine what to display on the marker based on active filters
-    let markerText: string
+    // Determine what emoji to display on the marker based on active filters
     let markerIcon: string
     let popupTitle: string
     
     if (this.useDateFilter && !this.usePriceFilter) {
-      // Date filter is active, price filter is not - show date
+      // Date filter is active, price filter is not - show date emoji
       const date = property.date_mutation || "Non spécifiée"
-      markerText = date
       markerIcon = "📅"
       popupTitle = `📅 ${date}`
-    } else if (this.usePriceFilter && !this.useDateFilter) {
-      // Price filter is active, date filter is not - show price
-      const price = this.formatPrice(property.valeur_fonciere)
-      markerText = price
-      markerIcon = "💰"
-      popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
     } else {
-      // Both filters active or neither active - show price (default)
-      const price = this.formatPrice(property.valeur_fonciere)
-      markerText = price
+      // Price filter is active or both filters active or neither active - show price emoji (default)
       markerIcon = "💰"
       popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
     }
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "compact-marker dvf-marker",
-        html: `<div class="compact-marker dvf-marker">${markerIcon} ${markerText}</div>`,
-        iconSize: [markerText.length * 8 + 30, 24], // Dynamic width based on text length
-        iconAnchor: [(markerText.length * 8 + 30) / 2, 12],
+        className: "emoji-marker dvf-marker",
+        html: `<div class="emoji-marker dvf-marker">${markerIcon}</div>`,
+        iconSize: [20, 20], // Fixed small size for emoji only
+        iconAnchor: [10, 10], // Center the emoji exactly on the position
       }),
     }).addTo(this.featureGroup)
 
@@ -370,10 +360,10 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: `compact-marker dpe-marker rating-${gesClass.toLowerCase()}`,
-        html: `<div class="compact-marker dpe-marker rating-${gesClass.toLowerCase()}">⚡ ${gesClass}</div>`,
-        iconSize: [45, 24],
-        iconAnchor: [22.5, 12],
+        className: `emoji-marker dpe-marker rating-${gesClass.toLowerCase()}`,
+        html: `<div class="emoji-marker dpe-marker rating-${gesClass.toLowerCase()}">⚡</div>`,
+        iconSize: [20, 20], // Fixed small size for emoji only
+        iconAnchor: [10, 10], // Center the emoji exactly on the position
       }),
     }).addTo(this.featureGroup)
 
@@ -397,14 +387,13 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const lat = property.latitude
     const lng = property.longitude
-    const surface = this.formatSurface(property.surface)
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "compact-marker parcelle-marker",
-        html: `<div class="compact-marker parcelle-marker">📐 ${surface}</div>`,
-        iconSize: [surface.length * 8 + 35, 24], // Dynamic width based on text length
-        iconAnchor: [(surface.length * 8 + 35) / 2, 12],
+        className: "emoji-marker parcelle-marker",
+        html: `<div class="emoji-marker parcelle-marker">📐</div>`,
+        iconSize: [20, 20], // Fixed small size for emoji only
+        iconAnchor: [10, 10], // Center the emoji exactly on the position
       }),
     }).addTo(this.featureGroup)
 

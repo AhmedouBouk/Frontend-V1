@@ -21,6 +21,7 @@
     "@cds/core": "^6.15.1",
     "@clr/angular": "^17.10.0",
     "@clr/ui": "^17.10.0",
+    "@types/proj4": "^2.19.0",
     "dvf-map": "file:",
     "geoportal-extensions-leaflet": "^2.4.2",
     "leaflet": "^1.9.4",
