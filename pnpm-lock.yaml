@@ -47,6 +47,9 @@ importers:
       dvf-map:
         specifier: 'file:'
         version: file:(@angular/cdk@19.2.19(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(encoding@0.1.13)
+      geoportal-access-lib:
+        specifier: ^3.4.6
+        version: 3.4.6(encoding@0.1.13)
       geoportal-extensions-leaflet:
         specifier: ^2.4.2
         version: 2.4.2(encoding@0.1.13)
@@ -1776,6 +1779,10 @@ packages:
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
     engines: {node: '>=10.0.0'}
 
+  '@xmldom/xmldom@0.9.8':
+    resolution: {integrity: sha512-p96FSY54r+WJ50FIOsCOjyj/wavs8921hG5+kVMmZgKcvIKxMXHTrjNJvRgWa/zuX3B6t2lijLNFaOyuxUH+2A==}
+    engines: {node: '>=14.6'}
+
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
 
@@ -2549,6 +2556,11 @@ packages:
 
   geoportal-access-lib@3.4.1:
     resolution: {integrity: sha512-ClyKb/NIJtCTz41ro+03+mlZ2HfyPVjRCc+6UdyZ8w0+2fLMi9yUrhK9UfiL0gZxwZGq0swBvl+1y9RJbNUfYA==}
+    bundledDependencies: []
+
+  geoportal-access-lib@3.4.6:
+    resolution: {integrity: sha512-TC0NKVHcJZ9QvkEDyuMB327lT0xQIcZoIE3aSNOHN4Bkt1TcF+D/zAMQTl2AVTAYdrLAqFl6bhTWn5r7VJvkpw==}
+    engines: {node: '>=20'}
     bundledDependencies: []
 
   geoportal-extensions-leaflet@2.4.2:
@@ -6261,6 +6273,8 @@ snapshots:
 
   '@xmldom/xmldom@0.8.10': {}
 
+  '@xmldom/xmldom@0.9.8': {}
+
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
@@ -6792,6 +6806,8 @@ snapshots:
       '@cds/core': 6.15.1
       '@clr/angular': 17.10.0(@angular/cdk@19.2.19(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(@cds/core@6.15.1)(@clr/ui@17.10.0(@cds/core@6.15.1))
       '@clr/ui': 17.10.0(@cds/core@6.15.1)
+      '@types/proj4': 2.19.0
+      geoportal-access-lib: 3.4.6(encoding@0.1.13)
       geoportal-extensions-leaflet: 2.4.2(encoding@0.1.13)
       leaflet: 1.9.4
       leaflet.wms: 0.2.0
@@ -7098,6 +7114,14 @@ snapshots:
   geoportal-access-lib@3.4.1(encoding@0.1.13):
     dependencies:
       '@xmldom/xmldom': 0.8.10
+      es6-promise: 4.2.8
+      node-fetch: 2.7.0(encoding@0.1.13)
+    transitivePeerDependencies:
+      - encoding
+
+  geoportal-access-lib@3.4.6(encoding@0.1.13):
+    dependencies:
+      '@xmldom/xmldom': 0.9.8
       es6-promise: 4.2.8
       node-fetch: 2.7.0(encoding@0.1.13)
     transitivePeerDependencies:

@@ -23,6 +23,7 @@
     "@clr/ui": "^17.10.0",
     "@types/proj4": "^2.19.0",
     "dvf-map": "file:",
+    "geoportal-access-lib": "^3.4.6",
     "geoportal-extensions-leaflet": "^2.4.2",
     "leaflet": "^1.9.4",
     "leaflet.wms": "^0.2.0",
