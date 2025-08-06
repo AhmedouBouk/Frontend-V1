@@ -51,6 +51,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   @Input() useSurfaceFilter = false
   @Input() useEnergyFilter = false
   @Input() markersVisible = true
+  @Input() tableCollapsed = false // Track sidebar state for bounds calculation
   @Input() visibleDvfProperties: DvfProperty[] = []
   @Input() visibleDpeProperties: DpeProperty[] = []
   @Input() visibleParcelleProperties: ParcelleProperty[] = []
@@ -191,9 +192,101 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-  // Method to get map bounds
+  // Method to get map bounds - accounting for both bottom and left sidebar coverage
   getMapBounds(): any {
-    return this.map ? this.map.getBounds() : null
+    if (!this.map) return null
+    
+    // Get the full map bounds
+    const fullBounds = this.map.getBounds()
+    
+    // Get map container dimensions
+    const mapContainer = this.map.getContainer()
+    const containerRect = mapContainer.getBoundingClientRect()
+    const mapWidth = containerRect.width
+    const mapHeight = containerRect.height
+    
+    // Initialize adjusted bounds with full bounds
+    let north = fullBounds.getNorth()
+    let south = fullBounds.getSouth()
+    let east = fullBounds.getEast()
+    let west = fullBounds.getWest()
+    
+    // Track if any adjustments were made
+    let adjustmentsMade = false
+    
+    // 1. Check for the results header bar (always visible, even when collapsed)
+    // This accounts for the "Résultats (212)" bar with export button shown in the screenshot
+    const resultsHeaderElement = document.querySelector('.property-list-header')
+    if (resultsHeaderElement) {
+      adjustmentsMade = true
+      const headerRect = resultsHeaderElement.getBoundingClientRect()
+      const headerHeight = headerRect.height
+      
+      // Calculate vertical coverage ratio for just the header
+      const headerCoverageRatio = Math.max(0, (mapHeight - headerHeight) / mapHeight)
+      
+      // Calculate the adjusted south boundary for header
+      const latRange = north - south
+      south = south + (latRange * (1 - headerCoverageRatio))
+      
+      console.log(`🗺️ Results header adjustment:`);
+      console.log(`📐 Original south: ${fullBounds.getSouth().toFixed(6)}`);
+      console.log(`📐 Adjusted south: ${south.toFixed(6)}`);
+      console.log(`📊 Header height: ${headerHeight}px, Map height: ${mapHeight}px`);
+      console.log(`📊 Vertical visible area after header adjustment: ${(headerCoverageRatio * 100).toFixed(1)}%`);
+    }
+    
+    // 2. Check for expanded bottom sidebar (property-list-container when not collapsed)
+    const bottomSidebarElement = document.querySelector('.property-list-container:not(.collapsed)')
+    if (bottomSidebarElement) {
+      adjustmentsMade = true
+      const sidebarRect = bottomSidebarElement.getBoundingClientRect()
+      const sidebarHeight = sidebarRect.height
+      
+      // Since we already adjusted for the header, we need to calculate additional adjustment
+      // for the expanded content area (total height minus header height)
+      const resultsHeaderElement = document.querySelector('.property-list-header')
+      const headerHeight = resultsHeaderElement ? resultsHeaderElement.getBoundingClientRect().height : 0
+      const contentHeight = sidebarHeight - headerHeight
+      
+      // Calculate vertical coverage ratios
+      const headerCoverageRatio = Math.max(0, (mapHeight - headerHeight) / mapHeight)
+      const contentCoverageRatio = Math.max(0, (mapHeight - sidebarHeight) / mapHeight)
+      
+      // Calculate the adjusted south boundary including content area
+      const latRange = north - south
+      south = south + (latRange * (1 - contentCoverageRatio))
+      
+      console.log(`🗺️ Bottom sidebar content adjustment:`);
+      console.log(`📐 Further adjusted south: ${south.toFixed(6)}`);
+      console.log(`📊 Full sidebar height: ${sidebarHeight}px, Content height: ${contentHeight}px`);
+      console.log(`📊 Vertical visible area after full adjustment: ${(contentCoverageRatio * 100).toFixed(1)}%`);
+    }
+    
+    // Note: Left sidebar doesn't overlay the map - it pushes the map to the right
+    // The map bounds change is handled by triggering new requests when sidebar state changes
+    // This is implemented in the parent component's ngOnChanges method
+    
+    if (!adjustmentsMade) {
+      console.log(`🗺️ No sidebars detected, using full map bounds`);
+      return fullBounds;
+    }
+    
+    // Create adjusted bounds object that mimics Leaflet LatLngBounds
+    const adjustedBounds = {
+      getNorth: () => north,
+      getSouth: () => south,
+      getEast: () => east,
+      getWest: () => west,
+      _northEast: { lat: north, lng: east },
+      _southWest: { lat: south, lng: west }
+    }
+    
+    console.log(`🗺️ Final map bounds adjustment:`);
+    console.log(`📐 Full bounds: N=${fullBounds.getNorth().toFixed(6)}, S=${fullBounds.getSouth().toFixed(6)}, E=${fullBounds.getEast().toFixed(6)}, W=${fullBounds.getWest().toFixed(6)}`);
+    console.log(`📐 Visible bounds: N=${north.toFixed(6)}, S=${south.toFixed(6)}, E=${east.toFixed(6)}, W=${west.toFixed(6)}`);
+    
+    return adjustedBounds
   }
 
   // Method to fit map to markers

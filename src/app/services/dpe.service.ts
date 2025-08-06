@@ -71,10 +71,15 @@ export class DpeService {
     // -- 1. Conversion des coordonnees -------------------------------------------
     const topConverted = this.convertLatLonToProjected(topLeft);
     const bottomConverted = this.convertLatLonToProjected(bottomRight);
-    
-    console.log('DPE Coordinate conversion:');
-    console.log(`  Original topLeft: ${topLeft} -> Projected: ${topConverted}`);
-    console.log(`  Original bottomRight: ${bottomRight} -> Projected: ${bottomConverted}`);
+  
+    console.log('🌍 DPE Frontend→Backend coordinate conversion:');
+    console.log(`  📍 Original topLeft: [${topLeft[0].toFixed(6)}, ${topLeft[1].toFixed(6)}] → Lambert93: [${topConverted[0].toFixed(2)}, ${topConverted[1].toFixed(2)}]`);
+    console.log(`  📍 Original bottomRight: [${bottomRight[0].toFixed(6)}, ${bottomRight[1].toFixed(6)}] → Lambert93: [${bottomConverted[0].toFixed(2)}, ${bottomConverted[1].toFixed(2)}]`);
+  
+    // Calculate the area covered by these bounds
+    const latRange = Math.abs(topLeft[0] - bottomRight[0]);
+    const lonRange = Math.abs(topLeft[1] - bottomRight[1]);
+    console.log(`  📏 Query area: ${latRange.toFixed(6)}° lat × ${lonRange.toFixed(6)}° lon`);
     
     // -- 2. Construction des parametres selon le format attendu par le backend ---
     // Le backend getPointsInZone attend topLeft et bottomRight au format "lat,lon"
@@ -104,12 +109,12 @@ export class DpeService {
       params.valeur_dpe_max = energyFilter[1]; // Le backend attend 'valeur_dpe_max'
     }
     
-    console.log('Parametres envoyes au backend DPE:', {
+    console.log('🚀 DPE Backend API parameters:', {
       topLeft: topLeftParam,
       bottomRight: bottomRightParam,
       filterMode: filterMode,
       energyFilter: energyFilter,
-      coordonnees_projetees: { lat_min, lat_max, lon_min, lon_max }
+      lambert93_bounds: { lat_min, lat_max, lon_min, lon_max }
     });
 
     const apiUrl = `${environment.apiUrl}/dpe`;
@@ -117,7 +122,10 @@ export class DpeService {
 
     // -- 3. Appel HTTP et mapping -------------------------------------------
     return this.http.get(apiUrl, { params }).pipe(
-      map((data: any) => Array.isArray(data) ? data : []),
+      map((data: any) => {
+        console.log(`📊 DPE Backend response: ${Array.isArray(data) ? data.length : 0} items received`);
+        return Array.isArray(data) ? data : [];
+      }),
       map(rows => rows.map(item => {
         // DPE coordinates handling: ban_x/ban_y appear to be in a different coordinate system
         // Based on sample data analysis, they seem to be encoded WGS84 coordinates

@@ -6,6 +6,9 @@ import {
   inject,
   type OnInit,
   ChangeDetectorRef,
+  Input,
+  type OnChanges,
+  type SimpleChanges,
 } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { HttpClient } from "@angular/common/http"
@@ -33,11 +36,12 @@ import { MapSearchComponent } from "./map-search/map-search.component"
   styleUrls: ["./map.component.scss"],
   templateUrl: "./map.component.html",
 })
-export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   // Timeout for debouncing map movements
   private mapMoveTimeout: any = null;
 
   @ViewChild(MapDisplayComponent) mapDisplay!: MapDisplayComponent
+  @Input() leftSidebarOpen = false
 
   private fetchDataTimeout: any
 
@@ -151,6 +155,29 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.visibleDpeProperties = []
       this.visibleParcelleProperties = []
       console.log(`✅ Tous les filtres désactivés pour ${this.currentDataSource} — pas de requête API`)
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Handle left sidebar state changes
+    if (changes['leftSidebarOpen'] && !changes['leftSidebarOpen'].firstChange) {
+      const previousValue = changes['leftSidebarOpen'].previousValue;
+      const currentValue = changes['leftSidebarOpen'].currentValue;
+      
+      console.log(`🔄 Left sidebar state changed: ${previousValue} → ${currentValue}`);
+      
+      // When sidebar opens/closes, the map bounds change significantly
+      // We need to trigger a new request after a short delay to allow the map to resize
+      setTimeout(() => {
+        if (this.mapDisplay) {
+          // Force map to recalculate its size
+          this.mapDisplay.invalidateSize();
+          
+          // Trigger new data fetch with updated bounds
+          console.log(`📡 Triggering new data fetch due to sidebar state change`);
+          this.fetchData();
+        }
+      }, 300); // Allow time for CSS transitions to complete
     }
   }
 

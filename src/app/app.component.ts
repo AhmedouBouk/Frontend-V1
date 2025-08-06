@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core"
+import { Component, inject, OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { HttpClient } from "@angular/common/http"
@@ -20,9 +20,10 @@ interface NominatimResult {
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   sidebarOpen = false
   mapType: "street" | "satellite" | "cadastre" = "street"
+  darkMode = false
 
   // Search functionality
   isSearchOpen = false
@@ -34,8 +35,28 @@ export class AppComponent {
   private readonly mapService = inject(MapService)
   private readonly http = inject(HttpClient)
 
+  ngOnInit(): void {
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'dark') {
+      this.darkMode = true
+      this.applyTheme(true)
+    }
+  }
+
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen
+  }
+
+  toggleDarkMode(): void {
+    this.darkMode = !this.darkMode
+    this.applyTheme(this.darkMode)
+    // Save preference to localStorage
+    localStorage.setItem('theme', this.darkMode ? 'dark' : 'light')
+  }
+
+  private applyTheme(isDark: boolean): void {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
   }
 
   setMapType(type: "street" | "satellite" | "cadastre"): void {

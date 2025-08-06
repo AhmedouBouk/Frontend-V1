@@ -119,8 +119,29 @@ export class ParcelleService {
       map((data: any) => Array.isArray(data) ? data : []),
       map(rows => rows.map(item => {
         // Convertir les coordonnees projetees (x, y) vers lat/lon pour l'affichage
-        const lat = this.convertProjectedToLatLon([item.y || 0, item.x || 0])[0];
-        const lon = this.convertProjectedToLatLon([item.y || 0, item.x || 0])[1];
+        let lat: number;
+        let lon: number;
+        
+        if (item.x && item.y) {
+          // Parcelle coordinates are in Lambert93 projection with Y,X order
+          // Use a single conversion call for consistency with DPE service
+          const converted = this.convertProjectedToLatLon([item.y, item.x]);
+          lat = converted[0];
+          lon = converted[1];
+          
+          // Validate coordinates are within reasonable bounds for France
+          if (lat >= 41 && lat <= 51 && lon >= -5 && lon <= 10) {
+            console.log(`🎯 Parcelle Lambert93 conversion: x=${item.x}, y=${item.y} → lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}`);
+          } else {
+            console.warn(`⚠️ Parcelle coordinates outside France bounds: x=${item.x}, y=${item.y} → lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}`);
+            // Keep coordinates anyway - might be overseas territories or edge cases
+          }
+        } else {
+          // Fallback to 0,0 if no coordinates
+          lat = 0;
+          lon = 0;
+          console.warn(`⚠️ Parcelle Missing coordinates for item:`, item.id);
+        }
         
         return {
           id:          item.id              ?? '',
