@@ -222,17 +222,17 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       const headerRect = resultsHeaderElement.getBoundingClientRect()
       const headerHeight = headerRect.height
       
-      // Calculate vertical coverage ratio for just the header
-      const headerCoverageRatio = Math.max(0, (mapHeight - headerHeight) / mapHeight)
+      // Almost no adjustment - only 5% of header height
+      const headerCoverageRatio = Math.max(0, (mapHeight - headerHeight * 0.05) / mapHeight)
       
       // Calculate the adjusted south boundary for header
       const latRange = north - south
       south = south + (latRange * (1 - headerCoverageRatio))
       
-      console.log(`🗺️ Results header adjustment:`);
+      console.log(`🗺️ Results header adjustment (micro):`);
       console.log(`📐 Original south: ${fullBounds.getSouth().toFixed(6)}`);
       console.log(`📐 Adjusted south: ${south.toFixed(6)}`);
-      console.log(`📊 Header height: ${headerHeight}px, Map height: ${mapHeight}px`);
+      console.log(`📊 Header height: ${headerHeight}px (5% adjustment), Map height: ${mapHeight}px`);
       console.log(`📊 Vertical visible area after header adjustment: ${(headerCoverageRatio * 100).toFixed(1)}%`);
     }
     
@@ -249,18 +249,19 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       const headerHeight = resultsHeaderElement ? resultsHeaderElement.getBoundingClientRect().height : 0
       const contentHeight = sidebarHeight - headerHeight
       
-      // Calculate vertical coverage ratios
-      const headerCoverageRatio = Math.max(0, (mapHeight - headerHeight) / mapHeight)
-      const contentCoverageRatio = Math.max(0, (mapHeight - sidebarHeight) / mapHeight)
+      // Almost no adjustment - only 5% of content height
+      const adjustedContentHeight = contentHeight * 0.05
+      const totalAdjustedHeight = headerHeight * 0.05 + adjustedContentHeight
+      const contentCoverageRatio = Math.max(0, (mapHeight - totalAdjustedHeight) / mapHeight)
       
       // Calculate the adjusted south boundary including content area
       const latRange = north - south
-      south = south + (latRange * (1 - contentCoverageRatio))
+      south = fullBounds.getSouth() + (latRange * (1 - contentCoverageRatio))
       
-      console.log(`🗺️ Bottom sidebar content adjustment:`);
+      console.log(`🗺️ Bottom sidebar content adjustment (micro):`);
       console.log(`📐 Further adjusted south: ${south.toFixed(6)}`);
-      console.log(`📊 Full sidebar height: ${sidebarHeight}px, Content height: ${contentHeight}px`);
-      console.log(`📊 Vertical visible area after full adjustment: ${(contentCoverageRatio * 100).toFixed(1)}%`);
+      console.log(`📊 Full sidebar height: ${sidebarHeight}px, Adjusted content: ${adjustedContentHeight.toFixed(1)}px`);
+      console.log(`📊 Vertical visible area after reduced adjustment: ${(contentCoverageRatio * 100).toFixed(1)}%`);
     }
     
     // Note: Left sidebar doesn't overlay the map - it pushes the map to the right
@@ -270,6 +271,15 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     if (!adjustmentsMade) {
       console.log(`🗺️ No sidebars detected, using full map bounds`);
       return fullBounds;
+    }
+    
+    // Ensure we don't over-adjust and create gaps
+    const minVisibleRatio = 0.95; // Always keep at least 95% of map visible
+    const currentVisibleRatio = (south - fullBounds.getSouth()) / (fullBounds.getNorth() - fullBounds.getSouth());
+    if (currentVisibleRatio > (1 - minVisibleRatio)) {
+      const latRange = fullBounds.getNorth() - fullBounds.getSouth();
+      south = fullBounds.getSouth() + (latRange * (1 - minVisibleRatio));
+      console.log(`🗺️ Applied minimum visible area constraint: ${(minVisibleRatio * 100)}%`);
     }
     
     // Create adjusted bounds object that mimics Leaflet LatLngBounds
