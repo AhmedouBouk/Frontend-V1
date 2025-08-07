@@ -41,9 +41,6 @@ importers:
       '@clr/ui':
         specifier: ^17.10.0
         version: 17.10.0(@cds/core@6.15.1)
-      '@types/proj4':
-        specifier: ^2.19.0
-        version: 2.19.0
       dvf-map:
         specifier: 'file:'
         version: file:(@angular/cdk@19.2.19(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(encoding@0.1.13)
@@ -93,6 +90,9 @@ importers:
       '@types/leaflet':
         specifier: ^1.9.17
         version: 1.9.17
+      '@types/proj4':
+        specifier: ^2.19.0
+        version: 2.19.0
       jasmine-core:
         specifier: ~5.4.0
         version: 5.4.0
@@ -6806,7 +6806,6 @@ snapshots:
       '@cds/core': 6.15.1
       '@clr/angular': 17.10.0(@angular/cdk@19.2.19(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/common@19.2.7(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.2.7(rxjs@7.8.2)(zone.js@0.15.0))(@cds/core@6.15.1)(@clr/ui@17.10.0(@cds/core@6.15.1))
       '@clr/ui': 17.10.0(@cds/core@6.15.1)
-      '@types/proj4': 2.19.0
       geoportal-access-lib: 3.4.6(encoding@0.1.13)
       geoportal-extensions-leaflet: 2.4.2(encoding@0.1.13)
       leaflet: 1.9.4

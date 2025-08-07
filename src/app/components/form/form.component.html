@@ -10,6 +10,9 @@
           </div>
           <h3>Ventes passées</h3>
         </div>
+        <div class="loading-spinner" *ngIf="priceLoading">
+          <div class="spinner"></div>
+        </div>
         <img src="assets/icons/down.png" 
              alt="Expand section" 
              class="section-chevron" 
@@ -63,6 +66,9 @@
             <img src="assets/icons/clock-icon.png" alt="Période" class="section-icon-img">
           </div>
           <h3>Période</h3>
+        </div>
+        <div class="loading-spinner" *ngIf="dateLoading">
+          <div class="spinner"></div>
         </div>
         <img src="assets/icons/down.png" 
              alt="Expand section" 
@@ -118,6 +124,9 @@
           </div>
           <h3>Taille du terrain</h3>
         </div>
+        <div class="loading-spinner" *ngIf="surfaceLoading">
+          <div class="spinner"></div>
+        </div>
         <img src="assets/icons/down.png" 
              alt="Expand section" 
              class="section-chevron" 
@@ -172,6 +181,9 @@
           </div>
           <h3>Classe énergétique</h3>
         </div>
+        <div class="loading-spinner" *ngIf="energyLoading">
+          <div class="spinner"></div>
+        </div>
         <img src="assets/icons/down.png" 
              alt="Expand section" 
              class="section-chevron" 
@@ -225,6 +237,9 @@
             <img src="assets/icons/kwh-icon.png" alt="Consommation" class="section-icon-img">
           </div>
           <h3>Consommation</h3>
+        </div>
+        <div class="loading-spinner" *ngIf="consumptionLoading">
+          <div class="spinner"></div>
         </div>
         <img src="assets/icons/down.png" 
              alt="Expand section" 

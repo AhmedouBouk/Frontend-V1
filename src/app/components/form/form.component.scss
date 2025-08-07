@@ -716,3 +716,45 @@ form {
 .form-group {
   contain: layout style;
 }
+
+/* ===== LOADING SPINNERS ===== */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: var(--space-sm);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-top: 2px solid var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ensure section header layout accommodates spinner */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1;
+}

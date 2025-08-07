@@ -36,6 +36,13 @@ export class FormComponent implements OnInit {
   // Marker visibility state
   markersVisible = false
 
+  // Loading states for each filter
+  priceLoading = false
+  dateLoading = false
+  surfaceLoading = false
+  energyLoading = false
+  consumptionLoading = false
+
   constructor() {
     this.filterForm = this.fb.group({
       // Source de données
@@ -289,6 +296,27 @@ export class FormComponent implements OnInit {
           setTimeout(() => this.search(), 300)
         }
       })
+    })
+
+    // Subscribe to loading states
+    this.formService.getPriceLoadingObservable().subscribe(loading => {
+      this.priceLoading = loading
+    })
+
+    this.formService.getDateLoadingObservable().subscribe(loading => {
+      this.dateLoading = loading
+    })
+
+    this.formService.getSurfaceLoadingObservable().subscribe(loading => {
+      this.surfaceLoading = loading
+    })
+
+    this.formService.getEnergyLoadingObservable().subscribe(loading => {
+      this.energyLoading = loading
+    })
+
+    this.formService.getConsumptionLoadingObservable().subscribe(loading => {
+      this.consumptionLoading = loading
     })
   }
 

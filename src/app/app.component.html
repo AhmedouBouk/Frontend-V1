@@ -6,11 +6,11 @@
     <div class="sidebar-header">
       <div class="logo-container">
         <button class="logo-icon" (click)="toggleSidebar()" (keydown.enter)="toggleSidebar()" aria-label="Afficher/masquer les filtres">
-          <img src="assets/icons/logo.png" alt="Logo" width="24" height="24">
+          <img src="assets/icons/logo.png" alt="Logo" width="20" height="20">
         </button>
         <span class="logo-text">c'est ou</span>
         <button (click)="toggleDarkMode()" class="theme-toggle" [class.dark]="darkMode" aria-label="Changer de thème">
-          <svg *ngIf="!darkMode" class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg *ngIf="!darkMode" class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 1V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M12 21V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -21,7 +21,7 @@
             <path d="M4.22 19.78L5.64 18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <svg *ngIf="darkMode" class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg *ngIf="darkMode" class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -69,13 +69,9 @@
     <!-- Logo fixe qui reste visible quand la sidebar est cachée -->
     <button class="fixed-logo" type="button" (click)="toggleSidebar()" (keydown.enter)="toggleSidebar()" *ngIf="!sidebarOpen">
       <div class="logo-icon-container">
-        <img src="assets/icons/logo.png" alt="Logo" width="24" height="24">
+        <img src="assets/icons/logo.png" alt="Logo" width="20" height="20">
       </div>
       <span class="sr-only">Afficher le menu</span>
     </button>
-  
-    
-
-    
   </div>
 </div>

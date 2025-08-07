@@ -661,6 +661,23 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         markersVisible: this.markersVisible
       })
 
+      // Set loading states for active filters
+      if (this.isPriceToggleActive) {
+        this.formService.setPriceLoading(true)
+      }
+      if (this.isDateToggleActive) {
+        this.formService.setDateLoading(true)
+      }
+      if (this.isSurfaceToggleActive) {
+        this.formService.setSurfaceLoading(true)
+      }
+      if (this.isEnergyToggleActive) {
+        this.formService.setEnergyLoading(true)
+      }
+      if (this.isConsumptionToggleActive) {
+        this.formService.setConsumptionLoading(true)
+      }
+
       // Déterminer quelles sources de données charger selon les filtres actifs
       const sourcesToLoad: string[] = []
       
@@ -725,6 +742,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       // Attendre que toutes les données soient chargées
       Promise.all(loadPromises).finally(() => {
         this.isLoading = false
+        
+        // Clear all loading states
+        this.formService.setPriceLoading(false)
+        this.formService.setDateLoading(false)
+        this.formService.setSurfaceLoading(false)
+        this.formService.setEnergyLoading(false)
+        this.formService.setConsumptionLoading(false)
+        
         this.updateGlobalAlert()
         this.cdr.detectChanges()
       })

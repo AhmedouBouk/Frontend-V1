@@ -33,6 +33,13 @@ export class FormService {
   private readonly energyToggleSubject = new BehaviorSubject<boolean>(false)
   private readonly consumptionToggleSubject = new BehaviorSubject<boolean>(false)
 
+  // États de chargement des filtres
+  private readonly priceLoadingSubject = new BehaviorSubject<boolean>(false)
+  private readonly dateLoadingSubject = new BehaviorSubject<boolean>(false)
+  private readonly surfaceLoadingSubject = new BehaviorSubject<boolean>(false)
+  private readonly energyLoadingSubject = new BehaviorSubject<boolean>(false)
+  private readonly consumptionLoadingSubject = new BehaviorSubject<boolean>(false)
+
   private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('none')
 
   getPriceFilterObservable(): Observable<[number, number] | null> {
@@ -99,6 +106,27 @@ export class FormService {
 
   getConsumptionToggleObservable(): Observable<boolean> {
     return this.consumptionToggleSubject.asObservable()
+  }
+
+  // Loading state observables
+  getPriceLoadingObservable(): Observable<boolean> {
+    return this.priceLoadingSubject.asObservable()
+  }
+
+  getDateLoadingObservable(): Observable<boolean> {
+    return this.dateLoadingSubject.asObservable()
+  }
+
+  getSurfaceLoadingObservable(): Observable<boolean> {
+    return this.surfaceLoadingSubject.asObservable()
+  }
+
+  getEnergyLoadingObservable(): Observable<boolean> {
+    return this.energyLoadingSubject.asObservable()
+  }
+
+  getConsumptionLoadingObservable(): Observable<boolean> {
+    return this.consumptionLoadingSubject.asObservable()
   }
 
   setPriceFilter(minPrice: number, maxPrice: number): void {
@@ -175,6 +203,27 @@ export class FormService {
 
   setConsumptionToggle(active: boolean): void {
     this.consumptionToggleSubject.next(active)
+  }
+
+  // Loading state setters
+  setPriceLoading(loading: boolean): void {
+    this.priceLoadingSubject.next(loading)
+  }
+
+  setDateLoading(loading: boolean): void {
+    this.dateLoadingSubject.next(loading)
+  }
+
+  setSurfaceLoading(loading: boolean): void {
+    this.surfaceLoadingSubject.next(loading)
+  }
+
+  setEnergyLoading(loading: boolean): void {
+    this.energyLoadingSubject.next(loading)
+  }
+
+  setConsumptionLoading(loading: boolean): void {
+    this.consumptionLoadingSubject.next(loading)
   }
 
   clearPriceFilter(): void {
