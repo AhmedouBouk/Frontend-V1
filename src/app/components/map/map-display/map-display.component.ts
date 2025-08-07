@@ -470,12 +470,17 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       }),
     }).addTo(this.featureGroup)
 
+    const consumptionText = property.ep_conso_5_usages 
+      ? `${property.ep_conso_5_usages} kWh/m²` 
+      : 'Non disponible'
+
     marker.bindPopup(`
       <div class="property-popup">
         <h3>⚡ DPE - Classe GES ${gesClass}</h3>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Classe énergie:</strong> ${property.energyClass}</p>
         <p><strong>Classe GES:</strong> ${property.gesClass}</p>
+        <p><strong>Consommation:</strong> ${consumptionText}</p>
         <p><strong>Année:</strong> ${property.year}</p>
       </div>
     `)

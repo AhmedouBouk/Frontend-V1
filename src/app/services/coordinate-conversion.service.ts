@@ -69,7 +69,6 @@ export class CoordinateConversionService {
     const x = params.x0 + rho * Math.sin(theta);
     const y = params.y0 + rho0 - rho * Math.cos(theta);
 
-    console.log(`🎯 Precise WGS84→Lambert93: [${lat}, ${lon}] → [${x.toFixed(2)}, ${y.toFixed(2)}]`);
     
     return [x, y];
   }
@@ -125,8 +124,6 @@ export class CoordinateConversionService {
     const latDeg = lat * 180 / Math.PI;
     const lonDeg = lon * 180 / Math.PI;
 
-    console.log(`🎯 Precise Lambert93→WGS84: [${x.toFixed(2)}, ${y.toFixed(2)}] → [${latDeg}, ${lonDeg}]`);
-    
     return [latDeg, lonDeg];
   }
 

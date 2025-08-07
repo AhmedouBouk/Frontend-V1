@@ -490,3 +490,15 @@
 .navbar-tab {
   display: none;
 }
+
+/* Consumption value styling for DPE results */
+.consumption-value {
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  display: inline-block;
+  border: 1px solid var(--primary-color-alpha);
+}

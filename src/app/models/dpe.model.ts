@@ -8,4 +8,5 @@ export interface DpeProperty {
   year: number;
   city: string;
   postalCode?: string;
+  ep_conso_5_usages?: number; // Energy consumption value
 }

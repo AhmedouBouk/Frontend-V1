@@ -137,6 +137,7 @@
           <th>Adresse</th>
           <th>Classe énergie</th>
           <th>Classe GES</th>
+          <th>Consommation</th>
           <th>Commune</th>
         </tr>
       </thead>
@@ -149,6 +150,7 @@
           <td>{{ prop.address }}</td>
           <td><span class="energy-rating rating-{{ prop.energyClass.toLowerCase() }}">{{ prop.energyClass }}</span></td>
           <td><span class="energy-rating rating-{{ prop.gesClass.toLowerCase() }}">{{ prop.gesClass }}</span></td>
+          <td><span class="consumption-value">{{ prop.ep_conso_5_usages || 'N/A' }} kWh/m²</span></td>
           <td>{{ prop.city }}</td>
         </tr>
       </tbody>

@@ -30,7 +30,6 @@ export class ParcelleService {
     // Conversion precise WGS84 → Lambert93
     const [x_projected, y_projected] = this.coordService.wgs84ToLambert93(lat, lon);
     
-    console.log(`🎯 Parcelles Conversion precise: [${lat}, ${lon}] → Lambert93: [${y_projected.toFixed(2)}, ${x_projected.toFixed(2)}]`);
     
     return [y_projected, x_projected];
   }
@@ -47,7 +46,7 @@ export class ParcelleService {
     // Conversion precise Lambert93 → WGS84
     const [lat, lon] = this.coordService.lambert93ToWgs84(x_projected, y_projected);
     
-    console.log(`🎯 Parcelles Conversion inverse precise: Lambert93 [${x_projected.toFixed(2)}, ${y_projected.toFixed(2)}] → WGS84: [${lat}, ${lon}]`);
+
     
     return [lat, lon];
   }
@@ -108,11 +107,7 @@ export class ParcelleService {
 
     // Construction de l'URL de l'API pour les parcelles
     const apiUrl = `${environment.apiUrl}/parcelles`;
-    console.log('API Parcelle URL:', `${apiUrl}?${params.toString()}`);
-
-    // -- 2. Appel HTTP et mapping -------------------------------------------
-    console.log('Tentative d\'appel API avec URL:', apiUrl);
-    console.log('Parametres complets:', params.toString());
+  
     
     // Appel HTTP vers le backend
     return this.http.get(apiUrl, { params }).pipe(
@@ -131,7 +126,6 @@ export class ParcelleService {
           
           // Validate coordinates are within reasonable bounds for France
           if (lat >= 41 && lat <= 51 && lon >= -5 && lon <= 10) {
-            console.log(`🎯 Parcelle Lambert93 conversion: x=${item.x}, y=${item.y} → lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}`);
           } else {
             console.warn(`⚠️ Parcelle coordinates outside France bounds: x=${item.x}, y=${item.y} → lat=${lat.toFixed(6)}, lon=${lon.toFixed(6)}`);
             // Keep coordinates anyway - might be overseas territories or edge cases
