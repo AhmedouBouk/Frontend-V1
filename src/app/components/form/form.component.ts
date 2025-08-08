@@ -96,11 +96,9 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearPriceFilter()
-        console.log('💰 Prix filter disabled - clearing data and refreshing map')
         // Trigger map refresh to remove markers for this filter
         this.mapService.refreshMap()
       } else {
-        console.log('💰 Prix filter enabled - triggering search with default values')
         // Set markers visible and trigger search immediately with default values
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
@@ -115,11 +113,9 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearDateFilter()
-        console.log('📅 Date filter disabled - clearing data and refreshing map')
         // Trigger map refresh to remove markers for this filter
         this.mapService.refreshMap()
       } else {
-        console.log('📅 Date filter enabled - triggering search with default values')
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
         // Trigger search with current form values (or defaults)
@@ -133,11 +129,9 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearSurfaceFilter()
-        console.log('📐 Surface filter disabled - clearing data and refreshing map')
         // Trigger map refresh to remove markers for this filter
         this.mapService.refreshMap()
       } else {
-        console.log('📐 Surface filter enabled - triggering search with default values')
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
         // Trigger search with current form values (or defaults)
@@ -151,14 +145,10 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearEnergyClassFilter()
-        console.log('⚡ Energy filter disabled - clearing data and refreshing map')
-        // Trigger map refresh to remove markers for this filter
         this.mapService.refreshMap()
       } else {
-        console.log('⚡ Energy filter enabled - can search immediately (uses checkboxes)')
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        // Energy filter can search immediately since it uses checkboxes
         setTimeout(() => this.search(), 100)
       }
     })
@@ -169,14 +159,10 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearConsumptionFilter()
-        console.log('🔥 Consumption filter disabled - clearing data and refreshing map')
-        // Trigger map refresh to remove markers for this filter
         this.mapService.refreshMap()
       } else {
-        console.log('🔥 Consumption filter enabled - triggering search with default values')
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        // Trigger search with current form values (or defaults)
         setTimeout(() => this.search(), 100)
       }
     })
@@ -184,9 +170,7 @@ export class FormComponent implements OnInit {
     // Update data source and trigger search if any filters are active
     this.filterForm.get("dataSource")?.valueChanges.subscribe((source: DataSourceType) => {
       this.formService.setDataSource(source)
-      // If any filters are active, trigger search for the new data source
       if (this.hasActiveFilters()) {
-        console.log(`📊 Data source changed to ${source} with active filters - triggering search`)
         setTimeout(() => this.search(), 100)
       }
     })
@@ -202,21 +186,19 @@ export class FormComponent implements OnInit {
     // Price filter value changes
     this.filterForm.get('price')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'exact' && value) {
-        console.log('💰 Prix exact value entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('minPrice')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'interval' && value && this.filterForm.get('maxPrice')?.value) {
-        console.log('💰 Prix interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('maxPrice')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'interval' && value && this.filterForm.get('minPrice')?.value) {
-        console.log('💰 Prix interval values entered - triggering search')
+        
         setTimeout(() => this.search(), 300)
       }
     })
@@ -224,21 +206,19 @@ export class FormComponent implements OnInit {
     // Date filter value changes
     this.filterForm.get('exactDate')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'exact' && value) {
-        console.log('📅 Date exact value entered - triggering search')
+        
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('startDate')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'interval' && value && this.filterForm.get('endDate')?.value) {
-        console.log('📅 Date interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('endDate')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'interval' && value && this.filterForm.get('startDate')?.value) {
-        console.log('📅 Date interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
@@ -246,21 +226,18 @@ export class FormComponent implements OnInit {
     // Surface filter value changes
     this.filterForm.get('surface')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'exact' && value) {
-        console.log('📐 Surface exact value entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('minSurface')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'interval' && value && this.filterForm.get('maxSurface')?.value) {
-        console.log('📐 Surface interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('maxSurface')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'interval' && value && this.filterForm.get('minSurface')?.value) {
-        console.log('📐 Surface interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
@@ -268,21 +245,18 @@ export class FormComponent implements OnInit {
     // Consumption filter value changes
     this.filterForm.get('exactConsumption')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'exact' && value) {
-        console.log('🔥 Consumption exact value entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('minConsumption')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'interval' && value && this.filterForm.get('maxConsumption')?.value) {
-        console.log('🔥 Consumption interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('maxConsumption')?.valueChanges.subscribe((value) => {
       if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'interval' && value && this.filterForm.get('minConsumption')?.value) {
-        console.log('🔥 Consumption interval values entered - triggering search')
         setTimeout(() => this.search(), 300)
       }
     })
@@ -292,7 +266,6 @@ export class FormComponent implements OnInit {
     energyClasses.forEach(className => {
       this.filterForm.get(className)?.valueChanges.subscribe((checked) => {
         if (this.filterForm.get('useEnergyFilter')?.value && checked) {
-          console.log(`⚡ Energy class ${className} selected - triggering search`)
           setTimeout(() => this.search(), 300)
         }
       })
@@ -353,13 +326,11 @@ export class FormComponent implements OnInit {
     if (values.priceMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.price ? Number(values.price) : 0
-      console.log(`💰 Applying exact price filter: ${val}`)
       this.formService.setPriceFilter(val, val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minPrice ? Number(values.minPrice) : 0
       const max = values.maxPrice ? Number(values.maxPrice) : 2000000
-      console.log(`💰 Applying price interval filter: ${min} - ${max}`)
       this.formService.setPriceFilter(min, max)
     }
   }
@@ -375,12 +346,10 @@ export class FormComponent implements OnInit {
 
     if (values.dateMode === "exact") {
       const date = values.exactDate || '2020-01-01' // Default date if empty
-      console.log(`📅 Applying exact date filter: ${date}`)
       this.formService.setDateFilter(date, date)
     } else {
       const startDate = values.startDate || '2020-01-01' // Default start date
       const endDate = values.endDate || '2023-12-31' // Default end date
-      console.log(`📅 Applying date interval filter: ${startDate} - ${endDate}`)
       this.formService.setDateFilter(startDate, endDate)
     }
   }
@@ -397,13 +366,11 @@ export class FormComponent implements OnInit {
     if (values.surfaceMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.surface ? Number(values.surface) : 0
-      console.log(`📐 Applying exact surface filter: ${val}`)
       this.formService.setSurfaceFilter(val, val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minSurface ? Number(values.minSurface) : 0
       const max = values.maxSurface ? Number(values.maxSurface) : 10000
-      console.log(`📐 Applying surface interval filter: ${min} - ${max}`)
       this.formService.setSurfaceFilter(min, max)
     }
   }
@@ -442,13 +409,11 @@ export class FormComponent implements OnInit {
     if (values.consumptionMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.exactConsumption ? Number(values.exactConsumption) : 0
-      console.log(`🔥 Applying exact consumption filter: ${val}`)
       this.formService.setConsumptionFilter(val, val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minConsumption ? Number(values.minConsumption) : 0
       const max = values.maxConsumption ? Number(values.maxConsumption) : 1000
-      console.log(`🔥 Applying consumption interval filter: ${min} - ${max}`)
       this.formService.setConsumptionFilter(min, max)
     }
   }
@@ -459,14 +424,6 @@ export class FormComponent implements OnInit {
   search() {
     const values = this.filterForm.value
   
-    console.log('🔍 Starting search with active filters:', {
-      price: values.usePriceFilter,
-      date: values.useDateFilter,
-      surface: values.useSurfaceFilter,
-      energy: values.useEnergyFilter,
-      consumption: values.useConsumptionFilter
-    })
-
     // Apply all active filters - the map component will determine which data sources to load
     this.applyPriceFilter(values)
     this.applyDateFilter(values)
@@ -479,8 +436,6 @@ export class FormComponent implements OnInit {
 
     // Refresh map - it will automatically load the appropriate data sources based on active filters
     this.mapService.refreshMap()
-  
-    console.log('✅ Search completed - map will load data for active filters')
   }
 
   /**
@@ -498,7 +453,6 @@ export class FormComponent implements OnInit {
       })
       // Apply the filter with default values immediately
       this.applyPriceFilter(this.filterForm.value)
-      console.log("💰 Price filter toggled ON with defaults - waiting for search button")
     } else {
       this.filterForm.patchValue({
         usePriceFilter: false,
@@ -507,7 +461,6 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearPriceFilter()
-      console.log("💰 Price filter toggled OFF - filter cleared")
     }
   }
 
@@ -529,7 +482,6 @@ export class FormComponent implements OnInit {
       })
       // Apply the filter with default values immediately
       this.applyDateFilter(this.filterForm.value)
-      console.log("📅 Date filter toggled ON with defaults - waiting for search button")
     } else {
       this.filterForm.patchValue({
         useDateFilter: false,
@@ -538,7 +490,6 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearDateFilter()
-      console.log("📅 Date filter toggled OFF - filter cleared")
     }
   }
 
@@ -557,7 +508,6 @@ export class FormComponent implements OnInit {
       })
       // Apply the filter with default values immediately
       this.applySurfaceFilter(this.filterForm.value)
-      console.log("📐 Surface filter toggled ON with defaults - waiting for search button")
     } else {
       this.filterForm.patchValue({
         useSurfaceFilter: false,
@@ -566,7 +516,6 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearSurfaceFilter()
-      console.log("📐 Surface filter toggled OFF - filter cleared")
     }
   }
 
@@ -590,11 +539,9 @@ export class FormComponent implements OnInit {
     if (this.allEnergySelected) {
       // Apply the filter with all classes selected immediately
       this.applyEnergyFilter(this.filterForm.value)
-      console.log("⚡ Energy filter toggled ON with all classes - waiting for search button")
     } else {
       // Clear the filter immediately
       this.formService.clearEnergyClassFilter()
-      console.log("⚡ Energy filter toggled OFF - filter cleared")
     }
   }
 
@@ -613,7 +560,6 @@ export class FormComponent implements OnInit {
       })
       // Apply the filter with default values immediately
       this.applyConsumptionFilter(this.filterForm.value)
-      console.log("🔋 Consumption filter toggled ON with defaults - waiting for search button")
     } else {
       this.filterForm.patchValue({
         useConsumptionFilter: false,
@@ -622,7 +568,6 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearConsumptionFilter()
-      console.log("🔋 Consumption filter toggled OFF - filter cleared")
     }
   }
 
@@ -650,14 +595,11 @@ export class FormComponent implements OnInit {
       // Show markers with current active filters
       if (this.hasActiveFilters()) {
         this.search()
-        console.log('🔼 Marqueurs affichés avec les filtres actifs')
       } else {
-        console.log('🔼 Marqueurs activés - activez des filtres pour voir les données')
       }
     } else {
       // Just hide markers without clearing filters - clear map data only
       this.mapService.refreshMap()
-      console.log('🔽 Marqueurs masqués (filtres conservés)')
     }
   }
 
@@ -715,7 +657,5 @@ export class FormComponent implements OnInit {
     this.formService.clearEnergyClassFilter()
     this.formService.clearConsumptionFilter()
     this.formService.setDataSource("dvf")
-
-    console.log("🔄 Filters reset - waiting for search button to apply changes")
   }
 }

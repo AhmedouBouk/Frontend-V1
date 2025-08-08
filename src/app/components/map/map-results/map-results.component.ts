@@ -202,7 +202,7 @@ export class MapResultsComponent {
 
   selectDataSource(source: string): void {
     this.selectedDataSource = source
-    console.log("📊 Selected data source:", source)
+    
   }
 
   getSelectedDataSource(): string {

@@ -180,8 +180,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
           this.map.invalidateSize()
         }
       }, 300)
-
-      console.log('🗺️ Carte initialisée avec l\'état:', mapState)
     }, 100)
   }
 
@@ -228,12 +226,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       // Calculate the adjusted south boundary for header
       const latRange = north - south
       south = south + (latRange * (1 - headerCoverageRatio))
-      
-      console.log(`🗺️ Results header adjustment (micro):`);
-      console.log(`📐 Original south: ${fullBounds.getSouth().toFixed(6)}`);
-      console.log(`📐 Adjusted south: ${south.toFixed(6)}`);
-      console.log(`📊 Header height: ${headerHeight}px (5% adjustment), Map height: ${mapHeight}px`);
-      console.log(`📊 Vertical visible area after header adjustment: ${(headerCoverageRatio * 100).toFixed(1)}%`);
     }
     
     // 2. Check for expanded bottom sidebar (property-list-container when not collapsed)
@@ -257,11 +249,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       // Calculate the adjusted south boundary including content area
       const latRange = north - south
       south = fullBounds.getSouth() + (latRange * (1 - contentCoverageRatio))
-      
-      console.log(`🗺️ Bottom sidebar content adjustment (micro):`);
-      console.log(`📐 Further adjusted south: ${south.toFixed(6)}`);
-      console.log(`📊 Full sidebar height: ${sidebarHeight}px, Adjusted content: ${adjustedContentHeight.toFixed(1)}px`);
-      console.log(`📊 Vertical visible area after reduced adjustment: ${(contentCoverageRatio * 100).toFixed(1)}%`);
     }
     
     // Note: Left sidebar doesn't overlay the map - it pushes the map to the right
@@ -269,7 +256,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     // This is implemented in the parent component's ngOnChanges method
     
     if (!adjustmentsMade) {
-      console.log(`🗺️ No sidebars detected, using full map bounds`);
+      
       return fullBounds;
     }
     
@@ -279,7 +266,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     if (currentVisibleRatio > (1 - minVisibleRatio)) {
       const latRange = fullBounds.getNorth() - fullBounds.getSouth();
       south = fullBounds.getSouth() + (latRange * (1 - minVisibleRatio));
-      console.log(`🗺️ Applied minimum visible area constraint: ${(minVisibleRatio * 100)}%`);
     }
     
     // Create adjusted bounds object that mimics Leaflet LatLngBounds
@@ -291,10 +277,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       _northEast: { lat: north, lng: east },
       _southWest: { lat: south, lng: west }
     }
-    
-    console.log(`🗺️ Final map bounds adjustment:`);
-    console.log(`📐 Full bounds: N=${fullBounds.getNorth().toFixed(6)}, S=${fullBounds.getSouth().toFixed(6)}, E=${fullBounds.getEast().toFixed(6)}, W=${fullBounds.getWest().toFixed(6)}`);
-    console.log(`📐 Visible bounds: N=${north.toFixed(6)}, S=${south.toFixed(6)}, E=${east.toFixed(6)}, W=${west.toFixed(6)}`);
     
     return adjustedBounds
   }
@@ -363,16 +345,10 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     // Déterminer quelles sources afficher
     const sourcesToShow = this.activeDataSources.length > 0 ? this.activeDataSources : [this.currentDataSource]
     
-    console.log('🎯 Updating markers for sources:', sourcesToShow)
-    console.log('📊 Data counts:', {
-      dvf: this.visibleDvfProperties.length,
-      dpe: this.visibleDpeProperties.length,
-      parcelles: this.visibleParcelleProperties.length
-    })
+    
 
     // Afficher les marqueurs DVF si la source est active
     if (sourcesToShow.includes('dvf') && this.visibleDvfProperties.length > 0) {
-      console.log('🏠 Adding', this.visibleDvfProperties.length, 'DVF markers')
       this.visibleDvfProperties.forEach((property) => {
         this.addDvfMarker(property)
       })
@@ -380,7 +356,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     // Afficher les marqueurs DPE si la source est active
     if (sourcesToShow.includes('dpe') && this.visibleDpeProperties.length > 0) {
-      console.log('⚡ Adding', this.visibleDpeProperties.length, 'DPE markers')
       this.visibleDpeProperties.forEach((property) => {
         this.addDpeMarker(property)
       })
@@ -388,13 +363,11 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     // Afficher les marqueurs Parcelles si la source est active
     if (sourcesToShow.includes('parcelles') && this.visibleParcelleProperties.length > 0) {
-      console.log('📐 Adding', this.visibleParcelleProperties.length, 'Parcelle markers')
       this.visibleParcelleProperties.forEach((property) => {
         this.addParcelleMarker(property)
       })
     }
 
-    console.log('✅ Total markers added:', this.markers.length)
   }
 
   private clearMarkers(): void {

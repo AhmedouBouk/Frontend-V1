@@ -1,28 +1,15 @@
-import {
-  Component,
-  type AfterViewInit,
-  type OnDestroy,
-  ViewChild,
-  inject,
-  type OnInit,
-  ChangeDetectorRef,
-  Input,
-  type OnChanges,
-  type SimpleChanges,
-} from "@angular/core"
+import { Component, AfterViewInit, OnDestroy, ViewChild, inject, OnInit, ChangeDetectorRef, Input, OnChanges, SimpleChanges } from "@angular/core";
 import { CommonModule } from "@angular/common"
 import { HttpClient } from "@angular/common/http"
-import type { Subscription } from "rxjs"
-import type { DvfProperty } from "../../models/dvf-property.model"
-import type { DpeProperty } from "../../models/dpe.model"
-import type { ParcelleProperty } from "../../models/parcelle.model"
+import { Subscription } from "rxjs"
+import { DvfProperty } from "../../models/dvf-property.model"
+import { DpeProperty } from "../../models/dpe.model"
+import { ParcelleProperty } from "../../models/parcelle.model"
 import { MapService } from "../../services/map.service"
 import { FormService } from "../../services/form.service"
 import { DvfService } from "../../services/dvf.service"
 import { DpeService } from "../../services/dpe.service"
 import { ParcelleService } from "../../services/parcelle.service"
-
-// Import the three new components
 import { MapDisplayComponent } from "./map-display/map-display.component"
 import { MapControlsComponent } from "./map-controls/map-controls.component"
 import { MapResultsComponent } from "./map-results/map-results.component"
@@ -154,7 +141,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       this.visibleDvfProperties = []
       this.visibleDpeProperties = []
       this.visibleParcelleProperties = []
-      console.log(`✅ Tous les filtres désactivés pour ${this.currentDataSource} — pas de requête API`)
     }
   }
 
@@ -164,7 +150,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       const previousValue = changes['leftSidebarOpen'].previousValue;
       const currentValue = changes['leftSidebarOpen'].currentValue;
       
-      console.log(`🔄 Left sidebar state changed: ${previousValue} → ${currentValue}`);
+
       
       // When sidebar opens/closes, the map bounds change significantly
       // We need to trigger a new request after a short delay to allow the map to resize
@@ -174,7 +160,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
           this.mapDisplay.invalidateSize();
           
           // Trigger new data fetch with updated bounds
-          console.log(`📡 Triggering new data fetch due to sidebar state change`);
           this.fetchData();
         }
       }, 300); // Allow time for CSS transitions to complete
@@ -186,27 +171,27 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     this.subscriptions.push(
       this.formService.getPriceToggleObservable().subscribe(active => {
         this.isPriceToggleActive = active;
-        console.log(`🔄 Price toggle state updated: ${active}`);
+        
       }),
       
       this.formService.getDateToggleObservable().subscribe(active => {
         this.isDateToggleActive = active;
-        console.log(`🔄 Date toggle state updated: ${active}`);
+        
       }),
       
       this.formService.getSurfaceToggleObservable().subscribe(active => {
         this.isSurfaceToggleActive = active;
-        console.log(`🔄 Surface toggle state updated: ${active}`);
+        
       }),
       
       this.formService.getEnergyToggleObservable().subscribe(active => {
         this.isEnergyToggleActive = active;
-        console.log(`🔄 Energy toggle state updated: ${active}`);
+        
       }),
       
       this.formService.getConsumptionToggleObservable().subscribe(active => {
         this.isConsumptionToggleActive = active;
-        console.log(`🔄 Consumption toggle state updated: ${active}`);
+        
       })
     );
   }
@@ -216,7 +201,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       // Listen for markers visibility changes
       this.formService.getMarkersVisibleObservable().subscribe((visible) => {
         this.markersVisible = visible
-        console.log(`🔍 Markers visibility changed: ${visible}`)
+        
         if (!visible) {
           // Clear all displayed properties when markers are hidden
           this.visibleDvfProperties = []
@@ -228,7 +213,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
       // Re-enable map refresh for search button functionality
       this.mapService.getRefreshObservable().subscribe(() => {
-        console.log('🔄 Map refresh requested - triggering fetchData')
+        
         this.fetchData()
       }),
 
@@ -236,7 +221,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       this.formService
         .getDataSourceObservable()
         .subscribe((source) => {
-          console.log('📊 Data source changed to:', source)
+         
           this.currentDataSource = source
           // DISABLED: this.fetchData() - user must use search button
         }),
@@ -250,12 +235,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.minPrice = min
             this.maxPrice = max
             this.usePriceFilter = true
-            console.log('💰 Price filter updated:', min, 'to', max)
+            
           } else {
             this.usePriceFilter = false
             this.minPrice = 0
             this.maxPrice = 0
-            console.log('💰 Price filter cleared')
+            
             // Clear displayed properties when filter is disabled
             if (this.currentDataSource === 'dvf') {
               this.visibleDvfProperties = []
@@ -274,10 +259,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.useDateFilter = true
             this.dateMode = "range"
             this.exactDate = null
-            console.log('📅 Date filter updated:', start, 'to', end, '(mode: range)')
+            
             // Refresh data if DPE is already active to apply date filter
             if (this.activeDataSources.includes('dpe')) {
-              console.log('🔄 Refreshing DPE data with date filter')
               this.fetchData()
             }
           } else {
@@ -285,10 +269,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.startDate = ""
             this.endDate = ""
             this.exactDate = ""
-            console.log('📅 Date filter cleared')
+            
             // Refresh data if DPE is active to remove date filter
             if (this.activeDataSources.includes('dpe')) {
-              console.log('🔄 Refreshing DPE data without date filter')
               this.fetchData()
             }
             // Clear displayed properties when filter is disabled
@@ -308,12 +291,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.minSurface = min
             this.maxSurface = max
             this.useSurfaceFilter = true
-            console.log('🏠 Surface filter updated:', min, 'to', max)
+            
           } else {
             this.useSurfaceFilter = false
             this.minSurface = 0
             this.maxSurface = 0
-            console.log('🏠 Surface filter cleared')
+            
             // Clear displayed properties when filter is disabled
             if (this.currentDataSource === 'parcelles') {
               this.visibleParcelleProperties = []
@@ -329,15 +312,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       this.formService
         .getSelectedEnergyClassesObservable()
         .subscribe((classes: string[] | null) => {
-          console.log('⚡ Energy classes filter updated:', classes)
+          
           if (classes && classes.length > 0) {
             this.energyClasses = classes
             this.energyClassRange = ["",""]
             this.energyExactClass = null
-            console.log('⚡ Energy filter activated with classes:', classes)
+            
           } else {
             this.energyClasses = []
-            console.log('⚡ Energy classes cleared')
+            
           }
           this.updateEnergyFilterState()
         }),
@@ -350,10 +333,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.energyExactClass = exactClass
             this.energyClasses = []
             this.energyClassRange = ["",""]
-            console.log('⚡ Exact energy class filter updated:', exactClass)
+            
           } else {
             this.energyExactClass = null
-            console.log('⚡ Exact energy class filter cleared')
+            
           }
           this.updateEnergyFilterState()
         }),
@@ -366,10 +349,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.energyClassRange = range
             this.energyClasses = []
             this.energyExactClass = null
-            console.log('⚡ Energy class range filter updated:', range)
+            
           } else {
             this.energyClassRange = ["",""]
-            console.log('⚡ Energy class range filter cleared')
+            
           }
           this.updateEnergyFilterState()
         }),
@@ -380,10 +363,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .subscribe((filter) => {
           if (filter) {
             const [min, max] = filter
-            console.log('🔥 Consumption filter updated:', min, 'to', max)
+            
             // Consumption filtering is handled in DPE service
           } else {
-            console.log('🔥 Consumption filter cleared')
+            
             // Clear DPE properties when consumption filter is disabled
             this.visibleDpeProperties = []
             this.alertMessages['dpe'] = { count: 0, show: false }
@@ -395,10 +378,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getExactConsumptionObservable()
         .subscribe((consumption) => {
           if (consumption !== null) {
-            console.log('🔥 Exact consumption filter updated:', consumption)
+            
             // Consumption filtering is handled in DPE service
           } else {
-            console.log('🔥 Exact consumption filter cleared')
+            
           }
         }),
 
@@ -407,7 +390,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getPriceToggleObservable()
         .subscribe((active) => {
           this.isPriceToggleActive = active
-          console.log('💰 Price toggle state:', active)
+          
           if (!active) {
             // Clear DVF properties when price toggle is disabled
             // Only clear if date toggle is also inactive
@@ -424,7 +407,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getDateToggleObservable()
         .subscribe((active) => {
           this.isDateToggleActive = active
-          console.log('📅 Date toggle state:', active)
+          
           if (!active) {
             // Clear DVF properties when date toggle is disabled
             // Only clear if price toggle is also inactive
@@ -441,7 +424,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getSurfaceToggleObservable()
         .subscribe((active) => {
           this.isSurfaceToggleActive = active
-          console.log('📐 Surface toggle state:', active)
+          
           if (!active) {
             // Clear parcelle properties when surface toggle is disabled
             this.visibleParcelleProperties = []
@@ -455,7 +438,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getEnergyToggleObservable()
         .subscribe((active) => {
           this.isEnergyToggleActive = active
-          console.log('⚡ Energy toggle state:', active)
+          
           if (!active) {
             // Clear DPE properties when energy toggle is disabled
             // Only clear if consumption toggle is also inactive
@@ -472,7 +455,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         .getConsumptionToggleObservable()
         .subscribe((active) => {
           this.isConsumptionToggleActive = active
-          console.log('🔥 Consumption toggle state:', active)
+          
           if (!active) {
             // Clear DPE properties when consumption toggle is disabled
             // Only clear if energy toggle is also inactive
@@ -497,18 +480,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     const wasActive = this.useEnergyFilter
     this.useEnergyFilter = hasEnergyClasses || hasExactClass || hasClassRange
     
-    console.log('⚡ Energy filter state updated:', {
-      hasEnergyClasses,
-      hasExactClass, 
-      hasClassRange,
-      useEnergyFilter: this.useEnergyFilter
-    })
+    
     
     // Si le filtre est désactivé et qu'on était sur DPE, effacer les résultats
     if (wasActive && !this.useEnergyFilter && this.currentDataSource === 'dpe') {
       this.visibleDpeProperties = []
       this.cdr.detectChanges()
-      console.log('⚡ Energy filter disabled - clearing DPE results')
     }
   }
 
@@ -520,7 +497,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
   // Handle map movement events with debouncing
   onMapMoved(): void {
-    console.log('🗺️ Map moved - scheduling data refresh...')
+    
     
     // Clear any existing timeout to prevent multiple requests
     if (this.mapMoveTimeout) {
@@ -529,7 +506,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     
     // Debounce the data fetching to avoid too many requests
     this.mapMoveTimeout = setTimeout(() => {
-      console.log('🔄 Auto-refreshing data after map movement')
       this.fetchData()
     }, 1000) // Wait 1 second after user stops moving/zooming
   }
@@ -646,20 +622,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     this.fetchDataTimeout = setTimeout(() => {
       // Check if markers should be visible
       if (!this.markersVisible) {
-        console.log('🚫 Markers are hidden - skipping data fetch')
+        
         this.isLoading = false
         this.cdr.detectChanges()
         return
       }
 
-      console.log('🔄 Fetching data for multiple sources')
-      console.log('Active filters:', {
-        price: this.usePriceFilter,
-        date: this.useDateFilter,
-        surface: this.useSurfaceFilter,
-        energy: this.useEnergyFilter,
-        markersVisible: this.markersVisible
-      })
+      
 
       // Set loading states for active filters
       if (this.isPriceToggleActive) {
@@ -682,13 +651,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       const sourcesToLoad: string[] = []
       
       // Utilisez directement les propriétés de classe maintenues à jour par les subscriptions
-      console.log('🔍 Active toggles:', {
-        price: this.isPriceToggleActive,
-        date: this.isDateToggleActive,
-        surface: this.isSurfaceToggleActive,
-        energy: this.isEnergyToggleActive,
-        consumption: this.isConsumptionToggleActive
-      })
+     
       
       // DVF si filtres prix ou date actifs (ou leurs toggles)
       if (this.isPriceToggleActive || this.isDateToggleActive) {
@@ -713,7 +676,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       }
       
       this.activeDataSources = sourcesToLoad
-      console.log('📊 Loading data sources:', sourcesToLoad)
+      
       
       // Charger toutes les sources nécessaires en parallèle
       const loadPromises: Promise<void>[] = []
@@ -776,7 +739,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     let priceRange: [number, number] | null = null
     if (this.usePriceFilter) {
       priceRange = [this.minPrice, this.maxPrice]
-      console.log('💰 DVF price range applied:', priceRange)
     }
 
     let dateRange: [string, string] | null = null
@@ -798,7 +760,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       .getDvfProperties(topLeft, bottomRight, priceRange, dateRange, exactDate, surfaceRange, null, null, null, null, 500)
       .subscribe({
         next: (properties: DvfProperty[]) => {
-          console.log("Received DVF data successfully:", properties.length, "properties")
           this.visibleDvfProperties = properties
           
           // Update alert state
@@ -876,12 +837,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       }
     }
 
-    console.log('🏠 DPE filters:', { 
-      filterMode, 
-      energyFilter, 
-      surfaceRange,
-      dateFilter: this.useDateFilter ? (exactDate || dateRange) : null
-    })
+    
 
     this.dpeService
       .getDpeProperties(
@@ -895,7 +851,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       )
       .subscribe({
         next: (properties: DpeProperty[]) => {
-          console.log("Received DPE data successfully:", properties.length, "properties")
           this.visibleDpeProperties = properties
           
           // Update alert state
@@ -940,7 +895,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
     this.parcelleService.getParcelleProperties(topLeft, bottomRight, [this.minSurface, this.maxSurface]).subscribe({
       next: (properties: ParcelleProperty[]) => {
-        console.log("Received Parcelle data successfully:", properties.length, "properties")
         this.visibleParcelleProperties = properties
         
         // Update result count for automatic alert
@@ -1003,7 +957,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
       this.dvfService.getDvfProperties(topLeft, bottomRight, priceRange, dateRange).subscribe({
         next: (properties: DvfProperty[]) => {
-          console.log("DVF data loaded:", properties.length, "properties")
           this.visibleDvfProperties = properties
           this.alertMessages['dvf'] = { 
             count: properties.length, 
@@ -1077,12 +1030,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         }
       }
 
-      console.log('🏠 DPE filters:', { 
-        filterMode, 
-        energyFilter, 
-        surfaceRange,
-        dateFilter: this.useDateFilter ? (exactDate || dateRange) : null
-      })
+      
 
       this.dpeService
         .getDpeProperties(
@@ -1096,7 +1044,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         )
         .subscribe({
           next: (properties: DpeProperty[]) => {
-            console.log("Received DPE data successfully:", properties.length, "properties")
             this.visibleDpeProperties = properties
             
             // Update alert state
@@ -1136,7 +1083,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
       this.parcelleService.getParcelleProperties(topLeft, bottomRight, [this.minSurface, this.maxSurface]).subscribe({
         next: (properties: ParcelleProperty[]) => {
-          console.log("Received Parcelle data successfully:", properties.length, "properties")
           this.visibleParcelleProperties = properties
           
           // Update alert state
@@ -1179,7 +1125,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     this.showAlert = hasAlert
     
     if (hasAlert) {
-      console.log(`🚨 Alert: ${alertSources.join(', ')} sources have 500+ results`)
+      
     }
   }
 }

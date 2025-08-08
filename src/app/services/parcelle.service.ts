@@ -71,9 +71,7 @@ export class ParcelleService {
     const projectedTopLeft = this.convertLatLonToProjected(topLeft);
     const projectedBottomRight = this.convertLatLonToProjected(bottomRight);
     
-    console.log('Coordinate conversion:');
-    console.log('  Original topLeft:', topLeft, '-> Projected:', projectedTopLeft);
-    console.log('  Original bottomRight:', bottomRight, '-> Projected:', projectedBottomRight);
+
 
     // -- 2. Construire les parametres selon le format attendu par le backend ------------
     // Le backend getParcelles attend topLeft et bottomRight au format "lat,lon"
@@ -98,12 +96,7 @@ export class ParcelleService {
       params = params.set('surface', surfaceParam);
     } 
     
-    console.log('Parametres envoyes au backend:', {
-      topLeft: topLeftParam,
-      bottomRight: bottomRightParam,
-      surface: params.get('surface'),
-      coordonnees_projetees: { lat_min, lat_max, lon_min, lon_max }
-    });
+    
 
     // Construction de l'URL de l'API pour les parcelles
     const apiUrl = `${environment.apiUrl}/parcelles`;

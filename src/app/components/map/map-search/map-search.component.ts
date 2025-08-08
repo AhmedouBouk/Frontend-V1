@@ -48,7 +48,7 @@ export class MapSearchComponent implements OnInit {
   }
 
   onSearchInput(): void {
-    console.log('Search input:', this.searchQuery) // Debug
+    
     
     if (this.searchQuery.length < 2) { // Minimum 2 characters
       this.searchResults = []
@@ -77,14 +77,14 @@ export class MapSearchComponent implements OnInit {
   }
 
   private searchAddress(query: string): void {
-    console.log('Searching for:', query) // Debug
+    
     
     // Use Nominatim API for French cities search
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=fr&addressdetails=1&limit=10&accept-language=fr`;
     
     this.http.get<any[]>(url).subscribe({
       next: (results) => {
-        console.log('Raw API results:', results);
+        
         
         // Filter and transform results with better relevance filtering
         const validResults = results
@@ -124,11 +124,10 @@ export class MapSearchComponent implements OnInit {
         this.showResults = this.searchResults.length > 0;
         this.isSearching = false;
         
-        console.log('Unique filtered results:', this.searchResults);
-        console.log('Show results:', this.showResults);
+        
       },
       error: (error) => {
-        console.error('Search error:', error);
+        
         this.isSearching = false;
         this.searchResults = [];
         this.showResults = false;
@@ -156,7 +155,7 @@ export class MapSearchComponent implements OnInit {
         seen.add(cityKey);
         uniqueResults.push(result);
       } else {
-        console.log('Duplicate result filtered out:', result.display_name);
+        
       }
     }
     
@@ -164,7 +163,7 @@ export class MapSearchComponent implements OnInit {
   }
 
   selectLocation(result: NominatimResult): void {
-    console.log('Location selected:', result) // Debug
+    
     
     this.locationSelected.emit({
       lat: parseFloat(result.lat),

@@ -47,13 +47,8 @@ export class DvfService {
     if (priceRange) {
       params.prix_min = priceRange[0];
       params.prix_max = priceRange[1];
-      console.log('💰 DVF Service: Price range parameters added:', {
-        prix_min: params.prix_min,
-        prix_max: params.prix_max
-      });
-    } else {
-      console.log('💰 DVF Service: No price range provided');
-    }
+      
+    } 
 
     if (exactDate) {
       // Si une date exacte est fournie, l'utiliser pour le filtrage
@@ -83,7 +78,7 @@ export class DvfService {
     }
 
     const apiUrl = `${environment.apiUrl}/dvf/filtrer`;
-    console.log('📡 API URL:', `${apiUrl}?${new URLSearchParams(params).toString()}`);
+    
 
     // Use responseType 'text' to avoid automatic JSON parsing which might fail
     return this.http.get(apiUrl, { 
@@ -97,7 +92,7 @@ export class DvfService {
           data = response ? JSON.parse(response) : [];
         } catch (e) {
           console.error('Failed to parse response:', e);
-          console.log('Raw response:', response);
+          
           return [];
         }
         
@@ -106,9 +101,9 @@ export class DvfService {
         if (!Array.isArray(data)) {
           // If it's an object with a message property, log it and return empty array
           if (data.message) {
-            console.log('API message:', data.message);
+            
           } else {
-            console.warn('API response is not an array:', data);
+            
           }
           return [];
         }

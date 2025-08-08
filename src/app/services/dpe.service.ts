@@ -117,21 +117,11 @@ export class DpeService {
     const apiUrl = `${environment.apiUrl}/dpe`;
     
     // Log the complete API request
-    console.log('🚀 DPE API Request:', {
-      url: apiUrl,
-      params: params,
-      dateParams: {
-        exactDate,
-        dateRange,
-        useDateFilter: exactDate !== null || dateRange !== null
-      }
-    });
+    
 
     // -- 3. Appel HTTP et mapping -------------------------------------------
     return this.http.get<any[]>(apiUrl, { params }).pipe(
       map((response: any[]) => {
-        console.log('🔍 DPE API Response sample (first item):', response[0]);
-        console.log('🔍 ep_conso_5_usages field check:', response[0]?.ep_conso_5_usages);
         return response.map((item: any) => {
           let lat: number;
           let lon: number;

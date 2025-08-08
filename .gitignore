@@ -32,8 +32,8 @@ yarn-error.log*
 *.swo
 
 # Docker
-Dockerfile
-.dockerignore
+# Dockerfile
+# .dockerignore
 
 # Angular
 /.angular/cache

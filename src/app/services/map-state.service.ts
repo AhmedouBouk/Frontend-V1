@@ -18,7 +18,6 @@ export class MapStateService {
   saveMapState(state: MapState): void {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state))
-      console.log('🗺️ État de la carte sauvegardé:', state)
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde de l\'état de la carte:', error)
     }
@@ -32,7 +31,6 @@ export class MapStateService {
       const saved = localStorage.getItem(this.STORAGE_KEY)
       if (saved) {
         const state = JSON.parse(saved) as MapState
-        console.log('🗺️ État de la carte restauré:', state)
         return state
       }
     } catch (error) {
@@ -47,7 +45,6 @@ export class MapStateService {
   clearMapState(): void {
     try {
       localStorage.removeItem(this.STORAGE_KEY)
-      console.log('🗺️ État de la carte supprimé')
     } catch (error) {
       console.error('❌ Erreur lors de la suppression de l\'état de la carte:', error)
     }
