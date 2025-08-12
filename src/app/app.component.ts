@@ -1,9 +1,11 @@
-import { Component, inject, OnInit } from "@angular/core"
+import { Component, inject, OnInit, OnDestroy } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { HttpClient } from "@angular/common/http"
+import { Subscription } from "rxjs"
 import { FormComponent } from "./components/form/form.component"
 import { MapService } from "./services/map.service"
+import { FormService } from "./services/form.service"
 import { MapComponent } from "./components/map/map.component"
 
 interface NominatimResult {
@@ -20,8 +22,8 @@ interface NominatimResult {
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
-export class AppComponent implements OnInit {
-  sidebarOpen = false
+export class AppComponent implements OnInit, OnDestroy {
+  sidebarOpen = true // Valeur par défaut, sera écrasée par FormService
   mapType: "street" | "satellite" | "cadastre" = "street"
   darkMode = false
 
@@ -33,7 +35,9 @@ export class AppComponent implements OnInit {
   showResults = false
 
   private readonly mapService = inject(MapService)
+  private readonly formService = inject(FormService)
   private readonly http = inject(HttpClient)
+  private readonly subscriptions: Subscription[] = []
 
   ngOnInit(): void {
     // Check for saved theme preference
@@ -42,10 +46,25 @@ export class AppComponent implements OnInit {
       this.darkMode = true
       this.applyTheme(true)
     }
+
+    // Restaurer l'état des filtres et synchroniser le sidebar
+    this.formService.restoreFilterState()
+    
+    // S'abonner aux changements d'état du sidebar depuis FormService
+    this.subscriptions.push(
+      this.formService.getLeftSidebarOpenObservable().subscribe(open => {
+        this.sidebarOpen = open
+      })
+    )
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe())
   }
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen
+    this.formService.setLeftSidebarOpen(this.sidebarOpen)
   }
 
   toggleDarkMode(): void {

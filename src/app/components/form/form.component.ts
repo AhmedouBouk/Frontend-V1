@@ -5,6 +5,7 @@ import { FormService } from "../../services/form.service"
 import { MapService } from "../../services/map.service"
 
 type DataSourceType = "dvf" | "dpe" | "parcelles"
+type FilterMode = "exact" | "range"
 
 @Component({
   selector: "app-form",
@@ -50,21 +51,21 @@ export class FormComponent implements OnInit {
 
       // Prix (DVF)
       usePriceFilter: [false],
-      priceMode: ["interval"],
+      priceMode: ["range"],
       price: [null],
       minPrice: [null],
       maxPrice: [null],
 
       // Date (DVF)
       useDateFilter: [false],
-      dateMode: ["interval"],
+      dateMode: ["range"],
       exactDate: [null],
       startDate: [null],
       endDate: [null],
 
       // Surface (Parcelle)
       useSurfaceFilter: [false],
-      surfaceMode: ["interval"],
+      surfaceMode: ["range"],
       surface: [null],
       minSurface: [null],
       maxSurface: [null],
@@ -81,7 +82,7 @@ export class FormComponent implements OnInit {
 
       // Consommation énergétique (DPE) - Valeurs kWh/m²/an
       useConsumptionFilter: [false],
-      consumptionMode: ["interval"],
+      consumptionMode: ["range"],
       exactConsumption: [null],
       minConsumption: [null],
       maxConsumption: [null],
@@ -89,6 +90,23 @@ export class FormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Restaurer l'état des filtres depuis localStorage
+    this.formService.restoreFilterState()
+    
+    // Synchroniser les propriétés locales avec FormService
+    this.setupFormServiceSubscriptions()
+    
+    // Configurer les listeners pour les changements de mode
+    this.setupModeChangeListeners()
+    
+    // Restaurer l'état du formulaire depuis FormService
+    this.restoreFormState()
+    
+    // Forçage de l'état des boutons radio après le chargement du DOM
+    setTimeout(() => {
+      this.forceRadioButtonsState()
+    }, 500)
+
     // Auto-trigger search when filters are enabled/disabled
     this.filterForm.get("usePriceFilter")?.valueChanges.subscribe((enabled: boolean) => {
       // Update toggle state in FormService
@@ -180,6 +198,32 @@ export class FormComponent implements OnInit {
   }
 
   /**
+   * Setup listeners for mode changes to ensure they're correctly synced with FormService
+   */
+  private setupModeChangeListeners(): void {
+    // Suivre les changements de mode pour les persister dans FormService
+    this.filterForm.get('priceMode')?.valueChanges.subscribe((mode: string) => {
+      console.log(`🔄 Mode prix changé à: ${mode}`)
+      this.formService.setPriceMode(mode as FilterMode)
+    })
+    
+    this.filterForm.get('dateMode')?.valueChanges.subscribe((mode: string) => {
+      console.log(`🔄 Mode date changé à: ${mode}`)
+      this.formService.setDateMode(mode as FilterMode)
+    })
+    
+    this.filterForm.get('surfaceMode')?.valueChanges.subscribe((mode: string) => {
+      console.log(`🔄 Mode surface changé à: ${mode}`)
+      this.formService.setSurfaceMode(mode as FilterMode)
+    })
+    
+    this.filterForm.get('consumptionMode')?.valueChanges.subscribe((mode: string) => {
+      console.log(`🔄 Mode consommation changé à: ${mode}`)
+      this.formService.setConsumptionMode(mode as FilterMode)
+    })
+  }
+
+  /**
    * Setup listeners for input field changes to trigger automatic search
    */
   private setupValueChangeListeners(): void {
@@ -256,7 +300,7 @@ export class FormComponent implements OnInit {
     })
 
     this.filterForm.get('maxConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'interval' && value && this.filterForm.get('minConsumption')?.value) {
+      if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'range' && value && this.filterForm.get('minConsumption')?.value) {
         setTimeout(() => this.search(), 300)
       }
     })
@@ -291,28 +335,110 @@ export class FormComponent implements OnInit {
     this.formService.getConsumptionLoadingObservable().subscribe(loading => {
       this.consumptionLoading = loading
     })
+
+    // Souscriptions aux modes des filtres pour synchronisation UI
+    this.formService.getPriceModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ priceMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getDateModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ dateMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getSurfaceModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ surfaceMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getEnergyModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ energyMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getConsumptionModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ consumptionMode: mode }, { emitEvent: false })
+    })
+
+    // Souscription à l'état des marqueurs
+    this.formService.getMarkersVisibleObservable().subscribe(visible => {
+      this.markersVisible = visible
+    })
+
+    // Souscriptions aux valeurs des filtres pour synchronisation UI
+    this.formService.getPriceFilterObservable().subscribe(value => {
+      if (value) {
+        this.filterForm.patchValue({ 
+          minPrice: value[0], 
+          maxPrice: value[1] 
+        }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getExactPriceObservable().subscribe(value => {
+      if (value !== null) {
+        this.filterForm.patchValue({ price: value }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getDateFilterObservable().subscribe(value => {
+      if (value) {
+        this.filterForm.patchValue({ 
+          startDate: value[0], 
+          endDate: value[1] 
+        }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getExactDateObservable().subscribe(value => {
+      if (value !== null) {
+        this.filterForm.patchValue({ exactDate: value }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getSurfaceFilterObservable().subscribe(value => {
+      if (value) {
+        this.filterForm.patchValue({ 
+          minSurface: value[0], 
+          maxSurface: value[1] 
+        }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getExactSurfaceObservable().subscribe(value => {
+      if (value !== null) {
+        this.filterForm.patchValue({ surface: value }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getConsumptionFilterObservable().subscribe(value => {
+      if (value) {
+        this.filterForm.patchValue({ 
+          minConsumption: value[0], 
+          maxConsumption: value[1] 
+        }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getExactConsumptionObservable().subscribe(value => {
+      if (value !== null) {
+        this.filterForm.patchValue({ exactConsumption: value }, { emitEvent: false })
+      }
+    })
+
+    // Souscription aux classes énergétiques sélectionnées
+    this.formService.getSelectedEnergyClassesObservable().subscribe(classes => {
+      const energyUpdates = {
+        energyClassA: classes ? classes.includes('A') : false,
+        energyClassB: classes ? classes.includes('B') : false,
+        energyClassC: classes ? classes.includes('C') : false,
+        energyClassD: classes ? classes.includes('D') : false,
+        energyClassE: classes ? classes.includes('E') : false,
+        energyClassF: classes ? classes.includes('F') : false,
+        energyClassG: classes ? classes.includes('G') : false
+      }
+      this.filterForm.patchValue(energyUpdates, { emitEvent: false })
+    })
   }
 
-  // Chevron toggle methods - independent of filter activation
-  togglePriceExpanded(): void {
-    this.priceExpanded = !this.priceExpanded
-  }
 
-  toggleDateExpanded(): void {
-    this.dateExpanded = !this.dateExpanded
-  }
-
-  toggleSurfaceExpanded(): void {
-    this.surfaceExpanded = !this.surfaceExpanded
-  }
-
-  toggleEnergyExpanded(): void {
-    this.energyExpanded = !this.energyExpanded
-  }
-
-  toggleConsumptionExpanded(): void {
-    this.consumptionExpanded = !this.consumptionExpanded
-  }
 
   /**
    * Handle price filter application
@@ -326,7 +452,7 @@ export class FormComponent implements OnInit {
     if (values.priceMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.price ? Number(values.price) : 0
-      this.formService.setPriceFilter(val, val)
+      this.formService.setExactPrice(val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minPrice ? Number(values.minPrice) : 0
@@ -346,7 +472,7 @@ export class FormComponent implements OnInit {
 
     if (values.dateMode === "exact") {
       const date = values.exactDate || '2020-01-01' // Default date if empty
-      this.formService.setDateFilter(date, date)
+      this.formService.setExactDate(date)
     } else {
       const startDate = values.startDate || '2020-01-01' // Default start date
       const endDate = values.endDate || '2023-12-31' // Default end date
@@ -366,7 +492,7 @@ export class FormComponent implements OnInit {
     if (values.surfaceMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.surface ? Number(values.surface) : 0
-      this.formService.setSurfaceFilter(val, val)
+      this.formService.setExactSurface(val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minSurface ? Number(values.minSurface) : 0
@@ -409,7 +535,7 @@ export class FormComponent implements OnInit {
     if (values.consumptionMode === "exact") {
       // Use user value if provided, otherwise default to 0
       const val = values.exactConsumption ? Number(values.exactConsumption) : 0
-      this.formService.setConsumptionFilter(val, val)
+      this.formService.setExactConsumption(val)
     } else {
       // Use user values if provided, otherwise use defaults
       const min = values.minConsumption ? Number(values.minConsumption) : 0
@@ -447,7 +573,7 @@ export class FormComponent implements OnInit {
     if (this.allPriceSelected) {
       this.filterForm.patchValue({
         usePriceFilter: true,
-        priceMode: "interval",
+        priceMode: "range",
         minPrice: 0,
         maxPrice: 2000000,
       })
@@ -476,7 +602,7 @@ export class FormComponent implements OnInit {
 
       this.filterForm.patchValue({
         useDateFilter: true,
-        dateMode: "interval",
+        dateMode: "range",
         startDate,
         endDate,
       })
@@ -502,7 +628,7 @@ export class FormComponent implements OnInit {
     if (this.allSurfaceSelected) {
       this.filterForm.patchValue({
         useSurfaceFilter: true,
-        surfaceMode: "interval",
+        surfaceMode: "range",
         minSurface: 0,
         maxSurface: 10000,
       })
@@ -554,7 +680,7 @@ export class FormComponent implements OnInit {
     if (this.allConsumptionSelected) {
       this.filterForm.patchValue({
         useConsumptionFilter: true,
-        consumptionMode: "interval",
+        consumptionMode: "range",
         minConsumption: 0,
         maxConsumption: 1000,
       })
@@ -657,5 +783,320 @@ export class FormComponent implements OnInit {
     this.formService.clearEnergyClassFilter()
     this.formService.clearConsumptionFilter()
     this.formService.setDataSource("dvf")
+  }
+
+  // ===== MÉTHODES DE SYNCHRONISATION AVEC FORMSERVICE =====
+
+  /**
+   * Configure toutes les souscriptions aux observables du FormService
+   */
+  private setupFormServiceSubscriptions(): void {
+    // Souscriptions aux états d'expansion des chevrons
+    this.formService.getPriceExpandedObservable().subscribe(expanded => {
+      this.priceExpanded = expanded
+    })
+
+    this.formService.getDateExpandedObservable().subscribe(expanded => {
+      this.dateExpanded = expanded
+    })
+
+    this.formService.getSurfaceExpandedObservable().subscribe(expanded => {
+      this.surfaceExpanded = expanded
+    })
+
+    this.formService.getEnergyExpandedObservable().subscribe(expanded => {
+      this.energyExpanded = expanded
+    })
+
+    this.formService.getConsumptionExpandedObservable().subscribe(expanded => {
+      this.consumptionExpanded = expanded
+    })
+
+    // Souscriptions aux états des toggles
+    this.formService.getPriceToggleObservable().subscribe(active => {
+      this.allPriceSelected = active
+      this.filterForm.patchValue({ usePriceFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getDateToggleObservable().subscribe(active => {
+      this.allDateSelected = active
+      this.filterForm.patchValue({ useDateFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getSurfaceToggleObservable().subscribe(active => {
+      this.allSurfaceSelected = active
+      this.filterForm.patchValue({ useSurfaceFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getEnergyToggleObservable().subscribe(active => {
+      this.allEnergySelected = active
+      this.filterForm.patchValue({ useEnergyFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getConsumptionToggleObservable().subscribe(active => {
+      this.allConsumptionSelected = active
+      this.filterForm.patchValue({ useConsumptionFilter: active }, { emitEvent: false })
+    })
+
+    // Souscriptions aux états de chargement
+    this.formService.getPriceLoadingObservable().subscribe(loading => {
+      this.priceLoading = loading
+    })
+
+    this.formService.getDateLoadingObservable().subscribe(loading => {
+      this.dateLoading = loading
+    })
+
+    this.formService.getSurfaceLoadingObservable().subscribe(loading => {
+      this.surfaceLoading = loading
+    })
+
+    this.formService.getEnergyLoadingObservable().subscribe(loading => {
+      this.energyLoading = loading
+    })
+
+    this.formService.getConsumptionLoadingObservable().subscribe(loading => {
+      this.consumptionLoading = loading
+    })
+
+    // Souscription à l'état de visibilité des marqueurs
+    this.formService.getMarkersVisibleObservable().subscribe(visible => {
+      this.markersVisible = visible
+    })
+
+    // Souscriptions aux modes des filtres pour synchroniser les form controls
+    this.formService.getPriceModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ priceMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getDateModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ dateMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getSurfaceModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ surfaceMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getEnergyModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ energyMode: mode }, { emitEvent: false })
+    })
+
+    this.formService.getConsumptionModeObservable().subscribe(mode => {
+      this.filterForm.patchValue({ consumptionMode: mode }, { emitEvent: false })
+    })
+  }
+
+  /**
+   * Restaure l'état du formulaire depuis les valeurs du FormService
+   */
+  /**
+   * Force l'état des boutons radio en utilisant le ViewChild pour sélectionner directement les éléments DOM
+   * Cette approche est plus robuste que de compter sur Angular Forms
+   */
+  private forceRadioButtonsState(): void {
+    console.log('🔄 Forçage de l\'état des boutons radio...')
+    
+    // Obtenir les valeurs actuelles des modes
+    let priceMode: string = 'range'
+    let dateMode: string = 'range'
+    let surfaceMode: string = 'range'
+    let consumptionMode: string = 'range'
+    
+    this.formService.getPriceModeObservable().pipe().subscribe(mode => {
+      if (mode) priceMode = mode
+    }).unsubscribe()
+    
+    this.formService.getDateModeObservable().pipe().subscribe(mode => {
+      if (mode) dateMode = mode
+    }).unsubscribe()
+    
+    this.formService.getSurfaceModeObservable().pipe().subscribe(mode => {
+      if (mode) surfaceMode = mode
+    }).unsubscribe()
+    
+    this.formService.getConsumptionModeObservable().pipe().subscribe(mode => {
+      if (mode) consumptionMode = mode
+    }).unsubscribe()
+    
+    // Utiliser setTimeout pour s'assurer que le DOM est prêt
+    setTimeout(() => {
+      console.log('🔄 Mise à jour des boutons radio:', { priceMode, dateMode, surfaceMode, consumptionMode })
+      
+      // Mettre à jour le formulaire avec les valeurs
+      this.filterForm.patchValue({
+        priceMode,
+        dateMode, 
+        surfaceMode,
+        consumptionMode
+      }, { emitEvent: false })
+      
+      // Rafraîchir manuellement tous les boutons radio pour contourner le problème Angular
+      try {
+        const radioInputs = document.querySelectorAll('input[type="radio"]')
+        radioInputs.forEach((radio: any) => {
+          const formName = radio.getAttribute('formcontrolname')
+          const value = radio.value
+          
+          // Déterminer si ce bouton radio devrait être sélectionné
+          let shouldBeChecked = false
+          
+          if (formName === 'priceMode') shouldBeChecked = value === priceMode
+          else if (formName === 'dateMode') shouldBeChecked = value === dateMode
+          else if (formName === 'surfaceMode') shouldBeChecked = value === surfaceMode
+          else if (formName === 'consumptionMode') shouldBeChecked = value === consumptionMode
+          
+          // Forcer l'état checked
+          if (shouldBeChecked && !radio.checked) {
+            radio.checked = true
+            console.log(`🔄 Bouton radio ${formName}=${value} forcé à checked=true`)
+          }
+        })
+      } catch (e) {
+        console.error('Erreur lors de la manipulation du DOM:', e)
+      }
+    }, 300)
+  }
+
+  private restoreFormState(): void {
+    console.log('🔄 Restauration de l\'état du formulaire...')
+
+    // Utiliser un délai pour s'assurer que les souscriptions sont établies
+    setTimeout(() => {
+      console.log('🔍 Début de la restauration des états du formulaire')
+      
+      // Restaurer directement depuis les BehaviorSubjects actuels
+      const formUpdates: any = {}
+
+      // FORCER des valeurs par défaut pour les modes (même s'ils sont null dans FormService)
+      // Utiliser 'interval' comme valeur par défaut sécuritaire
+      formUpdates.priceMode = 'range'
+      formUpdates.dateMode = 'range'
+      formUpdates.surfaceMode = 'range'
+      formUpdates.consumptionMode = 'range'
+      
+      console.log('🔍 Modes par défaut définis :', formUpdates)
+
+      // Puis, essayer de restaurer les vraies valeurs des modes depuis FormService
+      this.formService.getPriceModeObservable().pipe().subscribe(mode => {
+        if (mode) {
+          console.log('🔍 Mode prix restauré :', mode)
+          formUpdates.priceMode = mode
+        }
+      }).unsubscribe()
+
+      this.formService.getDateModeObservable().pipe().subscribe(mode => {
+        if (mode) {
+          console.log('🔍 Mode date restauré :', mode)
+          formUpdates.dateMode = mode
+        }
+      }).unsubscribe()
+
+      this.formService.getSurfaceModeObservable().pipe().subscribe(mode => {
+        if (mode) {
+          console.log('🔍 Mode surface restauré :', mode)
+          formUpdates.surfaceMode = mode
+        }
+      }).unsubscribe()
+
+      this.formService.getConsumptionModeObservable().pipe().subscribe(mode => {
+        if (mode) {
+          console.log('🔍 Mode consommation restauré :', mode)
+          formUpdates.consumptionMode = mode
+        }
+      }).unsubscribe()
+      
+      // Restaurer les valeurs des filtres
+      // Prix
+      this.formService.getPriceFilterObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.minPrice = value[0]
+          formUpdates.maxPrice = value[1]
+        }
+      }).unsubscribe()
+
+      this.formService.getExactPriceObservable().pipe().subscribe(value => {
+        if (value !== null) {
+          formUpdates.price = value
+        }
+      }).unsubscribe()
+
+      // Date
+      this.formService.getDateFilterObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.startDate = value[0]
+          formUpdates.endDate = value[1]
+        }
+      }).unsubscribe()
+
+      this.formService.getExactDateObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.exactDate = value
+        }
+      }).unsubscribe()
+
+      // Surface
+      this.formService.getSurfaceFilterObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.minSurface = value[0]
+          formUpdates.maxSurface = value[1]
+        }
+      }).unsubscribe()
+
+      this.formService.getExactSurfaceObservable().pipe().subscribe(value => {
+        if (value !== null) {
+          formUpdates.surface = value
+        }
+      }).unsubscribe()
+
+      // Consommation
+      this.formService.getConsumptionFilterObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.minConsumption = value[0]
+          formUpdates.maxConsumption = value[1]
+        }
+      }).unsubscribe()
+
+      this.formService.getExactConsumptionObservable().pipe().subscribe(value => {
+        if (value !== null) {
+          formUpdates.exactConsumption = value
+        }
+      }).unsubscribe()
+
+      // Appliquer toutes les mises à jour en une fois
+      if (Object.keys(formUpdates).length > 0) {
+        console.log('📊 Mise à jour du formulaire avec valeurs:', formUpdates)
+        this.filterForm.patchValue(formUpdates, { emitEvent: false })
+      }
+
+      console.log('✅ État du formulaire restauré')
+    }, 200)
+  }
+
+  /**
+   * Méthodes pour gérer les chevrons (expansion/contraction des sections)
+   */
+  togglePriceExpanded(): void {
+    this.priceExpanded = !this.priceExpanded
+    this.formService.setPriceExpanded(this.priceExpanded)
+  }
+
+  toggleDateExpanded(): void {
+    this.dateExpanded = !this.dateExpanded
+    this.formService.setDateExpanded(this.dateExpanded)
+  }
+
+  toggleSurfaceExpanded(): void {
+    this.surfaceExpanded = !this.surfaceExpanded
+    this.formService.setSurfaceExpanded(this.surfaceExpanded)
+  }
+
+  toggleEnergyExpanded(): void {
+    this.energyExpanded = !this.energyExpanded
+    this.formService.setEnergyExpanded(this.energyExpanded)
+  }
+
+  toggleConsumptionExpanded(): void {
+    this.consumptionExpanded = !this.consumptionExpanded
+    this.formService.setConsumptionExpanded(this.consumptionExpanded)
   }
 }

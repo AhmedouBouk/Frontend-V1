@@ -27,11 +27,11 @@
       <div class="section-content" *ngIf="priceExpanded">
         <div class="radio-group-inline">
           <label class="radio-item">
-            <input type="radio" value="exact" formControlName="priceMode">
+            <input type="radio" value="exact" formControlName="priceMode" [checked]="filterForm.get('priceMode')?.value === 'exact'">
             <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
-            <input type="radio" value="interval" formControlName="priceMode">
+            <input type="radio" value="range" formControlName="priceMode" [checked]="filterForm.get('priceMode')?.value === 'range'">
             <span class="radio-label">Intervalle</span>
           </label>
         </div>
@@ -43,7 +43,7 @@
           </div>
         </div>
   
-        <div class="price-interval" *ngIf="filterForm.get('priceMode')?.value === 'interval'">
+        <div class="price-interval" *ngIf="filterForm.get('priceMode')?.value === 'range'">
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minPrice">Min (€)</label>
@@ -84,11 +84,11 @@
       <div class="section-content" *ngIf="dateExpanded">
         <div class="radio-group-inline">
           <label class="radio-item">
-            <input type="radio" value="exact" formControlName="dateMode">
+            <input type="radio" value="exact" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'exact'">
             <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
-            <input type="radio" value="interval" formControlName="dateMode">
+            <input type="radio" value="range" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'range'">
             <span class="radio-label">Intervalle</span>
           </label>
         </div>
@@ -100,7 +100,7 @@
           </div>
         </div>
   
-        <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'interval'">
+        <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'range'">
           <div class="input-row-compact">
             <div class="form-group">
               <label for="startDate">Début</label>
@@ -141,11 +141,11 @@
       <div class="section-content" *ngIf="surfaceExpanded">
         <div class="radio-group-inline">
           <label class="radio-item">
-            <input type="radio" value="exact" formControlName="surfaceMode">
+            <input type="radio" value="exact" formControlName="surfaceMode" [checked]="filterForm.get('surfaceMode')?.value === 'exact'">
             <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
-            <input type="radio" value="interval" formControlName="surfaceMode">
+            <input type="radio" value="range" formControlName="surfaceMode" [checked]="filterForm.get('surfaceMode')?.value === 'range'">
             <span class="radio-label">Intervalle</span>
           </label>
         </div>
@@ -157,7 +157,7 @@
           </div>
         </div>
   
-        <div class="surface-interval" *ngIf="filterForm.get('surfaceMode')?.value === 'interval'">
+        <div class="surface-interval" *ngIf="filterForm.get('surfaceMode')?.value === 'range'">
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minSurface">Min (m²)</label>
@@ -255,11 +255,11 @@
       <div class="section-content" *ngIf="consumptionExpanded">
         <div class="radio-group-inline">
           <label class="radio-item">
-            <input type="radio" value="exact" formControlName="consumptionMode">
+            <input type="radio" value="exact" formControlName="consumptionMode" [checked]="filterForm.get('consumptionMode')?.value === 'exact'">
             <span class="radio-label">Exact</span>
           </label>
           <label class="radio-item">
-            <input type="radio" value="interval" formControlName="consumptionMode">
+            <input type="radio" value="range" formControlName="consumptionMode" [checked]="filterForm.get('consumptionMode')?.value === 'range'">
             <span class="radio-label">Intervalle</span>
           </label>
         </div>
@@ -271,7 +271,7 @@
           </div>
         </div>
 
-        <div class="consumption-interval" *ngIf="filterForm.get('consumptionMode')?.value === 'interval'">
+        <div class="consumption-interval" *ngIf="filterForm.get('consumptionMode')?.value === 'range'">
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minConsumption">Min (kWh/m²/an)</label>

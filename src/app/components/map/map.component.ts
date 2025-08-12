@@ -28,7 +28,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
   private mapMoveTimeout: any = null;
 
   @ViewChild(MapDisplayComponent) mapDisplay!: MapDisplayComponent
-  @Input() leftSidebarOpen = false
+  @Input() leftSidebarOpen = true // Valeur par défaut, sera écrasée par la restauration FormService
 
   private fetchDataTimeout: any
 
@@ -167,36 +167,54 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
   }
 
   ngOnInit(): void {
+    // Restaurer l'état des filtres depuis FormService
+    this.formService.restoreFilterState()
+    
     // Subscribe to toggle states
     this.subscriptions.push(
       this.formService.getPriceToggleObservable().subscribe(active => {
         this.isPriceToggleActive = active;
-        
       }),
       
       this.formService.getDateToggleObservable().subscribe(active => {
         this.isDateToggleActive = active;
-        
       }),
       
       this.formService.getSurfaceToggleObservable().subscribe(active => {
         this.isSurfaceToggleActive = active;
-        
       }),
       
       this.formService.getEnergyToggleObservable().subscribe(active => {
         this.isEnergyToggleActive = active;
-        
       }),
       
       this.formService.getConsumptionToggleObservable().subscribe(active => {
         this.isConsumptionToggleActive = active;
-        
+      }),
+
+      // Subscribe to sidebar state changes
+      this.formService.getTableCollapsedObservable().subscribe(collapsed => {
+        this.tableCollapsed = collapsed;
+      }),
+      
+      this.formService.getLeftSidebarOpenObservable().subscribe(open => {
+        this.leftSidebarOpen = open;
+      }),
+
+      // Subscribe to markers visibility
+      this.formService.getMarkersVisibleObservable().subscribe(visible => {
+        this.markersVisible = visible;
       })
     );
   }
 
   ngAfterViewInit(): void {
+    // Déclencher fetchData() automatiquement si des filtres sont actifs après restauration
+    if (this.formService.hasActiveFilters()) {
+      console.log('🔄 Filtres actifs détectés après restauration - chargement automatique des données')
+      setTimeout(() => this.fetchData(), 100)
+    }
+    
     this.subscriptions.push(
       // Listen for markers visibility changes
       this.formService.getMarkersVisibleObservable().subscribe((visible) => {
@@ -559,13 +577,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     )
   }
 
-  // Handle sidebar toggle - only toggles the UI without fetching data
-  onToggleSidebar(): void {
-    this.tableCollapsed = !this.tableCollapsed
-    setTimeout(() => {
-      this.mapDisplay.invalidateSize()
-    }, 300)
-  }
+
 
   // Handle property selection
   onPropertySelected(event: { index: number; property: any }): void {
@@ -579,16 +591,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     }
   }
 
-  // Handle table toggle
-  onTableToggled(collapsed: boolean): void {
-    this.tableCollapsed = collapsed
-    console.log('📊 Sidebar toggled:', collapsed ? 'fermé' : 'ouvert')
-  }
 
-  // Handle map size invalidation
-  onMapSizeInvalidated(): void {
-    this.mapDisplay.invalidateSize()
-  }
 
   // Handle location search from search component
   onLocationSelected(location: {lat: number, lon: number, name: string}): void {
@@ -1126,6 +1129,34 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     
     if (hasAlert) {
       
+    }
+  }
+
+  /**
+   * Toggle du sidebar gauche avec persistance
+   */
+  onToggleSidebar(): void {
+    this.leftSidebarOpen = !this.leftSidebarOpen
+    this.formService.setLeftSidebarOpen(this.leftSidebarOpen)
+  }
+
+  /**
+   * Toggle du tableau de résultats avec persistance
+   */
+  onTableToggled(collapsed: boolean): void {
+    this.tableCollapsed = collapsed
+    this.formService.setTableCollapsed(collapsed)
+  }
+
+  /**
+   * Invalidation de la taille de la carte
+   */
+  onMapSizeInvalidated(): void {
+    // Déclencher une mise à jour de la taille de la carte si nécessaire
+    if (this.mapDisplay) {
+      setTimeout(() => {
+        this.mapDisplay.invalidateSize()
+      }, 100)
     }
   }
 }
