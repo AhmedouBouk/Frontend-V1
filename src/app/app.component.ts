@@ -40,7 +40,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
 
   ngOnInit(): void {
-    // Check for saved theme preference
+    setTimeout(() => {
+      window.location.reload();
+    }, 300000);
+
     const savedTheme = localStorage.getItem('theme')
     if (savedTheme === 'dark') {
       this.darkMode = true
