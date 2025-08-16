@@ -377,7 +377,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     if (!property.latitude || !property.longitude || !property.valeur_fonciere) {
       return
     }
-
+  
     const lat = property.latitude
     const lng = property.longitude
     
@@ -385,26 +385,36 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     let markerIcon: string
     let popupTitle: string
     
-    if (this.useDateFilter && !this.usePriceFilter) {
-      // Date filter is active, price filter is not - show date emoji
+    // Handle different filter combinations with appropriate markers
+    if (this.useDateFilter && this.usePriceFilter) {
+      // Both filters active - use a combined marker
+      markerIcon = "🔍"
+      popupTitle = `🔍 ${property.date_mutation || "Non spécifiée"} - ${property.valeur_fonciere.toLocaleString()} €`
+    } else if (this.useDateFilter) {
+      // Only date filter is active
       const date = property.date_mutation || "Non spécifiée"
       markerIcon = "📅"
       popupTitle = `📅 ${date}`
-    } else {
-      // Price filter is active or both filters active or neither active - show price emoji (default)
+    } else if (this.usePriceFilter) {
+      // Only price filter is active
       markerIcon = "💰"
       popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
+    } else {
+      // No filters active - use default marker
+      markerIcon = "📍"
+      popupTitle = `📍 Propriété`
     }
+  
 
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: "emoji-marker dvf-marker",
         html: `<div class="emoji-marker dvf-marker">${markerIcon}</div>`,
-        iconSize: [20, 20], // Fixed small size for emoji only
-        iconAnchor: [10, 10], // Center the emoji exactly on the position
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
       }),
     }).addTo(this.featureGroup)
-
+  
     marker.bindPopup(`
       <div class="property-popup">
         <h3>${popupTitle}</h3>
@@ -417,7 +427,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         <p><strong>Commune:</strong> ${property.nom_commune || "Non spécifiée"}</p>
       </div>
     `)
-
+  
     this.markers.push(marker)
   }
 

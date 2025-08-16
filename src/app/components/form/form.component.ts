@@ -195,6 +195,7 @@ export class FormComponent implements OnInit {
 
     // Listen for value changes in input fields to trigger automatic search
     this.setupValueChangeListeners()
+    this.setupAutoToggleActivation()
   }
 
   /**
@@ -1142,6 +1143,135 @@ private logFilter(tag: string, payload: any) {
   // You can silence all logs by switching to console.debug in prod
   console.log(`🧪 [Filter:${tag}]`, payload);
 }
+// Add this new method to automatically activate toggles when user starts typing
+private setupAutoToggleActivation(): void {
+  // Price filter inputs - activate toggle when user starts typing
+  this.filterForm.get('price')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('usePriceFilter')?.value) {
+      this.filterForm.patchValue({ usePriceFilter: true }, { emitEvent: false });
+      this.formService.setPriceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('minPrice')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('usePriceFilter')?.value) {
+      this.filterForm.patchValue({ usePriceFilter: true }, { emitEvent: false });
+      this.formService.setPriceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('maxPrice')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('usePriceFilter')?.value) {
+      this.filterForm.patchValue({ usePriceFilter: true }, { emitEvent: false });
+      this.formService.setPriceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  // Date filter inputs - activate toggle when user starts typing
+  this.filterForm.get('exactDate')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useDateFilter')?.value) {
+      this.filterForm.patchValue({ useDateFilter: true }, { emitEvent: false });
+      this.formService.setDateToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('startDate')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useDateFilter')?.value) {
+      this.filterForm.patchValue({ useDateFilter: true }, { emitEvent: false });
+      this.formService.setDateToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('endDate')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useDateFilter')?.value) {
+      this.filterForm.patchValue({ useDateFilter: true }, { emitEvent: false });
+      this.formService.setDateToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  // Surface filter inputs - activate toggle when user starts typing
+  this.filterForm.get('surface')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useSurfaceFilter')?.value) {
+      this.filterForm.patchValue({ useSurfaceFilter: true }, { emitEvent: false });
+      this.formService.setSurfaceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('minSurface')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useSurfaceFilter')?.value) {
+      this.filterForm.patchValue({ useSurfaceFilter: true }, { emitEvent: false });
+      this.formService.setSurfaceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('maxSurface')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useSurfaceFilter')?.value) {
+      this.filterForm.patchValue({ useSurfaceFilter: true }, { emitEvent: false });
+      this.formService.setSurfaceToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  // Consumption filter inputs - activate toggle when user starts typing
+  this.filterForm.get('exactConsumption')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useConsumptionFilter')?.value) {
+      this.filterForm.patchValue({ useConsumptionFilter: true }, { emitEvent: false });
+      this.formService.setConsumptionToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('minConsumption')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useConsumptionFilter')?.value) {
+      this.filterForm.patchValue({ useConsumptionFilter: true }, { emitEvent: false });
+      this.formService.setConsumptionToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  this.filterForm.get('maxConsumption')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useConsumptionFilter')?.value) {
+      this.filterForm.patchValue({ useConsumptionFilter: true }, { emitEvent: false });
+      this.formService.setConsumptionToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
+  // Energy class checkboxes - activate toggle when user checks any checkbox
+  const energyClasses = ['energyClassA', 'energyClassB', 'energyClassC', 'energyClassD', 'energyClassE', 'energyClassF', 'energyClassG'];
+  energyClasses.forEach(className => {
+    this.filterForm.get(className)?.valueChanges.subscribe((checked) => {
+      if (checked && !this.filterForm.get('useEnergyFilter')?.value) {
+        this.filterForm.patchValue({ useEnergyFilter: true }, { emitEvent: false });
+        this.formService.setEnergyToggle(true);
+        this.markersVisible = true;
+        this.formService.setMarkersVisible(true);
+      }
+    });
+  });
+}
+
+
 
 }
 

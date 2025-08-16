@@ -188,9 +188,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         if (value) { 
           this.minPrice = value[0]; 
           this.maxPrice = value[1];
-          this.usePriceFilter = true;
         } else {
-          this.usePriceFilter = false;
+          // Clear price values when filter is cleared
+          this.minPrice = 0;
+          this.maxPrice = 2000000;
         }
       }),
 
@@ -198,18 +199,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         if (value) { 
           this.startDate = value[0]; 
           this.endDate = value[1];
-          this.useDateFilter = true;
         } else if (!this.exactDate) {
-          // Only set useDateFilter to false if we don't have an exact date
-          this.useDateFilter = false;
+          // Only clear date values if exactDate is not set
+          this.startDate = "2020-01-01";
+          this.endDate = "2023-12-31";
         } 
       }),
       this.formService.getExactDateObservable().subscribe(value => {
         if (value !== null && value !== '') {
           this.exactDate = value;
+        } else {
+          this.exactDate = null;
         }
-        // Set useDateFilter based on whether we have an exact date OR a date range
-        this.useDateFilter = (this.exactDate !== null && this.exactDate !== '') || !!(this.startDate && this.endDate);
       }),
       this.formService.getDateModeObservable().subscribe(mode => this.dateMode = mode),
       
@@ -405,10 +406,8 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             const [min, max] = filter
             this.minPrice = min
             this.maxPrice = max
-            this.usePriceFilter = true
             
           } else {
-            this.usePriceFilter = false
             this.minPrice = 0
             this.maxPrice = 0
             
@@ -427,7 +426,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             const [start, end] = filter
             this.startDate = start
             this.endDate = end || start
-            this.useDateFilter = true
+            
             // Only switch to range mode and clear exactDate if we don't have an exact date
             if (!this.exactDate) {
               this.dateMode = "range"
@@ -438,12 +437,11 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
               this.fetchData()
             }
           } else {
-            // Only clear useDateFilter if we don't have an exact date
+            // Only clear date values if exactDate is not set
             if (!this.exactDate || this.exactDate === '') {
-              this.useDateFilter = false
+              this.startDate = ""
+              this.endDate = ""
             }
-            this.startDate = ""
-            this.endDate = ""
             
             // Refresh data if DPE is active to remove date filter
             if (this.activeDataSources.includes('dpe')) {
@@ -539,6 +537,9 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // Toggle state subscriptions with immediate reload triggers
       this.formService.getPriceToggleObservable().subscribe(active => {
         this.isPriceToggleActive = active
+        // Set usePriceFilter based on toggle state
+        this.usePriceFilter = active;
+        console.log(`💰 Price filter toggle ${active ? 'activated' : 'deactivated'} - usePriceFilter set to ${this.usePriceFilter}`);
         
         if (active) {
           if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
@@ -557,6 +558,9 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
 
       this.formService.getDateToggleObservable().subscribe(active => {
         this.isDateToggleActive = active
+        // Set useDateFilter based on toggle state
+        this.useDateFilter = active;
+        console.log(`📅 Date filter toggle ${active ? 'activated' : 'deactivated'} - useDateFilter set to ${this.useDateFilter}`);
         
         if (active) {
           if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
