@@ -258,6 +258,7 @@ getDpeProperties(
         longitude: lon,
         address: item.ban_street ?? item.adresse_brut ?? '',
         energyClass: item.classe_bilan_dpe ?? 'G', // Use the correct energy class field that backend filters on
+        gesClass: item.classe_bilan_ges ?? 'G', // Add the missing GES class property
         year: item.annee_construction ?? new Date().getFullYear(),
         city: item.ban_city ?? item.nom_commune_brut ?? '',
         postalCode: item.ban_postcode ?? item.code_postal_brut ?? '',

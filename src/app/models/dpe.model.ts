@@ -9,4 +9,5 @@ export interface DpeProperty {
   city: string;
   postalCode?: string;
   ep_conso_5_usages?: number; // Energy consumption value
+  periode_construction?: string | null; // Construction period for different markers
 }
