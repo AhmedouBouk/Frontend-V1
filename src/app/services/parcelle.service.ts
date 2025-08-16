@@ -85,22 +85,38 @@ export class ParcelleService {
     // Format topLeft/bottomRight attendu par le backend (format: "lat,lon")
     const topLeftParam = `${lat_max},${lon_min}`; // Top-left: lat_max, lon_min
     const bottomRightParam = `${lat_min},${lon_max}`; // Bottom-right: lat_min, lon_max
+
+    
     
     let params = new HttpParams()
       .set('topLeft', topLeftParam)
       .set('bottomRight', bottomRightParam);
 
-    // Format surface selon le format attendu par le backend ("min,max")
+    // Format surface selon le format attendu par le backend
     if (surfaceRange) {
-      const surfaceParam = `${surfaceRange[0]},${surfaceRange[1]}`;
-      params = params.set('surface', surfaceParam);
-    } 
-    
+      // Check if this is an exact surface value (both min and max are the same)
+      if (surfaceRange[0] === surfaceRange[1] && surfaceRange[0] !== 0) {
+        // This is an exact surface value
+        params = params.set('surface_exact', `${surfaceRange[0]}`);
+              } else if (surfaceRange[0] !== 0 || surfaceRange[1] !== 0) {
+        // This is a range with actual values
+        params = params.set('surface_min', `${surfaceRange[0]}`);
+        params = params.set('surface_max', `${surfaceRange[1]}`);
+              } else {
+        // Both values are 0, don't send any surface parameters (SELECT * behavior)
+              }
+    } else {
+          }
     
 
     // Construction de l'URL de l'API pour les parcelles
     const apiUrl = `${environment.apiUrl}/parcelles`;
+
+    const baseUrl = `${environment.apiUrl}/parcelles`;
+  const fullUrl = `${baseUrl}?${params.toString()}`;
   
+  // 🔍 LOG THE FULL API URL HERE
+              
     
     // Appel HTTP vers le backend
     return this.http.get(apiUrl, { params }).pipe(

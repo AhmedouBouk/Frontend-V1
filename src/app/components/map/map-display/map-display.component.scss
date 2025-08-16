@@ -59,75 +59,95 @@
   background: #ecfdf5;
 }
 
-/* Energy rating colors for DPE markers */
-.dpe-marker.rating-a {
-  border-color: #00a651;
-  color: #00a651;
-  background: #f0fdf4;
+/* ===== BEAUTIFUL ENERGY CLASS LETTER MARKERS ===== */
+.dpe-marker.energy-letter {
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15) !important;
+  border: 2px solid !important;
+  user-select: none !important;
+  transition: all 0.2s ease !important;
 }
 
-.dpe-marker.rating-a:hover {
-  background: #dcfce7;
+.dpe-marker.energy-letter:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+  z-index: 1000 !important;
 }
 
-.dpe-marker.rating-b {
-  border-color: #50b848;
-  color: #50b848;
-  background: #f0fdf4;
+/* Energy Class A - Excellent (Dark Green) */
+.dpe-marker.energy-a {
+  background: linear-gradient(135deg, #00a651, #059669) !important;
+  border-color: #065f46 !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-b:hover {
-  background: #dcfce7;
+/* Energy Class B - Very Good (Green) */
+.dpe-marker.energy-b {
+  background: linear-gradient(135deg, #50b848, #22c55e) !important;
+  border-color: #166534 !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-c {
-  border-color: #aed136;
-  color: #65a30d;
-  background: #fefce8;
+/* Energy Class C - Good (Light Green) */
+.dpe-marker.energy-c {
+  background: linear-gradient(135deg, #aed136, #84cc16) !important;
+  border-color: #365314 !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-c:hover {
-  background: #fef3c7;
+/* Energy Class D - Fair (Yellow) */
+.dpe-marker.energy-d {
+  background: linear-gradient(135deg, #fff200, #eab308) !important;
+  border-color: #a16207 !important;
+  color: #92400e !important;
 }
 
-.dpe-marker.rating-d {
-  border-color: #fff200;
-  color: #ca8a04;
-  background: #fefce8;
+/* Energy Class E - Poor (Orange) */
+.dpe-marker.energy-e {
+  background: linear-gradient(135deg, #fdb913, #f59e0b) !important;
+  border-color: #c2410c !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-d:hover {
-  background: #fef3c7;
+/* Energy Class F - Very Poor (Red-Orange) */
+.dpe-marker.energy-f {
+  background: linear-gradient(135deg, #f37021, #ea580c) !important;
+  border-color: #9a3412 !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-e {
-  border-color: #fdb913;
-  color: #d97706;
-  background: #fffbeb;
+/* Energy Class G - Terrible (Red) */
+.dpe-marker.energy-g {
+  background: linear-gradient(135deg, #ed1c24, #dc2626) !important;
+  border-color: #991b1b !important;
+  color: white !important;
 }
 
-.dpe-marker.rating-e:hover {
-  background: #fed7aa;
+/* ===== PERIOD-BASED ADDITIONAL STYLING ===== */
+.dpe-marker.period-historic {
+  border-style: dotted !important;
 }
 
-.dpe-marker.rating-f {
-  border-color: #f37021;
-  color: #ea580c;
-  background: #fff7ed;
+.dpe-marker.period-postwar {
+  border-style: dashed !important;
 }
 
-.dpe-marker.rating-f:hover {
-  background: #fed7aa;
+.dpe-marker.period-modern {
+  border-style: solid !important;
 }
 
-.dpe-marker.rating-g {
-  border-color: #ed1c24;
-  color: #dc2626;
-  background: #fef2f2;
-}
-
-.dpe-marker.rating-g:hover {
-  background: #fecaca;
+.dpe-marker.period-recent {
+  border-style: double !important;
+  border-width: 3px !important;
 }
 
 /* ===== PARCELLE MARKERS ===== */
@@ -311,4 +331,109 @@
 
 .compact-marker {
   animation: markerAppear 0.2s ease-out;
+}
+
+.emoji-marker.dpe-marker {
+  min-width: 26px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  user-select: none;
+  transition: transform 0.2s;
+}
+
+.emoji-marker.dpe-marker:hover {
+  transform: scale(1.2);
+  z-index: 1000;
+}
+/* Small square “chip” marker */
+.dpe-icon-wrapper {
+  /* keep wrapper empty so Leaflet positioning stays simple */
+}
+
+.dpe-chip {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;              /* small rounded corners like your image */
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  user-select: none;
+
+  /* crisp text */
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* soft blue halo like the picture */
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.35),   /* outer blue glow */
+    0 1px 3px rgba(0, 0, 0, 0.35),        /* drop shadow */
+    inset 0 1px 0 rgba(255, 255, 255, 0.25); /* subtle inner highlight */
+
+  border: 1px solid rgba(0,0,0,0.15);     /* thin border for definition */
+}
+
+.dpe-chip span {
+  font-size: 12px;     /* letter size inside 24px square */
+  transform: translateY(0.5px); /* tiny optical alignment */
+}
+
+/* --- Palette/gradients per energy class (A → G) --- */
+/* Tweak the stops to match your exact art direction */
+
+.dpe-chip.energy-a {
+  background: linear-gradient(145deg, #11c26a 0%, #0ea85f 60%, #0a8f54 100%);
+  color: #ffffff;
+}
+
+.dpe-chip.energy-b {
+  background: linear-gradient(145deg, #3dc375 0%, #31ac65 60%, #2b985b 100%);
+  color: #ffffff;
+}
+
+.dpe-chip.energy-c {
+  background: linear-gradient(145deg, #a0c63a 0%, #91b431 60%, #7a9b29 100%);
+  color: #202124; /* darker text for contrast like your image */
+}
+
+.dpe-chip.energy-d {
+  background: linear-gradient(145deg, #ffe23d 0%, #ffd21f 60%, #f2c212 100%);
+  color: #202124;
+}
+
+.dpe-chip.energy-e {
+  background: linear-gradient(145deg, #ffb63d 0%, #ffa41f 60%, #f29012 100%);
+  color: #202124;
+}
+
+.dpe-chip.energy-f {
+  background: linear-gradient(145deg, #ff7a38 0%, #ff6a1f 60%, #ef5a15 100%);
+  color: #ffffff;
+}
+
+.dpe-chip.energy-g {
+  background: linear-gradient(145deg, #ff4747 0%, #ff2d2d 60%, #e51f1f 100%);
+  color: #ffffff;
+}
+
+/* Optional: a subtle hover pulse for mouse users */
+.leaflet-marker-icon .dpe-chip {
+  transition: transform .08s ease;
+}
+.leaflet-marker-icon:hover .dpe-chip {
+  transform: scale(1.06);
+}
+
+/* If you keep a consumption variant, you can style it slightly differently */
+.dpe-chip.is-consumption span {
+  font-size: 13px;       /* bolt reads better a tick larger */
 }

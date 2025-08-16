@@ -108,6 +108,9 @@ export class FormService {
 
   private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('none')
 
+  // ✅ Auto-reload trigger - émet un événement à chaque changement de paramètre
+  private readonly reloadTriggerSubject = new BehaviorSubject<number>(0)
+
   // Clé de stockage localStorage
   private readonly STORAGE_KEY = 'dvf-map-filter-state'
   private readonly STORAGE_VERSION = '1.0'
@@ -147,6 +150,32 @@ export class FormService {
 
   getExactConsumptionObservable(): Observable<number | null> {
     return this.exactConsumptionSubject.asObservable()
+  }
+
+  // 🔥 Getter methods for current values
+  getCurrentConsumptionFilter(): [number, number] | null {
+    return this.consumptionFilterSubject.value
+  }
+
+  getCurrentExactConsumption(): number | null {
+    return this.exactConsumptionSubject.value
+  }
+
+  getCurrentConsumptionMode(): FilterMode {
+    return this.consumptionModeSubject.value
+  }
+
+  // Surface filter getter methods
+  getCurrentSurfaceFilter(): [number, number] | null {
+    return this.surfaceFilterSubject.value
+  }
+
+  getCurrentExactSurface(): number | null {
+    return this.exactSurfaceSubject.value
+  }
+
+  getCurrentSurfaceMode(): FilterMode {
+    return this.surfaceModeSubject.value
   }
 
   getDataSourceObservable(): Observable<DataSourceType> {
@@ -256,57 +285,76 @@ export class FormService {
   }
 
   getExactDateObservable(): Observable<string | null> {
-    return this.exactDateSubject.asObservable()
+        return this.exactDateSubject.asObservable()
+  }
+
+  // ✅ Auto-reload trigger observable
+  getReloadTrigger(): Observable<number> {
+    return this.reloadTriggerSubject.asObservable()
   }
 
 
+
+  // ✅ Auto-reload trigger method
+  triggerReload(): void {
+    const currentCount = this.reloadTriggerSubject.value
+        this.reloadTriggerSubject.next(currentCount + 1)
+  }
 
   setPriceFilter(minPrice: number, maxPrice: number): void {
     this.priceFilterSubject.next([minPrice, maxPrice])
     this.exactPriceSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setExactPrice(price: number): void {
-    this.exactPriceSubject.next(price)
-    this.priceFilterSubject.next(null)
+        this.exactPriceSubject.next(price)
+    this.priceFilterSubject.next(null)  // Clear price range when setting exact
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setDateFilter(startDate: string, endDate: string): void {
-    this.dateFilterSubject.next([startDate, endDate])
+        this.dateFilterSubject.next([startDate, endDate])
     this.exactDateSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setExactDate(date: string): void {
-    this.exactDateSubject.next(date)
+        this.exactDateSubject.next(date)
     this.dateFilterSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setSurfaceFilter(minSurface: number, maxSurface: number): void {
     this.surfaceFilterSubject.next([minSurface, maxSurface])
     this.exactSurfaceSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
   
   setExactSurface(surface: number): void {
     this.exactSurfaceSubject.next(surface)
     this.surfaceFilterSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setExactEnergyClass(energyClass: string): void {
     this.exactEnergyClassSubject.next(energyClass)
     this.energyClassRangeSubject.next(null)
     this.selectedEnergyClassesSubject.next(null)
+    this.triggerReload()
   }
 
   setEnergyClassRange(min: string, max: string): void {
     this.energyClassRangeSubject.next([min, max])
     this.exactEnergyClassSubject.next(null)
     this.selectedEnergyClassesSubject.next(null)
+    this.triggerReload()
   }
 
   setSelectedEnergyClasses(energyClasses: string[]): void {
@@ -314,6 +362,7 @@ export class FormService {
     this.exactEnergyClassSubject.next(null)
     this.energyClassRangeSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   // Nouvelles méthodes pour la consommation
@@ -321,12 +370,14 @@ export class FormService {
     this.consumptionFilterSubject.next([minConsumption, maxConsumption])
     this.exactConsumptionSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setExactConsumption(consumption: number): void {
     this.exactConsumptionSubject.next(consumption)
     this.consumptionFilterSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
 
   setDataSource(source: DataSourceType): void {
@@ -340,24 +391,42 @@ export class FormService {
   // Toggle state setters
   setPriceToggle(active: boolean): void {
     this.priceToggleSubject.next(active)
+    this.saveCurrentState()
+    // Trigger reload when price filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
   }
 
   setDateToggle(active: boolean): void {
     this.dateToggleSubject.next(active)
+    this.saveCurrentState()
+    // Trigger reload when date filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
   }
 
   setSurfaceToggle(active: boolean): void {
     this.surfaceToggleSubject.next(active)
+    this.saveCurrentState()
+    // Trigger reload when surface filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
   }
 
   setEnergyToggle(active: boolean): void {
     this.energyToggleSubject.next(active)
     this.saveCurrentState()
+    // Trigger reload when energy filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
   }
 
   setConsumptionToggle(active: boolean): void {
     this.consumptionToggleSubject.next(active)
     this.saveCurrentState()
+    // Trigger reload when consumption filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
   }
 
   // Setters pour les états d'expansion des chevrons
@@ -449,13 +518,18 @@ export class FormService {
   }
 
   clearDateFilter(): void {
-    this.dateFilterSubject.next(null)
+        this.dateFilterSubject.next(null)
+    this.exactDateSubject.next(null)
+    this.saveCurrentState()
+    this.triggerReload()
   }
 
   clearSurfaceFilter(): void {
     this.surfaceFilterSubject.next(null)
     this.exactSurfaceSubject.next(null)
-  }
+    this.saveCurrentState()
+    this.triggerReload()
+      }
 
   clearEnergyClassFilter(): void {
     this.exactEnergyClassSubject.next(null)
@@ -467,7 +541,9 @@ export class FormService {
     this.consumptionFilterSubject.next(null)
     this.exactConsumptionSubject.next(null)
     this.saveCurrentState()
+    this.triggerReload()
   }
+
 
   // ===== MÉTHODES DE PERSISTANCE =====
 
@@ -522,8 +598,7 @@ export class FormService {
       }
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(currentState))
-      console.log('💾 État des filtres sauvegardé:', currentState)
-    } catch (error) {
+          } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde de l\'état des filtres:', error)
     }
   }
@@ -535,8 +610,7 @@ export class FormService {
     try {
       const saved = localStorage.getItem(this.STORAGE_KEY)
       if (!saved) {
-        console.log('📝 Aucun état sauvegardé trouvé')
-        return
+                return
       }
 
       const savedState = JSON.parse(saved) as FilterState
@@ -545,13 +619,11 @@ export class FormService {
       const maxAge = 7 * 24 * 60 * 60 * 1000 // 7 jours en millisecondes
       if (savedState.version !== this.STORAGE_VERSION || 
           (Date.now() - savedState.timestamp) > maxAge) {
-        console.log('🗑️ État sauvegardé expiré ou incompatible, suppression')
-        localStorage.removeItem(this.STORAGE_KEY)
+                localStorage.removeItem(this.STORAGE_KEY)
         return
       }
 
-      console.log('🔄 Restauration de l\'état des filtres:', savedState)
-
+      
       // Restaurer les états des toggles
       this.priceToggleSubject.next(savedState.priceToggle)
       this.dateToggleSubject.next(savedState.dateToggle)
@@ -570,7 +642,7 @@ export class FormService {
       this.priceFilterSubject.next(savedState.priceFilter)
       this.exactPriceSubject.next(savedState.exactPrice)
       this.dateFilterSubject.next(savedState.dateFilter)
-      this.exactDateSubject.next(savedState.exactDate)
+            this.exactDateSubject.next(savedState.exactDate)
       this.surfaceFilterSubject.next(savedState.surfaceFilter)
       this.exactSurfaceSubject.next(savedState.exactSurface)
       this.energyClassRangeSubject.next(savedState.energyClassRange)
@@ -591,8 +663,7 @@ export class FormService {
       this.leftSidebarOpenSubject.next(savedState.leftSidebarOpen)
       this.tableCollapsedSubject.next(savedState.tableCollapsed)
 
-      console.log('✅ État des filtres restauré avec succès')
-    } catch (error) {
+          } catch (error) {
       console.error('❌ Erreur lors de la restauration de l\'état des filtres:', error)
       // En cas d'erreur, supprimer l'état corrompu
       localStorage.removeItem(this.STORAGE_KEY)
@@ -612,7 +683,7 @@ export class FormService {
 
   /**
    * Efface tous les filtres et l'état sauvegardé
-   */
+   
   clearAllFilters(): void {
     // Effacer tous les toggles
     this.priceToggleSubject.next(false)
@@ -644,6 +715,6 @@ export class FormService {
 
     // Supprimer l'état sauvegardé
     localStorage.removeItem(this.STORAGE_KEY)
-    console.log('🗑️ Tous les filtres effacés et état sauvegardé supprimé')
-  }
+      }
+  */
 }

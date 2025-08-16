@@ -58,63 +58,6 @@
       </div>
     </div>
   
-    <!-- Section Date -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-title">
-          <div class="icon-container">
-            <img src="assets/icons/clock-icon.png" alt="Période" class="section-icon-img">
-          </div>
-          <h3>Période</h3>
-        </div>
-        <div class="loading-spinner" *ngIf="dateLoading">
-          <div class="spinner"></div>
-        </div>
-        <img src="assets/icons/down.png" 
-             alt="Expand section" 
-             class="section-chevron" 
-             [class.rotated]="dateExpanded"
-             (click)="toggleDateExpanded()">
-        <label class="toggle-switch" for="useDateFilter">
-          <input type="checkbox" formControlName="useDateFilter" id="useDateFilter">
-          <span class="slider"></span>
-        </label>
-      </div>
-  
-      <div class="section-content" *ngIf="dateExpanded">
-        <div class="radio-group-inline">
-          <label class="radio-item">
-            <input type="radio" value="exact" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'exact'">
-            <span class="radio-label">Exact</span>
-          </label>
-          <label class="radio-item">
-            <input type="radio" value="range" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'range'">
-            <span class="radio-label">Intervalle</span>
-          </label>
-        </div>
-  
-        <div class="date-exact" *ngIf="filterForm.get('dateMode')?.value === 'exact'">
-          <div class="form-group">
-            <label for="exactDate">Date</label>
-            <input type="date" id="exactDate" formControlName="exactDate">
-          </div>
-        </div>
-  
-        <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'range'">
-          <div class="input-row-compact">
-            <div class="form-group">
-              <label for="startDate">Début</label>
-              <input type="date" id="startDate" formControlName="startDate">
-            </div>
-            <div class="form-group">
-              <label for="endDate">Fin</label>
-              <input type="date" id="endDate" formControlName="endDate">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  
     <!-- Section Surface -->
     <div class="form-section">
       <div class="section-header">
@@ -172,7 +115,7 @@
       </div>
     </div>
   
-    <!-- Section Classe Énergie -->
+    <!-- Section Classe Énergétique -->
     <div class="form-section">
       <div class="section-header">
         <div class="section-title">
@@ -280,6 +223,63 @@
             <div class="form-group">
               <label for="maxConsumption">Max (kWh/m²/an)</label>
               <input type="number" id="maxConsumption" formControlName="maxConsumption" placeholder="300">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Date with Custom Date Picker -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="icon-container">
+            <img src="assets/icons/clock-icon.png" alt="Période" class="section-icon-img">
+          </div>
+          <h3>Période</h3>
+        </div>
+        <div class="loading-spinner" *ngIf="dateLoading">
+          <div class="spinner"></div>
+        </div>
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="dateExpanded"
+             (click)="toggleDateExpanded()">
+        <label class="toggle-switch" for="useDateFilter">
+          <input type="checkbox" formControlName="useDateFilter" id="useDateFilter">
+          <span class="slider"></span>
+        </label>
+      </div>
+  
+      <div class="section-content" *ngIf="dateExpanded">
+        <div class="radio-group-inline">
+          <label class="radio-item">
+            <input type="radio" value="exact" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'exact'">
+            <span class="radio-label">Exact</span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" value="range" formControlName="dateMode" [checked]="filterForm.get('dateMode')?.value === 'range'">
+            <span class="radio-label">Intervalle</span>
+          </label>
+        </div>
+  
+        <div class="date-exact" *ngIf="filterForm.get('dateMode')?.value === 'exact'">
+          <div class="form-group">
+            <label for="exactDate">Date</label>
+            <input type="date" id="exactDate" formControlName="exactDate">
+          </div>
+        </div>
+  
+        <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'range'">
+          <div class="input-row-compact">
+            <div class="form-group">
+              <label for="startDate">Début</label>
+              <input type="date" id="startDate" formControlName="startDate">
+            </div>
+            <div class="form-group">
+              <label for="endDate">Fin</label>
+              <input type="date" id="endDate" formControlName="endDate">
             </div>
           </div>
         </div>

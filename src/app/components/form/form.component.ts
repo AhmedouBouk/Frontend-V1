@@ -203,23 +203,24 @@ export class FormComponent implements OnInit {
   private setupModeChangeListeners(): void {
     // Suivre les changements de mode pour les persister dans FormService
     this.filterForm.get('priceMode')?.valueChanges.subscribe((mode: string) => {
-      console.log(`🔄 Mode prix changé à: ${mode}`)
-      this.formService.setPriceMode(mode as FilterMode)
+            this.formService.setPriceMode(mode as FilterMode)
     })
     
     this.filterForm.get('dateMode')?.valueChanges.subscribe((mode: string) => {
-      console.log(`🔄 Mode date changé à: ${mode}`)
-      this.formService.setDateMode(mode as FilterMode)
+            this.formService.setDateMode(mode as FilterMode)
     })
     
     this.filterForm.get('surfaceMode')?.valueChanges.subscribe((mode: string) => {
-      console.log(`🔄 Mode surface changé à: ${mode}`)
-      this.formService.setSurfaceMode(mode as FilterMode)
+            this.formService.setSurfaceMode(mode as FilterMode)
+      
+      // If surface filter is active, trigger search to apply the new mode
+      if (this.filterForm.get('useSurfaceFilter')?.value) {
+                setTimeout(() => this.search(), 100)
+      }
     })
     
     this.filterForm.get('consumptionMode')?.valueChanges.subscribe((mode: string) => {
-      console.log(`🔄 Mode consommation changé à: ${mode}`)
-      this.formService.setConsumptionMode(mode as FilterMode)
+            this.formService.setConsumptionMode(mode as FilterMode)
     })
   }
 
@@ -249,9 +250,8 @@ export class FormComponent implements OnInit {
 
     // Date filter value changes
     this.filterForm.get('exactDate')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'exact' && value) {
-        
-        setTimeout(() => this.search(), 300)
+            if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'exact' && value) {
+                setTimeout(() => this.search(), 300)
       }
     })
 
@@ -267,43 +267,74 @@ export class FormComponent implements OnInit {
       }
     })
 
-    // Surface filter value changes
+    // Surface filter value changes - FIXED TO MATCH PRICE/DATE PATTERN
     this.filterForm.get('surface')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'exact' && value) {
-        setTimeout(() => this.search(), 300)
+            if (this.filterForm.get('useSurfaceFilter')?.value && 
+          this.filterForm.get('surfaceMode')?.value === 'exact' && 
+          value !== null && value !== '') {
+                setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('minSurface')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'interval' && value && this.filterForm.get('maxSurface')?.value) {
-        setTimeout(() => this.search(), 300)
+            if (this.filterForm.get('useSurfaceFilter')?.value && 
+          this.filterForm.get('surfaceMode')?.value === 'range' && 
+          value !== null && value !== '' && 
+          this.filterForm.get('maxSurface')?.value !== null && 
+          this.filterForm.get('maxSurface')?.value !== '') {
+                setTimeout(() => this.search(), 300)
       }
     })
 
     this.filterForm.get('maxSurface')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useSurfaceFilter')?.value && this.filterForm.get('surfaceMode')?.value === 'interval' && value && this.filterForm.get('minSurface')?.value) {
-        setTimeout(() => this.search(), 300)
+            if (this.filterForm.get('useSurfaceFilter')?.value && 
+          this.filterForm.get('surfaceMode')?.value === 'range' && 
+          value !== null && value !== '' && 
+          this.filterForm.get('minSurface')?.value !== null && 
+          this.filterForm.get('minSurface')?.value !== '') {
+                setTimeout(() => this.search(), 300)
       }
     })
 
-    // Consumption filter value changes
+
     this.filterForm.get('exactConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'exact' && value) {
-        setTimeout(() => this.search(), 300)
+      if (this.filterForm.get('useConsumptionFilter')?.value &&
+          this.filterForm.get('consumptionMode')?.value === 'exact' &&
+          value !== null && value !== '') {
+        this.logFilter('Consumption:exact input', { exact: Number(value) });
+        setTimeout(() => this.search(), 300);
       }
-    })
-
+    });
+  
+    // Consumption — range (fix 'interval' -> 'range' in both places)
     this.filterForm.get('minConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'interval' && value && this.filterForm.get('maxConsumption')?.value) {
-        setTimeout(() => this.search(), 300)
+      if (this.filterForm.get('useConsumptionFilter')?.value &&
+          this.filterForm.get('consumptionMode')?.value === 'range' &&  // fixed here
+          value !== null && value !== '' &&
+          this.filterForm.get('maxConsumption')?.value !== null &&
+          this.filterForm.get('maxConsumption')?.value !== '') {
+        this.logFilter('Consumption:range input', {
+          min: Number(this.filterForm.get('minConsumption')?.value),
+          max: Number(this.filterForm.get('maxConsumption')?.value)
+        });
+        setTimeout(() => this.search(), 300);
       }
-    })
-
+    });
+  
     this.filterForm.get('maxConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value && this.filterForm.get('consumptionMode')?.value === 'range' && value && this.filterForm.get('minConsumption')?.value) {
-        setTimeout(() => this.search(), 300)
+      if (this.filterForm.get('useConsumptionFilter')?.value &&
+          this.filterForm.get('consumptionMode')?.value === 'range' &&  // fixed here
+          value !== null && value !== '' &&
+          this.filterForm.get('minConsumption')?.value !== null &&
+          this.filterForm.get('minConsumption')?.value !== '') {
+        this.logFilter('Consumption:range input', {
+          min: Number(this.filterForm.get('minConsumption')?.value),
+          max: Number(this.filterForm.get('maxConsumption')?.value)
+        });
+        setTimeout(() => this.search(), 300);
       }
-    })
+    });
+  
 
     // Energy class checkboxes - trigger search when any checkbox changes
     const energyClasses = ['energyClassA', 'energyClassB', 'energyClassC', 'energyClassD', 'energyClassE', 'energyClassF', 'energyClassG']
@@ -388,9 +419,10 @@ export class FormComponent implements OnInit {
     })
 
     this.formService.getExactDateObservable().subscribe(value => {
-      if (value !== null) {
-        this.filterForm.patchValue({ exactDate: value }, { emitEvent: false })
-      }
+            if (value !== null && value !== '') {
+                this.filterForm.patchValue({ exactDate: value }, { emitEvent: false })
+      } else {
+              }
     })
 
     this.formService.getSurfaceFilterObservable().subscribe(value => {
@@ -450,14 +482,27 @@ export class FormComponent implements OnInit {
     }
 
     if (values.priceMode === "exact") {
-      // Use user value if provided, otherwise default to 0
-      const val = values.price ? Number(values.price) : 0
-      this.formService.setExactPrice(val)
+      // Only apply if user provided a value
+      if (values.price && values.price !== '' && values.price !== null) {
+        const val = Number(values.price)
+        this.formService.setExactPrice(val)
+              } else {
+        // No value provided - clear filter to enable SELECT * behavior
+        this.formService.clearPriceFilter()
+              }
     } else {
-      // Use user values if provided, otherwise use defaults
-      const min = values.minPrice ? Number(values.minPrice) : 0
-      const max = values.maxPrice ? Number(values.maxPrice) : 2000000
-      this.formService.setPriceFilter(min, max)
+      // Only apply if user provided values
+      const hasMin = values.minPrice && values.minPrice !== '' && values.minPrice !== null
+      const hasMax = values.maxPrice && values.maxPrice !== '' && values.maxPrice !== null
+      
+      if (hasMin || hasMax) {
+        const min = hasMin ? Number(values.minPrice) : 0
+        const max = hasMax ? Number(values.maxPrice) : 2000000
+        this.formService.setPriceFilter(min, max)
+              } else {
+        // No values provided - clear filter to enable SELECT * behavior
+        this.formService.clearPriceFilter()
+              }
     }
   }
 
@@ -465,41 +510,71 @@ export class FormComponent implements OnInit {
    * Handle date filter application
    */
   private applyDateFilter(values: any): void {
+        
     if (!values.useDateFilter) {
       this.formService.clearDateFilter()
       return
     }
 
     if (values.dateMode === "exact") {
-      const date = values.exactDate || '2020-01-01' // Default date if empty
-      this.formService.setExactDate(date)
+      // Only apply if user provided a value
+      if (values.exactDate && values.exactDate !== '' && values.exactDate !== null) {
+                this.formService.setExactDate(values.exactDate)
+                      } else {
+        // No value provided - clear filter to enable SELECT * behavior
+        this.formService.clearDateFilter()
+              }
     } else {
-      const startDate = values.startDate || '2020-01-01' // Default start date
-      const endDate = values.endDate || '2023-12-31' // Default end date
-      this.formService.setDateFilter(startDate, endDate)
+      // Only apply if user provided values
+      const hasStart = values.startDate && values.startDate !== '' && values.startDate !== null
+      const hasEnd = values.endDate && values.endDate !== '' && values.endDate !== null
+      
+      if (hasStart && hasEnd) {
+        this.formService.setDateFilter(values.startDate, values.endDate)
+              } else {
+        // No complete range provided - clear filter to enable SELECT * behavior
+        this.formService.clearDateFilter()
+              }
     }
   }
 
-  /**
-   * Handle surface filter application
-   */
-  private applySurfaceFilter(values: any): void {
-    if (!values.useSurfaceFilter) {
-      this.formService.clearSurfaceFilter()
-      return
-    }
+  // ALSO ENSURE - The applySurfaceFilter method is correctly implemented
+private applySurfaceFilter(values: any): void {
+  
+  if (!values.useSurfaceFilter) {
+        this.formService.clearSurfaceFilter();
+    return;
+  }
 
-    if (values.surfaceMode === "exact") {
-      // Use user value if provided, otherwise default to 0
-      const val = values.surface ? Number(values.surface) : 0
-      this.formService.setExactSurface(val)
+  if (values.surfaceMode === "exact") {
+    // Only apply if user provided a value
+    if (values.surface && values.surface !== '' && values.surface !== null) {
+      const val = Number(values.surface);
+            this.formService.setExactSurface(val);
     } else {
-      // Use user values if provided, otherwise use defaults
-      const min = values.minSurface ? Number(values.minSurface) : 0
-      const max = values.maxSurface ? Number(values.maxSurface) : 10000
-      this.formService.setSurfaceFilter(min, max)
+      // No value provided - clear filter to enable SELECT * behavior
+            this.formService.clearSurfaceFilter();
+    }
+  } else {
+    // Range mode
+    const hasMin = values.minSurface && values.minSurface !== '' && values.minSurface !== null;
+    const hasMax = values.maxSurface && values.maxSurface !== '' && values.maxSurface !== null;
+    
+    if (hasMin && hasMax) {
+      const min = Number(values.minSurface);
+      const max = Number(values.maxSurface);
+            this.formService.setSurfaceFilter(min, max);
+    } else if (hasMin || hasMax) {
+      // Partial range - use defaults for missing values
+      const min = hasMin ? Number(values.minSurface) : 0;
+      const max = hasMax ? Number(values.maxSurface) : 10000;
+            this.formService.setSurfaceFilter(min, max);
+    } else {
+      // No values provided - clear filter to enable SELECT * behavior
+            this.formService.clearSurfaceFilter();
     }
   }
+}
 
   /**
    * Handle energy class filter application
@@ -533,14 +608,27 @@ export class FormComponent implements OnInit {
     }
 
     if (values.consumptionMode === "exact") {
-      // Use user value if provided, otherwise default to 0
-      const val = values.exactConsumption ? Number(values.exactConsumption) : 0
-      this.formService.setExactConsumption(val)
+      // Only apply if user provided a value
+      if (values.exactConsumption && values.exactConsumption !== '' && values.exactConsumption !== null) {
+        const val = Number(values.exactConsumption)
+        this.formService.setExactConsumption(val)
+              } else {
+        // No value provided - clear filter to enable SELECT * behavior
+        this.formService.clearConsumptionFilter()
+              }
     } else {
-      // Use user values if provided, otherwise use defaults
-      const min = values.minConsumption ? Number(values.minConsumption) : 0
-      const max = values.maxConsumption ? Number(values.maxConsumption) : 1000
-      this.formService.setConsumptionFilter(min, max)
+      // Only apply if user provided values
+      const hasMin = values.minConsumption && values.minConsumption !== '' && values.minConsumption !== null
+      const hasMax = values.maxConsumption && values.maxConsumption !== '' && values.maxConsumption !== null
+      
+      if (hasMin || hasMax) {
+        const min = hasMin ? Number(values.minConsumption) : 0
+        const max = hasMax ? Number(values.maxConsumption) : 1000
+        this.formService.setConsumptionFilter(min, max)
+              } else {
+        // No values provided - clear filter to enable SELECT * behavior
+        this.formService.clearConsumptionFilter()
+              }
     }
   }
 
@@ -574,12 +662,13 @@ export class FormComponent implements OnInit {
       this.filterForm.patchValue({
         usePriceFilter: true,
         priceMode: "range",
-        minPrice: 0,
-        maxPrice: 2000000,
+        // Don't set default values - let user enter their own
+        minPrice: null,
+        maxPrice: null,
       })
-      // Apply the filter with default values immediately
+      // Apply the filter - will trigger SELECT * behavior since no values provided
       this.applyPriceFilter(this.filterForm.value)
-    } else {
+          } else {
       this.filterForm.patchValue({
         usePriceFilter: false,
         minPrice: null,
@@ -587,7 +676,7 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearPriceFilter()
-    }
+          }
   }
 
   /**
@@ -597,18 +686,17 @@ export class FormComponent implements OnInit {
     this.allDateSelected = !this.allDateSelected
 
     if (this.allDateSelected) {
-      const endDate = new Date().toISOString().split("T")[0]
-      const startDate = new Date(new Date().setFullYear(new Date().getFullYear() - 3)).toISOString().split("T")[0]
-
       this.filterForm.patchValue({
         useDateFilter: true,
-        dateMode: "range",
-        startDate,
-        endDate,
+        dateMode: "exact", // Changed from "range" to "exact" as default
+        // Don't set default values - let user enter their own
+        exactDate: null,
+        startDate: null,
+        endDate: null,
       })
-      // Apply the filter with default values immediately
+      // Apply the filter - will trigger SELECT * behavior since no values provided
       this.applyDateFilter(this.filterForm.value)
-    } else {
+          } else {
       this.filterForm.patchValue({
         useDateFilter: false,
         startDate: null,
@@ -616,7 +704,7 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearDateFilter()
-    }
+          }
   }
 
   /**
@@ -629,12 +717,23 @@ export class FormComponent implements OnInit {
       this.filterForm.patchValue({
         useSurfaceFilter: true,
         surfaceMode: "range",
-        minSurface: 0,
-        maxSurface: 10000,
+        // Don't set default values - let user enter their own
+        minSurface: null,
+        maxSurface: null,
       })
-      // Apply the filter with default values immediately
+      // Activate markers and sync with FormService
+      this.markersVisible = true
+      this.formService.setMarkersVisible(true)
+      this.formService.setSurfaceToggle(true)
+      this.formService.setSurfaceMode("range")
+      
+      // Apply the filter - will trigger SELECT * behavior since no values provided
       this.applySurfaceFilter(this.filterForm.value)
-    } else {
+      
+      // Trigger immediate search for SELECT * behavior
+            setTimeout(() => this.search(), 100)
+      
+          } else {
       this.filterForm.patchValue({
         useSurfaceFilter: false,
         minSurface: null,
@@ -642,7 +741,8 @@ export class FormComponent implements OnInit {
       })
       // Clear the filter immediately
       this.formService.clearSurfaceFilter()
-    }
+      this.formService.setSurfaceToggle(false)
+          }
   }
 
   /**
@@ -729,61 +829,7 @@ export class FormComponent implements OnInit {
     }
   }
 
-  resetFilters(): void {
-    // Reset toggle states
-    this.allPriceSelected = false
-    this.allDateSelected = false
-    this.allSurfaceSelected = false
-    this.allEnergySelected = false
-    this.allConsumptionSelected = false
-    this.markersVisible = false
-
-    // Reset expansion states
-    this.priceExpanded = false
-    this.dateExpanded = false
-    this.surfaceExpanded = false
-    this.energyExpanded = false
-    this.consumptionExpanded = false
-
-    this.filterForm.patchValue({
-      dataSource: "dvf",
-      usePriceFilter: false,
-      priceMode: "interval",
-      price: null,
-      minPrice: null,
-      maxPrice: null,
-      useDateFilter: false,
-      dateMode: "interval",
-      exactDate: null,
-      startDate: null,
-      endDate: null,
-      useSurfaceFilter: false,
-      surfaceMode: "interval",
-      surface: null,
-      minSurface: null,
-      maxSurface: null,
-      useEnergyFilter: false,
-      energyClassA: false,
-      energyClassB: false,
-      energyClassC: false,
-      energyClassD: false,
-      energyClassE: false,
-      energyClassF: false,
-      energyClassG: false,
-      useConsumptionFilter: false,
-      consumptionMode: "interval",
-      exactConsumption: null,
-      minConsumption: null,
-      maxConsumption: null,
-    })
-
-    this.formService.clearPriceFilter()
-    this.formService.clearDateFilter()
-    this.formService.clearSurfaceFilter()
-    this.formService.clearEnergyClassFilter()
-    this.formService.clearConsumptionFilter()
-    this.formService.setDataSource("dvf")
-  }
+  
 
   // ===== MÉTHODES DE SYNCHRONISATION AVEC FORMSERVICE =====
 
@@ -821,6 +867,11 @@ export class FormComponent implements OnInit {
     this.formService.getDateToggleObservable().subscribe(active => {
       this.allDateSelected = active
       this.filterForm.patchValue({ useDateFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getSurfaceToggleObservable().subscribe(active => {
+      this.allSurfaceSelected = active
+      this.filterForm.patchValue({ useSurfaceFilter: active }, { emitEvent: false })
     })
 
     this.formService.getSurfaceToggleObservable().subscribe(active => {
@@ -894,7 +945,6 @@ export class FormComponent implements OnInit {
    * Cette approche est plus robuste que de compter sur Angular Forms
    */
   private forceRadioButtonsState(): void {
-    console.log('🔄 Forçage de l\'état des boutons radio...')
     
     // Obtenir les valeurs actuelles des modes
     let priceMode: string = 'range'
@@ -920,7 +970,6 @@ export class FormComponent implements OnInit {
     
     // Utiliser setTimeout pour s'assurer que le DOM est prêt
     setTimeout(() => {
-      console.log('🔄 Mise à jour des boutons radio:', { priceMode, dateMode, surfaceMode, consumptionMode })
       
       // Mettre à jour le formulaire avec les valeurs
       this.filterForm.patchValue({
@@ -948,8 +997,7 @@ export class FormComponent implements OnInit {
           // Forcer l'état checked
           if (shouldBeChecked && !radio.checked) {
             radio.checked = true
-            console.log(`🔄 Bouton radio ${formName}=${value} forcé à checked=true`)
-          }
+                      }
         })
       } catch (e) {
         console.error('Erreur lors de la manipulation du DOM:', e)
@@ -958,11 +1006,9 @@ export class FormComponent implements OnInit {
   }
 
   private restoreFormState(): void {
-    console.log('🔄 Restauration de l\'état du formulaire...')
 
     // Utiliser un délai pour s'assurer que les souscriptions sont établies
     setTimeout(() => {
-      console.log('🔍 Début de la restauration des états du formulaire')
       
       // Restaurer directement depuis les BehaviorSubjects actuels
       const formUpdates: any = {}
@@ -974,33 +1020,27 @@ export class FormComponent implements OnInit {
       formUpdates.surfaceMode = 'range'
       formUpdates.consumptionMode = 'range'
       
-      console.log('🔍 Modes par défaut définis :', formUpdates)
-
       // Puis, essayer de restaurer les vraies valeurs des modes depuis FormService
       this.formService.getPriceModeObservable().pipe().subscribe(mode => {
         if (mode) {
-          console.log('🔍 Mode prix restauré :', mode)
           formUpdates.priceMode = mode
         }
       }).unsubscribe()
 
       this.formService.getDateModeObservable().pipe().subscribe(mode => {
         if (mode) {
-          console.log('🔍 Mode date restauré :', mode)
           formUpdates.dateMode = mode
         }
       }).unsubscribe()
 
       this.formService.getSurfaceModeObservable().pipe().subscribe(mode => {
         if (mode) {
-          console.log('🔍 Mode surface restauré :', mode)
           formUpdates.surfaceMode = mode
         }
       }).unsubscribe()
 
       this.formService.getConsumptionModeObservable().pipe().subscribe(mode => {
         if (mode) {
-          console.log('🔍 Mode consommation restauré :', mode)
           formUpdates.consumptionMode = mode
         }
       }).unsubscribe()
@@ -1064,11 +1104,8 @@ export class FormComponent implements OnInit {
 
       // Appliquer toutes les mises à jour en une fois
       if (Object.keys(formUpdates).length > 0) {
-        console.log('📊 Mise à jour du formulaire avec valeurs:', formUpdates)
         this.filterForm.patchValue(formUpdates, { emitEvent: false })
       }
-
-      console.log('✅ État du formulaire restauré')
     }, 200)
   }
 
@@ -1099,4 +1136,14 @@ export class FormComponent implements OnInit {
     this.consumptionExpanded = !this.consumptionExpanded
     this.formService.setConsumptionExpanded(this.consumptionExpanded)
   }
+
+  /** Small helper to keep logs tidy */
+private logFilter(tag: string, payload: any) {
+  // You can silence all logs by switching to console.debug in prod
+  console.log(`🧪 [Filter:${tag}]`, payload);
 }
+
+}
+
+
+

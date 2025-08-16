@@ -50,6 +50,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   @Input() useDateFilter = false
   @Input() useSurfaceFilter = false
   @Input() useEnergyFilter = false
+  @Input() useConsumptionFilter = false
   @Input() markersVisible = true
   @Input() tableCollapsed = false // Track sidebar state for bounds calculation
   @Input() visibleDvfProperties: DvfProperty[] = []
@@ -183,12 +184,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     }, 100)
   }
 
-  // Method to center the map (called by MapService)
-  centerMap(): void {
-    if (this.map) {
-      this.map.setView([46.603354, 1.888334], 6)
-    }
-  }
+  
 
   // Method to get map bounds - accounting for both bottom and left sidebar coverage
   getMapBounds(): any {
@@ -426,40 +422,85 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private addDpeMarker(property: DpeProperty): void {
-    if (!property.latitude || !property.longitude) {
-      return
-    }
-
-    const lat = property.latitude
-    const lng = property.longitude
-    const gesClass = property.gesClass
-
+    if (!property.latitude || !property.longitude) return;
+  
+    const lat = property.latitude;
+    const lng = property.longitude;
+    const energyClass = (property.energyClass || 'G').toUpperCase();
+  
+    const isConsumption = this.useConsumptionFilter;
+    const iconChar = isConsumption ? '⚡' : energyClass;
+  
+    // pick gradient for A..G
+    const { bg } = this.getEnergyPalette(energyClass);
+  
+    // inline-styled chip (24x24), no blue halo, white text
+    const html = `
+      <div style="
+        width:24px;height:24px;border-radius:6px;
+        display:grid;place-items:center;
+        font-weight:800;letter-spacing:.02em;line-height:1;
+        border:1px solid rgba(0,0,0,.15);
+        box-shadow:
+          0 1px 3px rgba(0,0,0,.35),
+          inset 0 1px 0 rgba(255,255,255,.25);
+        background:${bg};
+        color:#ffffff;
+        user-select:none;
+      ">
+        <span style="font-size:${isConsumption ? '13px' : '12px'};transform:translateY(.5px)">${iconChar}</span>
+      </div>`;
+  
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: `emoji-marker dpe-marker rating-${gesClass.toLowerCase()}`,
-        html: `<div class="emoji-marker dpe-marker rating-${gesClass.toLowerCase()}">⚡</div>`,
-        iconSize: [20, 20], // Fixed small size for emoji only
-        iconAnchor: [10, 10], // Center the emoji exactly on the position
+        className: `leaflet-dpe-chip energy-${energyClass.toLowerCase()} ${isConsumption ? 'is-consumption' : ''}`,
+        html,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
       }),
-    }).addTo(this.featureGroup)
-
-    const consumptionText = property.ep_conso_5_usages 
-      ? `${property.ep_conso_5_usages} kWh/m²` 
-      : 'Non disponible'
-
+    }).addTo(this.featureGroup);
+  
+    const consumptionText = property.ep_conso_5_usages
+      ? `${property.ep_conso_5_usages} kWh/m²`
+      : 'Non disponible';
+  
+    const periodText = property.periode_construction || 'Non spécifiée';
+  
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>⚡ DPE - Classe GES ${gesClass}</h3>
+        <h3>${isConsumption ? '⚡ Consommation' : 'Classe Énergie ' + energyClass}</h3>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Classe énergie:</strong> ${property.energyClass}</p>
-        <p><strong>Classe GES:</strong> ${property.gesClass}</p>
         <p><strong>Consommation:</strong> ${consumptionText}</p>
         <p><strong>Année:</strong> ${property.year}</p>
+        <p><strong>Période:</strong> ${periodText}</p>
       </div>
-    `)
-
-    this.markers.push(marker)
+    `);
+  
+    this.markers.push(marker);
   }
+  
+  private getEnergyPalette(letter: string): { bg: string } {
+    switch (letter) {
+      case 'A':
+        return { bg: 'linear-gradient(145deg,#11c26a 0%,#0ea85f 60%,#0a8f54 100%)' };
+      case 'B':
+        return { bg: 'linear-gradient(145deg,#3dc375 0%,#31ac65 60%,#2b985b 100%)' };
+      case 'C':
+        return { bg: 'linear-gradient(145deg,#a0c63a 0%,#91b431 60%,#7a9b29 100%)' };
+      case 'D':
+        return { bg: 'linear-gradient(145deg,#ffe23d 0%,#ffd21f 60%,#f2c212 100%)' };
+      case 'E':
+        return { bg: 'linear-gradient(145deg,#ffb63d 0%,#ffa41f 60%,#f29012 100%)' };
+      case 'F':
+        return { bg: 'linear-gradient(145deg,#ff7a38 0%,#ff6a1f 60%,#ef5a15 100%)' };
+      case 'G':
+      default:
+        return { bg: 'linear-gradient(145deg,#ff4747 0%,#ff2d2d 60%,#e51f1f 100%)' };
+    }
+  }
+  
+  
 
   private addParcelleMarker(property: ParcelleProperty): void {
     if (!property.latitude || !property.longitude) {
@@ -488,24 +529,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     `)
 
     this.markers.push(marker)
-  }
-
-  private formatPrice(price: number): string {
-    if (price >= 1000000) {
-      return `${(price / 1000000).toFixed(1)}M€`
-    } else if (price >= 1000) {
-      return `${(price / 1000).toFixed(0)}k€`
-    }
-    return `${price}€`
-  }
-
-  private formatSurface(surface: number): string {
-    if (surface >= 10000) {
-      return `${(surface / 10000).toFixed(1)}ha`
-    } else if (surface >= 1000) {
-      return `${(surface / 1000).toFixed(1)}k m²`
-    }
-    return `${surface}m²`
   }
 
   /**

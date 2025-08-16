@@ -46,6 +46,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
   // DVF filter properties
   minPrice = 0
   maxPrice = 2000000
+  exactPrice: number | null = null
+  priceMode = "range"
   
   // Filter toggle states - these track UI toggle state
   isPriceToggleActive = false
@@ -62,6 +64,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
   energyClasses: string[] = []
   energyExactClass: string | null = null
   energyClassRange: [string, string] | null = null
+
+  // Consumption filter properties
+  consumptionFilter: [number, number] | null = null
+  exactConsumption: number | null = null
+  consumptionMode = "exact"
+
+  // Surface filter properties
+  surfaceFilter: [number, number] | null = null
+  exactSurface: number | null = null
+  surfaceMode = "exact"
 
   public visibleDvfProperties: DvfProperty[] = []
   public visibleDpeProperties: DpeProperty[] = []
@@ -172,25 +184,153 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     
     // Subscribe to toggle states
     this.subscriptions.push(
-      this.formService.getPriceToggleObservable().subscribe(active => {
-        this.isPriceToggleActive = active;
+      this.formService.getPriceFilterObservable().subscribe(value => { 
+        if (value) { 
+          this.minPrice = value[0]; 
+          this.maxPrice = value[1];
+          this.usePriceFilter = true;
+        } else {
+          this.usePriceFilter = false;
+        }
+      }),
+
+      this.formService.getDateFilterObservable().subscribe(value => { 
+        if (value) { 
+          this.startDate = value[0]; 
+          this.endDate = value[1];
+          this.useDateFilter = true;
+        } else if (!this.exactDate) {
+          // Only set useDateFilter to false if we don't have an exact date
+          this.useDateFilter = false;
+        } 
+      }),
+      this.formService.getExactDateObservable().subscribe(value => {
+        if (value !== null && value !== '') {
+          this.exactDate = value;
+        }
+        // Set useDateFilter based on whether we have an exact date OR a date range
+        this.useDateFilter = (this.exactDate !== null && this.exactDate !== '') || !!(this.startDate && this.endDate);
+      }),
+      this.formService.getDateModeObservable().subscribe(mode => this.dateMode = mode),
+      
+      // 💰 Exact price subscription
+      this.formService.getExactPriceObservable().subscribe(value => {
+        this.exactPrice = value;
       }),
       
-      this.formService.getDateToggleObservable().subscribe(active => {
-        this.isDateToggleActive = active;
+      this.formService.getPriceModeObservable().subscribe(mode => {
+        this.priceMode = mode;
       }),
-      
-      this.formService.getSurfaceToggleObservable().subscribe(active => {
-        this.isSurfaceToggleActive = active;
+
+      this.formService.getSelectedEnergyClassesObservable().subscribe(classes => {
+        this.energyClasses = classes || [];
+        this.updateEnergyFilterState();
       }),
-      
-      this.formService.getEnergyToggleObservable().subscribe(active => {
-        this.isEnergyToggleActive = active;
+      this.formService.getExactEnergyClassObservable().subscribe(value => {
+        this.energyExactClass = value;
+        this.updateEnergyFilterState();
       }),
-      
+      this.formService.getEnergyClassRangeObservable().subscribe(value => {
+        this.energyClassRange = value;
+        this.updateEnergyFilterState();
+      }),
+
       this.formService.getConsumptionToggleObservable().subscribe(active => {
         this.isConsumptionToggleActive = active;
+        
+        if (active) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100) // Short debounce for toggle activation
+        }
       }),
+      this.formService.getConsumptionFilterObservable().subscribe(value => {
+        this.consumptionFilter = value;
+      
+        // Log exactly what arrived from the form
+        if (value) {
+          const [min, max] = value;
+          this.logConsumption('range', { min: Number(min), max: Number(max) });
+        } else {
+          this.logConsumption('range', null);
+        }
+      
+        if (this.isConsumptionToggleActive) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout);
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300);
+        }
+      }), 
+      
+      
+      this.formService.getExactConsumptionObservable().subscribe(value => {
+        this.exactConsumption = value;
+      
+        // Log exactly what arrived from the form
+        if (value !== null && value !== undefined && value !== undefined) {
+          this.logConsumption('exact', { exact: Number(value) });
+        } else {
+          this.logConsumption('exact', null);
+        }
+      
+        if (this.isConsumptionToggleActive) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout);
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300);
+        }
+      }), 
+      // ðŸ  Surface filter subscriptions with immediate reload - FIXED VERSION
+this.formService.getSurfaceToggleObservable().subscribe(active => {
+  this.isSurfaceToggleActive = active;
+  
+  if (active) {
+    this.useSurfaceFilter = true
+    
+    // Clear any existing timeout to prevent race conditions
+    if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+    
+    // Trigger immediate data fetch when toggle is activated
+    this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100)
+  } else {
+    this.useSurfaceFilter = false
+    this.visibleParcelleProperties = []
+    this.alertMessages['parcelles'] = { count: 0, show: false }
+    this.updateGlobalAlert()
+    this.cdr.detectChanges()
+  }
+}),
+
+this.formService.getSurfaceFilterObservable().subscribe(value => {
+  this.surfaceFilter = value;
+  if (value) {
+    this.minSurface = value[0];
+    this.maxSurface = value[1];
+    this.useSurfaceFilter = true;
+  }
+  
+  // TRIGGER RELOAD when surface range changes and toggle is active
+  if (this.isSurfaceToggleActive && value) {
+    if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+    this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300)
+  }
+}),
+
+this.formService.getExactSurfaceObservable().subscribe(value => {
+  this.exactSurface = value;
+  
+  // TRIGGER RELOAD when exact surface changes and toggle is active
+  if (this.isSurfaceToggleActive && value !== null) {
+    if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+    this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300)
+  }
+}),
+
+this.formService.getSurfaceModeObservable().subscribe(mode => {
+  this.surfaceMode = mode;
+  
+  // TRIGGER RELOAD when surface mode changes and toggle is active
+  if (this.isSurfaceToggleActive) {
+    if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+    this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300)
+  }
+}),
 
       // Subscribe to sidebar state changes
       this.formService.getTableCollapsedObservable().subscribe(collapsed => {
@@ -204,14 +344,27 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       // Subscribe to markers visibility
       this.formService.getMarkersVisibleObservable().subscribe(visible => {
         this.markersVisible = visible;
+      }),
+
+      // ✅ Auto-reload subscription - triggers when parameters change
+      this.formService.getReloadTrigger().subscribe(() => {
+        if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+        this.fetchDataTimeout = setTimeout(() => this.fetchData(), 300) // 300ms debounce
       })
     );
   }
 
   ngAfterViewInit(): void {
+    // Ensure exact date is restored from FormService after subscriptions
+    this.formService.getExactDateObservable().pipe().subscribe(value => {
+      if (value && value !== '') {
+        this.exactDate = value;
+      }
+    }).unsubscribe();
+    
     // Déclencher fetchData() automatiquement si des filtres sont actifs après restauration
     if (this.formService.hasActiveFilters()) {
-      console.log('🔄 Filtres actifs détectés après restauration - chargement automatique des données')
+      setTimeout(() => this.fetchData(), 100)
       setTimeout(() => this.fetchData(), 100)
     }
     
@@ -275,18 +428,22 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
             this.startDate = start
             this.endDate = end || start
             this.useDateFilter = true
-            this.dateMode = "range"
-            this.exactDate = null
+            // Only switch to range mode and clear exactDate if we don't have an exact date
+            if (!this.exactDate) {
+              this.dateMode = "range"
+            }
             
             // Refresh data if DPE is already active to apply date filter
             if (this.activeDataSources.includes('dpe')) {
               this.fetchData()
             }
           } else {
-            this.useDateFilter = false
+            // Only clear useDateFilter if we don't have an exact date
+            if (!this.exactDate || this.exactDate === '') {
+              this.useDateFilter = false
+            }
             this.startDate = ""
             this.endDate = ""
-            this.exactDate = ""
             
             // Refresh data if DPE is active to remove date filter
             if (this.activeDataSources.includes('dpe')) {
@@ -375,116 +532,83 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
           this.updateEnergyFilterState()
         }),
 
-      // Consumption filters
-      this.formService
-        .getConsumptionFilterObservable()
-        .subscribe((filter) => {
-          if (filter) {
-            const [min, max] = filter
-            
-            // Consumption filtering is handled in DPE service
-          } else {
-            
-            // Clear DPE properties when consumption filter is disabled
-            this.visibleDpeProperties = []
-            this.alertMessages['dpe'] = { count: 0, show: false }
-            this.cdr.detectChanges()
-          }
-        }),
 
-      this.formService
-        .getExactConsumptionObservable()
-        .subscribe((consumption) => {
-          if (consumption !== null) {
-            
-            // Consumption filtering is handled in DPE service
-          } else {
-            
-          }
-        }),
 
-      // Toggle state subscriptions - CRITICAL: These were missing!
-      this.formService
-        .getPriceToggleObservable()
-        .subscribe((active) => {
-          this.isPriceToggleActive = active
-          
-          if (!active) {
-            // Clear DVF properties when price toggle is disabled
-            // Only clear if date toggle is also inactive
-            if (!this.isDateToggleActive) {
-              this.visibleDvfProperties = []
-              this.alertMessages['dvf'] = { count: 0, show: false }
-              this.updateGlobalAlert()
-              this.cdr.detectChanges()
-            }
-          }
-        }),
 
-      this.formService
-        .getDateToggleObservable()
-        .subscribe((active) => {
-          this.isDateToggleActive = active
-          
-          if (!active) {
-            // Clear DVF properties when date toggle is disabled
-            // Only clear if price toggle is also inactive
-            if (!this.isPriceToggleActive) {
-              this.visibleDvfProperties = []
-              this.alertMessages['dvf'] = { count: 0, show: false }
-              this.updateGlobalAlert()
-              this.cdr.detectChanges()
-            }
-          }
-        }),
 
-      this.formService
-        .getSurfaceToggleObservable()
-        .subscribe((active) => {
-          this.isSurfaceToggleActive = active
-          
-          if (!active) {
-            // Clear parcelle properties when surface toggle is disabled
-            this.visibleParcelleProperties = []
-            this.alertMessages['parcelles'] = { count: 0, show: false }
+      // Toggle state subscriptions with immediate reload triggers
+      this.formService.getPriceToggleObservable().subscribe(active => {
+        this.isPriceToggleActive = active
+        
+        if (active) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100)
+        } else {
+          // Clear DVF properties when price toggle is disabled
+          // Only clear if date toggle is also inactive
+          if (!this.isDateToggleActive) {
+            this.visibleDvfProperties = []
+            this.alertMessages['dvf'] = { count: 0, show: false }
             this.updateGlobalAlert()
             this.cdr.detectChanges()
           }
-        }),
+        }
+      }),
 
-      this.formService
-        .getEnergyToggleObservable()
-        .subscribe((active) => {
-          this.isEnergyToggleActive = active
-          
-          if (!active) {
-            // Clear DPE properties when energy toggle is disabled
-            // Only clear if consumption toggle is also inactive
-            if (!this.isConsumptionToggleActive) {
-              this.visibleDpeProperties = []
-              this.alertMessages['dpe'] = { count: 0, show: false }
-              this.updateGlobalAlert()
-              this.cdr.detectChanges()
-            }
+      this.formService.getDateToggleObservable().subscribe(active => {
+        this.isDateToggleActive = active
+        
+        if (active) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100)
+        } else {
+          // Clear DVF properties when date toggle is disabled
+          // Only clear if price toggle is also inactive
+          if (!this.isPriceToggleActive) {
+            this.visibleDvfProperties = []
+            this.alertMessages['dvf'] = { count: 0, show: false }
+            this.updateGlobalAlert()
+            this.cdr.detectChanges()
           }
-        }),
+        }
+      }),
 
-      this.formService
-        .getConsumptionToggleObservable()
-        .subscribe((active) => {
-          this.isConsumptionToggleActive = active
-          
-          if (!active) {
-            // Clear DPE properties when consumption toggle is disabled
-            // Only clear if energy toggle is also inactive
-            if (!this.isEnergyToggleActive) {
-              this.visibleDpeProperties = []
-              this.alertMessages['dpe'] = { count: 0, show: false }
-              this.updateGlobalAlert()
-              this.cdr.detectChanges()
-            }
+      this.formService.getEnergyToggleObservable().subscribe(active => {
+        this.isEnergyToggleActive = active
+        
+        if (active) {
+     
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100)
+        } else {
+          // Clear DPE properties when energy toggle is disabled
+          // Only clear if consumption toggle is also inactive
+          if (!this.isConsumptionToggleActive) {
+            this.visibleDpeProperties = []
+            this.alertMessages['dpe'] = { count: 0, show: false }
+            this.updateGlobalAlert()
+            this.cdr.detectChanges()
           }
-        }),
+        }
+      }),
+
+      this.formService.getConsumptionToggleObservable().subscribe(active => {
+        this.isConsumptionToggleActive = active
+        
+        if (active) {
+          if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
+          this.fetchDataTimeout = setTimeout(() => this.fetchData(), 100)
+        } else {
+          // Clear DPE properties when consumption toggle is disabled
+          // Only clear if energy toggle is also inactive
+          if (!this.isEnergyToggleActive) {
+            this.visibleDpeProperties = []
+            this.alertMessages['dpe'] = { count: 0, show: false }
+            this.updateGlobalAlert()
+            this.cdr.detectChanges()
+          }
+        }
+      }),
     )
   }
 
@@ -595,7 +719,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
   // Handle location search from search component
   onLocationSelected(location: {lat: number, lon: number, name: string}): void {
-    console.log('📍 Location selected:', location)
+    
     
     // Center map on selected location
     this.mapDisplay.setMapView(location.lat, location.lon, 14)
@@ -608,7 +732,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
   // Handle user location request from search component
   onUserLocationRequested(): void {
-    console.log('📍 User location requested')
+    
     this.onLocateUser()
   }
 
@@ -722,208 +846,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
     }, 300)
   }
 
-  private loadDvfData(): void {
-    // Continue even if no filters are applied - we want to show all data in this case
-    // instead of returning empty results
-
-    const bounds = this.mapDisplay.getMapBounds()
-    if (!bounds) return
-
-    const lat_min = bounds.getSouth()
-    const lat_max = bounds.getNorth()
-    const lon_min = bounds.getWest()
-    const lon_max = bounds.getEast()
-
-    const topLeft: [number, number] = [lat_max, lon_min]
-    const bottomRight: [number, number] = [lat_min, lon_max]
-
-    // Only set price range if the filter is explicitly enabled
-    // This prevents sending extreme values (0 to 10,000,000) when no filter is applied
-    let priceRange: [number, number] | null = null
-    if (this.usePriceFilter) {
-      priceRange = [this.minPrice, this.maxPrice]
-    }
-
-    let dateRange: [string, string] | null = null
-    let exactDate: string | null = null
-    if (this.useDateFilter) {
-      if (this.dateMode === "range") {
-        dateRange = [this.startDate, this.endDate || this.startDate]
-      } else if (this.dateMode === "exact") {
-        exactDate = this.exactDate
-      }
-    }
-
-    let surfaceRange: [number, number] | null = null
-    if (this.useSurfaceFilter) {
-      surfaceRange = [this.minSurface, this.maxSurface]
-    }
-
-    this.dvfService
-      .getDvfProperties(topLeft, bottomRight, priceRange, dateRange, exactDate, surfaceRange, null, null, null, null, 500)
-      .subscribe({
-        next: (properties: DvfProperty[]) => {
-          this.visibleDvfProperties = properties
-          
-          // Update alert state
-          this.resultCount = properties.length
-          this.showAlert = properties.length >= this.maxResults
-
-          setTimeout(() => {
-            this.isLoading = false
-            this.cdr.detectChanges()
-          }, 0)
-
-          // DISABLED: Automatic fit to markers to prevent infinite loop
-          // if (properties.length > 0) {
-          //   this.mapDisplay.fitToMarkers()
-          // }
-        },
-        error: (error: any) => {
-          console.error("Error fetching DVF data:", error)
-          setTimeout(() => {
-            this.isLoading = false
-            this.cdr.detectChanges()
-          }, 0)
-        },
-      })
-  }
-
-  private loadDpeData(): void {
-    // Always load DPE data when requested, regardless of filter state
-    // The backend will handle filtering based on the provided parameters
-
-    const bounds = this.mapDisplay.getMapBounds()
-    if (!bounds) return
-
-    const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
-    const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
-
-    // Determine energy filter mode and values
-    let energyFilter: string[] | number | [number, number] | null = null
-    // Always using 'class' mode for energy filters
-    const filterMode: 'exact' | 'interval' | 'class' = 'class'
-
-    // Only apply energy filters if the energy filter toggle is active
-    if (this.useEnergyFilter) {
-      if (this.energyClasses && this.energyClasses.length > 0) {
-        // Class filtering mode
-        energyFilter = this.energyClasses
-      } else if (this.energyExactClass) {
-        // Exact class filtering (treat as single class array)
-        energyFilter = [this.energyExactClass]
-      } else if (this.energyClassRange && this.energyClassRange.length === 2) {
-        // Range filtering - convert to class array (A to C = ['A', 'B', 'C'])
-        const classes = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-        const startIndex = classes.indexOf(this.energyClassRange[0])
-        const endIndex = classes.indexOf(this.energyClassRange[1])
-        if (startIndex !== -1 && endIndex !== -1) {
-          energyFilter = classes.slice(startIndex, endIndex + 1)
-        }
-      }
-    }
-
-    // Surface range for DPE filtering
-    const surfaceRange: [number, number] = this.useSurfaceFilter 
-      ? [this.minSurface, this.maxSurface] 
-      : [0, 10000]
-      
-    // Date filter parameters for DPE
-    let dateRange: [string, string] | null = null;
-    let exactDate: string | null = null;
-    
-    if (this.useDateFilter) {
-      if (this.dateMode === "range") {
-        dateRange = [this.startDate, this.endDate || this.startDate];
-      } else if (this.dateMode === "exact") {
-        exactDate = this.exactDate;
-      }
-    }
-
-    
-
-    this.dpeService
-      .getDpeProperties(
-        topLeft,
-        bottomRight,
-        energyFilter,
-        filterMode,
-        surfaceRange,
-        exactDate,
-        dateRange
-      )
-      .subscribe({
-        next: (properties: DpeProperty[]) => {
-          this.visibleDpeProperties = properties
-          
-          // Update alert state
-          this.resultCount = properties.length
-          this.showAlert = properties.length >= this.maxResults
-
-          setTimeout(() => {
-            this.isLoading = false
-            this.cdr.detectChanges()
-          }, 0)
-
-          // DISABLED: Automatic fit to markers to prevent infinite loop
-          // if (properties.length > 0) {
-          //   this.mapDisplay.fitToMarkers()
-          // }
-        },
-        error: (error) => {
-          console.error("Error fetching DPE data:", error)
-          setTimeout(() => {
-            this.isLoading = false
-            this.cdr.detectChanges()
-          }, 0)
-        },
-      })
-  }
-
-  private loadParcelleData(): void {
-    if (!this.useSurfaceFilter) {
-      this.visibleParcelleProperties = []
-      setTimeout(() => {
-        this.isLoading = false
-        this.cdr.detectChanges()
-      }, 0)
-      return
-    }
-
-    const bounds = this.mapDisplay.getMapBounds()
-    if (!bounds) return
-
-    const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
-    const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
-
-    this.parcelleService.getParcelleProperties(topLeft, bottomRight, [this.minSurface, this.maxSurface]).subscribe({
-      next: (properties: ParcelleProperty[]) => {
-        this.visibleParcelleProperties = properties
-        
-        // Update result count for automatic alert
-        this.resultCount = properties.length
-
-        setTimeout(() => {
-          this.isLoading = false
-          this.cdr.detectChanges()
-        }, 0)
-
-        // DISABLED: Automatic fit to markers to prevent infinite loop
-        // if (properties.length > 0) {
-        //   this.mapDisplay.fitToMarkers()
-        // }
-      },
-      error: (error: any) => {
-        console.error("Error fetching parcelle data:", error)
-        setTimeout(() => {
-          this.isLoading = false
-          this.cdr.detectChanges()
-        }, 0)
-        return
-      }
-    })
-  }
-
   private async loadDvfDataAsync(): Promise<void> {
     return new Promise((resolve, reject) => {
       // DVF should load if price OR date filter is active (or both)
@@ -944,21 +866,35 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
       const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
 
+      // 💰 Price filter handling - exact price takes priority
       let priceRange: [number, number] | null = null
-      if (this.usePriceFilter && this.minPrice !== 0 && this.maxPrice !== 0) {
-        priceRange = [this.minPrice, this.maxPrice]
-      }
-
-      let dateRange: [string, string] | null = null
-      if (this.useDateFilter) {
-        if (this.dateMode === "exact" && this.exactDate) {
-          dateRange = [this.exactDate, this.exactDate]
-        } else {
-          dateRange = [this.startDate, this.endDate]
+      let exactPrice: number | null = null
+      
+      if (this.isPriceToggleActive) {
+        if (this.priceMode === 'exact' && this.exactPrice !== null && this.exactPrice !== undefined) {
+          exactPrice = this.exactPrice
+        } else if (this.priceMode === 'range' && this.minPrice !== 0 && this.maxPrice !== 0) {
+          priceRange = [this.minPrice, this.maxPrice]
         }
       }
 
-      this.dvfService.getDvfProperties(topLeft, bottomRight, priceRange, dateRange).subscribe({
+      let dateRange: [string, string] | null = null
+      let exactDate: string | null = null
+      
+      if (this.isDateToggleActive) {
+        
+        
+        if (this.dateMode === "exact" && this.exactDate && this.exactDate !== '') {
+          
+          exactDate = this.exactDate
+        } else if (this.dateMode === "range") {
+          dateRange = [this.startDate, this.endDate]
+        } else {
+          
+        }
+      } 
+
+      this.dvfService.getDvfProperties(topLeft, bottomRight, priceRange, exactPrice, dateRange, exactDate).subscribe({
         next: (properties: DvfProperty[]) => {
           this.visibleDvfProperties = properties
           this.alertMessages['dvf'] = { 
@@ -1035,15 +971,30 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
       
 
+      // 🔥 Consumption filter parameters - FIXED TO INCLUDE IN API CALL
+      const consumptionFilterToUse = this.consumptionFilter && Array.isArray(this.consumptionFilter) && this.consumptionFilter.length === 2 ? this.consumptionFilter : null;
+      const exactConsumptionToUse = this.exactConsumption !== null && this.exactConsumption !== undefined ? this.exactConsumption : null;
+
+      console.log('🔥 MapComponent - Consumption parameters being sent to DPE service:', {
+        consumptionFilter: consumptionFilterToUse,
+        exactConsumption: exactConsumptionToUse,
+        isConsumptionToggleActive: this.isConsumptionToggleActive
+      });
+
+      // Use DpeFilterOptions interface for cleaner API
       this.dpeService
         .getDpeProperties(
           topLeft,
           bottomRight,
-          energyFilter,
-          filterMode,
-          surfaceRange,
-          exactDate,
-          dateRange
+          {
+            energyFilter,
+            filterMode,
+            surfaceRange,
+            exactDate,
+            dateRange,
+            consumptionFilter: consumptionFilterToUse,
+            exactConsumption: exactConsumptionToUse
+          }
         )
         .subscribe({
           next: (properties: DpeProperty[]) => {
@@ -1068,7 +1019,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
   private async loadParcelleDataAsync(): Promise<void> {
     return new Promise<void>((resolve) => {
-      if (!this.useSurfaceFilter) {
+      // Surface filter should load when toggle is active (like price/date filters)
+      if (!this.isSurfaceToggleActive) {
         this.visibleParcelleProperties = []
         this.alertMessages['parcelles'] = { count: 0, show: false }
         resolve()
@@ -1083,8 +1035,25 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
 
       const topLeft: [number, number] = [bounds.getNorth(), bounds.getWest()]
       const bottomRight: [number, number] = [bounds.getSouth(), bounds.getEast()]
+      
+      // 🏠 Surface filter handling - FIXED TO MATCH PRICE/DATE PATTERN
+      let surfaceParam: [number, number] | null = null
+      
+      if (this.isSurfaceToggleActive) {
+        if (this.surfaceMode === 'exact' && this.exactSurface !== null && this.exactSurface !== undefined) {
+          // For exact surface, pass the exact value as both min and max
+          surfaceParam = [this.exactSurface, this.exactSurface]
+        } else if (this.surfaceMode === 'range' && this.surfaceFilter && 
+                   this.surfaceFilter[0] !== null && this.surfaceFilter[1] !== null) {
+          // Use actual range values from FormService
+          surfaceParam = this.surfaceFilter
+        } else {
+          // No values provided - use SELECT * behavior (null = no surface filter)
+          surfaceParam = null
+        }
+      }
 
-      this.parcelleService.getParcelleProperties(topLeft, bottomRight, [this.minSurface, this.maxSurface]).subscribe({
+      this.parcelleService.getParcelleProperties(topLeft, bottomRight, surfaceParam).subscribe({
         next: (properties: ParcelleProperty[]) => {
           this.visibleParcelleProperties = properties
           
@@ -1099,6 +1068,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
         error: (error: any) => {
           console.error("Error fetching Parcelle data:", error)
           this.visibleParcelleProperties = []
+          this.alertMessages['parcelles'] = { count: 0, show: false }
           resolve()
         },
       })
@@ -1159,4 +1129,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
       }, 100)
     }
   }
+
+  /** Debug helper for consumption filter logs */
+private logConsumption(tag: string, payload: any) {
+  console.log(`🔎 [Consumption:${tag}]`, payload);
+}
+
 }

@@ -9,6 +9,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Ensure content is clipped when collapsed */
+  
+  /* Desktop positioning - stays at bottom of map area */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .property-list-container.collapsed {
@@ -29,21 +35,27 @@
   font-family: inherit;
   font-size: inherit;
   position: relative;
+  flex-shrink: 0;
 }
 
-/* Header layout - three columns */
+/* Header layout - three columns with better centering */
 .header-left {
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .header-center {
-  flex: 2;
+  flex: 0 0 auto; /* Don't grow or shrink, just use content width */
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 0; /* Allow shrinking */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Perfect centering */
+  top: 50%;
+  transform: translate(-50%, -50%); /* Perfect vertical and horizontal centering */
 }
 
 .header-right {
@@ -82,16 +94,15 @@
   transform: rotate(180deg);
 }
 
-/* ===== INLINE NAVBAR (IN HEADER) ===== */
+/* ===== SIMPLIFIED INLINE NAVBAR (IN HEADER) ===== */
 .results-navbar-inline {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  background: rgba(255, 255, 255, 0.1);
+  gap: var(--space-sm);
+  background: rgba(59, 130, 246, 0.1);
   border-radius: var(--radius-lg);
   padding: var(--space-xs);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .navbar-tab-inline {
@@ -104,16 +115,17 @@
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 500;
   border-radius: var(--radius-md);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
+  min-width: 0;
 }
 
 .navbar-tab-inline:hover:not(.disabled) {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(59, 130, 246, 0.15);
   color: var(--text-primary);
   transform: translateY(-1px);
 }
@@ -122,35 +134,38 @@
   background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: white;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 .navbar-tab-inline.disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .navbar-tab-inline .tab-icon {
-  font-size: 0.9rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .navbar-tab-inline .tab-label {
   font-weight: inherit;
+  flex-shrink: 0;
 }
 
 .navbar-tab-inline .tab-count {
   background: rgba(255, 255, 255, 0.2);
   color: inherit;
-  padding: var(--space-xs) var(--space-sm);
+  padding: 2px var(--space-sm);
   border-radius: var(--radius-full);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  min-width: 18px;
+  min-width: 20px;
   text-align: center;
-  line-height: 1;
+  line-height: 1.2;
+  flex-shrink: 0;
 }
 
 .navbar-tab-inline.active .tab-count {
@@ -239,6 +254,7 @@
 .property-list {
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
 
 .property-table {
@@ -366,19 +382,31 @@
 @media (max-width: 768px) {
   .property-list-container {
     max-height: 50vh; /* Adjust for mobile */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  
+  .property-list-container.collapsed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60px; /* Ensure it's always visible */
   }
   
   .property-list-header {
-    // Keep everything on one line in mobile
     flex-direction: row;
     flex-wrap: nowrap;
     gap: var(--space-sm);
     align-items: center;
     padding: var(--space-md);
+    min-height: 60px;
   }
   
   .header-left {
-    flex: 0 0 auto; // Don't grow, don't shrink
+    flex: 0 1 auto;
     min-width: 0;
   }
   
@@ -392,41 +420,49 @@
   }
   
   .header-center {
-    flex: 1; // Take remaining space
+    flex: 1;
     min-width: 0;
     margin: 0 var(--space-xs);
+    justify-content: center;
+    position: static; /* Reset absolute positioning on mobile */
+    transform: none; /* Reset transform on mobile */
   }
   
   .header-right {
-    flex: 0 0 auto; // Don't grow, don't shrink
+    flex: 0 0 auto;
   }
   
   .results-navbar-inline {
-    padding: 2px;
-    gap: 2px;
+    padding: 4px;
+    gap: 4px;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(59, 130, 246, 0.08);
+    width: 100%;
+    justify-content: center;
   }
   
   .navbar-tab-inline {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     padding: var(--space-xs) var(--space-sm);
-    gap: 2px;
+    gap: 4px;
     min-width: 0;
+    flex: 1;
+    justify-content: center;
   }
   
   .navbar-tab-inline .tab-icon {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
   
   .navbar-tab-inline .tab-label {
-    display: none; // Hide labels on mobile to save space
+    display: block; /* Show labels on mobile */
+    font-size: 0.7rem;
   }
   
   .navbar-tab-inline .tab-count {
-    font-size: 0.6rem;
-    padding: 1px var(--space-xs);
-    min-width: 16px;
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    min-width: 18px;
   }
   
   .export-btn {
@@ -436,17 +472,7 @@
   }
   
   .export-btn span {
-    display: none; // Hide "Exporter" text on mobile
-  }
-}
-
-@media (max-width: 480px) {
-  .property-list-header {
-    padding: var(--space-sm);
-  }
-  
-  .header-left h3 {
-    font-size: 0.8rem;
+    display: none; /* Hide "Exporter" text on mobile */
   }
   
   .property-table th,
@@ -454,16 +480,39 @@
     padding: var(--space-md);
     font-size: 0.8rem;
   }
+}
+
+@media (max-width: 480px) {
+  .property-list-container.collapsed {
+    max-height: 55px;
+  }
+  
+  .property-list-header {
+    padding: var(--space-sm);
+    min-height: 55px;
+  }
+  
+  .header-left h3 {
+    font-size: 0.8rem;
+  }
   
   .navbar-tab-inline {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     padding: 4px var(--space-xs);
   }
   
+  .navbar-tab-inline .tab-label {
+    font-size: 0.65rem;
+  }
+  
   .navbar-tab-inline .tab-count {
-    font-size: 0.55rem;
+    font-size: 0.6rem;
     padding: 1px 4px;
-    min-width: 14px;
+    min-width: 16px;
+  }
+  
+  .navbar-tab-inline .tab-icon {
+    font-size: 0.8rem;
   }
   
   .export-btn {
@@ -478,7 +527,7 @@
   }
   
   .export-btn svg:last-child {
-    display: none; // Hide dropdown arrow on very small screens
+    display: none;
   }
 }
 

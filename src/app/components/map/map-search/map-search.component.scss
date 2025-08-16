@@ -12,6 +12,13 @@
   transition: bottom 0.3s ease;
 }
 
+/* Desktop: Position above map-results when it exists */
+@media (min-width: 769px) {
+  .map-search-container {
+    bottom: calc(40vh + 20px); /* Position above the map-results container */
+  }
+}
+
 .search-controls {
   display: flex;
   flex-direction: column;

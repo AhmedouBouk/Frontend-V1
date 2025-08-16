@@ -39,10 +39,10 @@
 
 /* ===== FORM SECTIONS ===== */
 .filter-form-container {
-  padding: var(--space-lg);
-  width: 350px;
+  padding: var(--space-md) var(--space-sm);
+  width: 100%;
   position: relative;
-  /* Fixer le problème de mouvement */
+  /* Fixer le problÃ¨me de mouvement */
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -91,7 +91,7 @@
 }
 
 .form-section {
-  margin-bottom: var(--space-md); /* Réduit de var(--space-xl) */
+  margin-bottom: var(--space-md);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -114,19 +114,19 @@
 }
 
 .section-header {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-md) var(--space-sm) var(--space-md) var(--space-xs);
   background: linear-gradient(135deg, var(--surface-hover), var(--surface-color));
   border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   flex: 1;
 }
 
@@ -135,13 +135,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px; /* Réduit de 40px */
-  height: 32px; /* Réduit de 40px */
+  width: 28px;
+  height: 28px;
 }
 
 .section-icon-img {
-  width: 28px; /* Réduit de 36px */
-  height: 28px; /* Réduit de 36px */
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .section-content {
-  padding: var(--space-lg); /* Réduit de var(--space-xl) */
+  padding: var(--space-md) var(--space-sm);
   background-color: var(--surface-color);
 }
 
@@ -245,7 +245,7 @@ input:checked + .slider:before {
 
 /* ===== FORM CONTROLS ===== */
 .form-group {
-  margin-bottom: var(--space-md); /* Réduit de var(--space-lg) */
+  margin-bottom: var(--space-md);
   min-width: 0;
 }
 
@@ -255,8 +255,8 @@ input:checked + .slider:before {
 
 .form-group label {
   display: block;
-  margin-bottom: var(--space-xs); /* Réduit de var(--space-sm) */
-  font-size: 0.8rem; /* Légèrement réduit */
+  margin-bottom: var(--space-xs);
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -272,7 +272,7 @@ input:checked + .slider:before {
 .input-row-compact {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm); /* Réduit l'espace entre les inputs */
+  gap: var(--space-xs);
   width: 100%;
 }
 
@@ -282,12 +282,12 @@ input[type="date"],
 select {
   width: 100%;
   min-width: 0;
-  padding: var(--space-sm) var(--space-md); /* Réduit le padding */
+  padding: var(--space-sm) var(--space-md);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
   background-color: var(--surface-color);
   color: var(--text-primary);
-  font-size: 0.8rem; /* Légèrement réduit */
+  font-size: 0.8rem;
   transition: all var(--transition-fast);
   box-sizing: border-box;
 }
@@ -312,8 +312,8 @@ select:focus {
 /* Nouvelle classe pour les radio groups en ligne compacts */
 .radio-group-inline {
   display: flex;
-  gap: var(--space-md); /* Réduit l'espace */
-  margin-bottom: var(--space-md); /* Réduit la marge */
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
   justify-content: flex-start;
   align-items: center;
 }
@@ -321,19 +321,19 @@ select:focus {
 .radio-item {
   display: flex;
   align-items: center;
-  gap: var(--space-xs); /* Réduit l'espace */
+  gap: var(--space-xs);
   cursor: pointer;
 }
 
 .radio-item input[type="radio"] {
-  width: 16px; /* Légèrement réduit */
-  height: 16px; /* Légèrement réduit */
+  width: 16px;
+  height: 16px;
   margin: 0;
   accent-color: var(--primary-color);
 }
 
 .radio-label {
-  font-size: 0.8rem; /* Légèrement réduit */
+  font-size: 0.8rem;
   color: var(--text-secondary);
   font-weight: 500;
   white-space: nowrap;
@@ -343,8 +343,8 @@ select:focus {
 .energy-ratings {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-xs); /* Réduit l'espace */
-  margin-top: var(--space-sm); /* Réduit la marge */
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
 }
 
 .energy-rating {
@@ -352,7 +352,7 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 38px; /* Légèrement réduit */
+  height: 38px;
   border-radius: var(--radius-lg);
   font-weight: 700;
   cursor: pointer;
@@ -368,7 +368,7 @@ select:focus {
 }
 
 .rating-letter {
-  font-size: 0.8rem; /* Légèrement réduit */
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -402,11 +402,11 @@ select:focus {
   color: var(--text-muted);
 }
 
-/* Selected energy rating colors - full color */
+/* Selected energy rating colors - full color WITHOUT blue border */
 .energy-rating:has(input:checked) {
   opacity: 1;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: transparent;  /* Removed blue border */
+  box-shadow: var(--shadow-md);  /* Removed blue box-shadow */
   transform: scale(1.05);
 }
 
@@ -454,11 +454,11 @@ select:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs); /* Réduit l'espace */
-  padding: var(--space-sm) var(--space-lg); /* Réduit le padding */
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-lg);
   font-weight: 600;
-  font-size: 0.8rem; /* Légèrement réduit */
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all var(--transition-fast);
   border: none;
@@ -605,12 +605,12 @@ select:focus {
 @media (max-width: 768px) {
   .filter-form-container {
     width: 100%;
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-xs);
   }
 
   .input-row,
   .input-row-compact {
-    grid-template-columns: 1fr 1fr; /* Garde les inputs sur la même ligne */
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-xs);
   }
 
@@ -624,7 +624,7 @@ select:focus {
   }
 
   .section-content {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-xs);
   }
 
   .map-controls {
@@ -644,7 +644,7 @@ select:focus {
 
 @media (max-width: 480px) {
   .filter-form-container {
-    padding: var(--space-sm);
+    padding: var(--space-xs);
   }
 
   .brand-header {
@@ -656,7 +656,7 @@ select:focus {
   }
 
   .section-content {
-    padding: var(--space-sm);
+    padding: var(--space-xs);
   }
 
   .energy-ratings {
@@ -666,7 +666,7 @@ select:focus {
 
   .input-row,
   .input-row-compact {
-    grid-template-columns: 1fr 1fr; /* Maintient les inputs côte à côte même sur très petit écran */
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-xs);
   }
 
@@ -676,7 +676,7 @@ select:focus {
   }
 
   .btn span {
-    display: none; /* Cache le texte sur très petit écran, garde seulement les icônes */
+    display: none;
   }
 }
 
@@ -690,7 +690,7 @@ select:focus {
 
 input[type="date"] {
   width: 100%;
-  min-width: 100px; /* Réduit pour mobile */
+  min-width: 100px;
   padding: var(--space-sm) var(--space-md);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -702,7 +702,7 @@ input[type="date"] {
   font-family: inherit;
 }
 
-/* Amélioration de la stabilité du formulaire */
+/* AmÃ©lioration de la stabilitÃ© du formulaire */
 form {
   position: relative;
   transform: translateZ(0);
@@ -710,7 +710,7 @@ form {
   will-change: auto;
 }
 
-/* Optimisation pour éviter les reflows */
+/* Optimisation pour Ã©viter les reflows */
 .form-section,
 .section-content,
 .form-group {

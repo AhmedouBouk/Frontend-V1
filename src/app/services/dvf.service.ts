@@ -15,6 +15,7 @@ export class DvfService {
    * @param topLeft Coordonnées du coin haut-gauche [lat, lng]
    * @param bottomRight Coordonnées du coin bas-droit [lat, lng]
    * @param priceRange Plage de prix [min, max] ou null si désactivé
+   * @param exactPrice Prix exact ou null si désactivé
    * @param dateRange Plage de dates [début, fin] ou null si désactivé
    * @param exactDate Date exacte ou null si désactivé
    * @param surfaceRange Plage de surface [min, max] ou null si désactivé
@@ -27,7 +28,8 @@ export class DvfService {
     topLeft: [number, number],
     bottomRight: [number, number],
     priceRange: [number, number] | null,
-    dateRange: [string, string] | null,
+    exactPrice: number | null = null,
+    dateRange: [string, string] | null = null,
     exactDate: string | null = null,
     surfaceRange: [number, number] | null = null,
     exactSurface: number | null = null,
@@ -44,20 +46,23 @@ export class DvfService {
       limit: limit // Add pagination limit parameter
     };
 
-    if (priceRange) {
+    // 💰 Price filter handling - exact price takes priority
+    if (exactPrice !== null && exactPrice !== undefined) {
+      params.prix_exact = exactPrice;
+          } else if (priceRange) {
       params.prix_min = priceRange[0];
       params.prix_max = priceRange[1];
-      
-    } 
+          } else {
+          } 
 
-    if (exactDate) {
-      // Si une date exacte est fournie, l'utiliser pour le filtrage
+    // 📅 Date filter handling - exact date takes priority
+    if (exactDate !== null && exactDate !== undefined) {
       params.date_exacte = exactDate;
-    } else if (dateRange) {
-      // Sinon, utiliser l'intervalle de dates
+          } else if (dateRange) {
       params.date_min = dateRange[0];
       params.date_max = dateRange[1];
-    }
+          } else {
+          }
     
     // Gestion du filtre de surface
     if (exactSurface) {

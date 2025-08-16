@@ -1,8 +1,7 @@
 .map-alert {
   position: fixed;
   top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: calc(var(--space-lg) + 50px); /* Position next to the fixed logo */
   z-index: 1000;
   max-width: 90vw;
   width: auto;
@@ -21,11 +20,11 @@
 
 @keyframes slideDown {
   from {
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateY(-10px);
     opacity: 0;
   }
   to {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
@@ -106,10 +105,9 @@
 @media (max-width: 768px) {
   .map-alert {
     top: 10px;
-    left: 10px;
+    left: calc(var(--space-lg) + 50px); /* Keep next to sidebar toggle on mobile */
     right: 10px;
-    transform: none;
-    max-width: none;
+    max-width: calc(100vw - var(--space-lg) - 70px); /* Adjust for available space */
     width: auto;
   }
   
@@ -137,14 +135,35 @@
   }
 }
 
+@media (max-width: 480px) {
+  .map-alert {
+    left: calc(var(--space-lg) + 45px); /* Slightly closer on small screens */
+    right: 10px;
+    max-width: calc(100vw - var(--space-lg) - 65px);
+  }
+  
+  .alert-content {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  
+  .alert-message {
+    font-size: 0.8rem;
+    
+    strong {
+      font-size: 12px;
+    }
+  }
+}
+
 // Animation keyframes
 @keyframes slideInDown {
   from {
-    transform: translateX(-50%) translateY(-20px);
+    transform: translateY(-20px);
     opacity: 0;
   }
   to {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }

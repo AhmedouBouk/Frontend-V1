@@ -1,18 +1,7 @@
 <!-- Tableau en bas -->
 <div class="property-list-container" [class.collapsed]="tableCollapsed">
   <button class="property-list-header" (click)="toggleTable()" [attr.aria-expanded]="!tableCollapsed" aria-controls="property-list-content">
-    <div class="header-left">
-      <h3>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3Z" stroke="currentColor" stroke-width="2"/>
-          <path d="M8 7H16M8 11H16M8 15H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        Résultats
-        <span class="property-count">
-          ({{getTotalResults()}})
-        </span>
-      </h3>
-    </div>
+   
 
     <!-- Navbar pour basculer entre les sources de données - maintenant au centre -->
     <div class="header-center">
@@ -52,48 +41,7 @@
 
     <div class="header-right">
       <div class="results-actions">
-        <!-- Export Dropdown -->
-        <div class="export-dropdown" [class.open]="exportDropdownOpen">
-          <button class="btn btn-sm export-btn" (click)="toggleExportDropdown($event)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Exporter</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="export-menu">
-            <button class="export-option" (click)="exportData('csv')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.5 2H6C5.44772 2 5 2.44772 5 3V21C5 21.5523 5.44772 22 6 22H18C18.5523 22 19 21.5523 19 21V7.5L14.5 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 12H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 16H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 20H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>CSV</span>
-            </button>
-            <button class="export-option" (click)="exportData('json')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 18L22 12L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 6L2 12L8 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>JSON</span>
-            </button>
-            <button class="export-option" (click)="exportData('pdf')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14.5 2H6C5.44772 2 5 2.44772 5 3V21C5 21.5523 5.44772 22 6 22H18C18.5523 22 19 21.5523 19 21V7.5L14.5 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 12H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>PDF</span>
-            </button>
-          </div>
-        </div>
+        
         <svg class="toggle-icon" [class.collapsed]="tableCollapsed" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -106,7 +54,7 @@
     <table class="property-table" *ngIf="getSelectedDataSource() === 'dvf' && visibleDvfProperties.length > 0">
       <thead>
         <tr>
-          <th>Type</th>
+         
           <th>ID</th>
           <th>Adresse</th>
           <th>Prix</th>
@@ -118,7 +66,7 @@
         <tr *ngFor="let prop of visibleDvfProperties; let i = index"
             [class.selected]="selectedPropertyIndex === i"
             (click)="selectProperty(i, prop)">
-          <td>DVF</td>
+          
           <td>{{ prop.id_mutation }}</td>
           <td>{{ prop.adresse_nom_voie }}</td>
           <td>{{ prop.valeur_fonciere | number }} €</td>
@@ -132,7 +80,7 @@
     <table class="property-table" *ngIf="getSelectedDataSource() === 'dpe' && visibleDpeProperties.length > 0">
       <thead>
         <tr>
-          <th>Type</th>
+          
           <th>ID</th>
           <th>Adresse</th>
           <th>Classe énergie</th>
@@ -145,7 +93,7 @@
         <tr *ngFor="let prop of visibleDpeProperties; let i = index"
             [class.selected]="selectedPropertyIndex === i"
             (click)="selectProperty(i, prop)">
-          <td>DPE</td>
+          
           <td><span class="id-text">{{ prop.id }}</span></td>
           <td>{{ prop.address }}</td>
           <td><span class="energy-rating rating-{{ prop.energyClass.toLowerCase() }}">{{ prop.energyClass }}</span></td>
@@ -160,7 +108,7 @@
     <table class="property-table" *ngIf="getSelectedDataSource() === 'parcelles' && visibleParcelleProperties.length > 0">
       <thead>
         <tr>
-          <th>Type</th>
+          
           <th>ID</th>
           <th>Adresse</th>
           <th>Numéro</th>
@@ -172,7 +120,7 @@
         <tr *ngFor="let prop of visibleParcelleProperties; let i = index"
             [class.selected]="selectedPropertyIndex === i"
             (click)="selectProperty(i, prop)">
-          <td>Parcelle</td>
+          
           <td><span class="id-text">{{ prop.id }}</span></td>
           <td>{{ prop.address }}</td>
           <td>{{ prop.number }}</td>
