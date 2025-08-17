@@ -13,7 +13,6 @@ import {
 } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import * as L from "leaflet"
-import "leaflet/dist/leaflet.css"
 import type { Subscription } from "rxjs"
 import type { DvfProperty } from "../../../models/dvf-property.model"
 import type { DpeProperty } from "../../../models/dpe.model"

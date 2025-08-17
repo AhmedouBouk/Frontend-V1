@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: angular-nginx-prod:latest
+    container_name: angular-web
+    ports:
+      - "80:80"
+    restart: unless-stopped

@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/geolocdpe/api/v0'
+  apiUrl: 'https://back.oucest.fr/geolocdpe/api/v0'
 };

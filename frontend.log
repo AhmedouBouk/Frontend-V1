@@ -1,0 +1,23 @@
+nohup: les entrées sont ignorées
+
+> dvf-map@0.0.0 start
+> ng serve --proxy-config proxy.conf.json --host 0.0.0.0 --disable-host-check
+
+Warning: Running a server with --disable-host-check is a security risk. See https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a for more information.
+The "disableHostCheck" option will not be used because it is not supported by the "@angular-devkit/build-angular:application" builder.
+Component HMR has been enabled, see https://angular.dev/hmr for more info.
+❯ Building...
+✔ Building...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 361.77 kB | 
+polyfills.js        | polyfills     |  89.77 kB | 
+styles.css          | styles        |  16.82 kB | 
+
+                    | Initial total | 468.37 kB
+
+Application bundle generation complete. [8.816 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/
+  ➜  Network: http://10.144.208.184:4200/
