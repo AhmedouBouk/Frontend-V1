@@ -179,3 +179,6 @@ body {
 .animate-slideInUp {
   animation: slideInUp 0.5s ease-out;
 }
+
+/* ===== LEAFLET STYLES ===== */
+@import './app/styles/leaflet-minimal.css';

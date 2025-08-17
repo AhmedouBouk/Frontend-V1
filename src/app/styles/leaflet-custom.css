@@ -1,0 +1,26 @@
+/* Custom Leaflet CSS with corrected asset paths */
+@import 'leaflet/dist/leaflet.css';
+
+/* Override problematic image paths */
+.leaflet-control-layers-toggle {
+  background-image: url('/assets/leaflet/layers.png') !important;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .leaflet-control-layers-toggle {
+    background-image: url('/assets/leaflet/layers-2x.png') !important;
+  }
+}
+
+.leaflet-default-icon-path {
+  background-image: url('/assets/leaflet/marker-icon.png') !important;
+}
+
+/* Override marker icon paths */
+.leaflet-marker-icon {
+  background-image: url('/assets/leaflet/marker-icon.png') !important;
+}
+
+.leaflet-marker-shadow {
+  background-image: url('/assets/leaflet/marker-shadow.png') !important;
+}

@@ -23,9 +23,9 @@ import { MapStateService, type MapState } from "../../../services/map-state.serv
 
 // Create a default icon for Leaflet markers
 const defaultIcon = L.icon({
-  iconUrl: "assets/marker-icon.png",
-  iconRetinaUrl: "assets/marker-icon-2x.png",
-  shadowUrl: "assets/marker-shadow.png",
+  iconUrl: "assets/leaflet/marker-icon.png",
+  iconRetinaUrl: "assets/leaflet/marker-icon-2x.png",
+  shadowUrl: "assets/leaflet/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
