@@ -1,26 +1,37 @@
-# Use Node.js 18 as base image
-FROM node:18-alpine
+# ---------- Build stage ----------
+    FROM node:18-alpine AS build
 
-# Set working directory
-WORKDIR /app
-
-# Copy package.json and pnpm-lock.yaml (if using pnpm)
-COPY package.json pnpm-lock.yaml* ./
-
-# Install pnpm globally
-RUN npm install -g pnpm
-
-# Install dependencies
-RUN pnpm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Install Angular CLI globally
-RUN npm install -g @angular/cli
-
-# Expose port 80 for standard HTTP
-EXPOSE 80
-
-# Command to start the development server on port 80
-CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "80", "--proxy-config", "proxy.conf.json"]
+    # Set working directory
+    WORKDIR /app
+    
+    # Install pnpm and Angular CLI globally
+    RUN npm install -g pnpm @angular/cli
+    
+    # Copy dependency files first (for better caching)
+    COPY package.json pnpm-lock.yaml* ./
+    
+    # Install dependencies
+    RUN pnpm install --frozen-lockfile
+    
+    # Copy the rest of the app source code
+    COPY . .
+    
+    # Build Angular app for production
+    RUN ng build --configuration production
+    
+    # ---------- Serve stage ----------
+    FROM nginx:alpine
+    
+    # Copy built Angular files into Nginx html directory
+    COPY --from=build /app/dist/dvf-map/browser/ /usr/share/nginx/html
+    
+    # Replace default Nginx config if you need Angular routing support
+    # (optional: create nginx.conf in your project root)
+    COPY nginx.conf /etc/nginx/conf.d/default.conf
+    
+    # Expose port 80
+    EXPOSE 80
+    
+    # Start Nginx
+    CMD ["nginx", "-g", "daemon off;"]
+    

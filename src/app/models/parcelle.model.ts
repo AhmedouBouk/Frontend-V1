@@ -7,4 +7,5 @@ export interface ParcelleProperty {
   address: string;
   city: string;
   postalCode?: string;
+  type_local?: string; // Type locale (Maison, Appartement, etc.)
 }

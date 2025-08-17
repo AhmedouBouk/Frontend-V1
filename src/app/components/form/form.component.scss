@@ -42,7 +42,7 @@
   padding: var(--space-md) var(--space-sm);
   width: 100%;
   position: relative;
-  /* Fixer le problÃ¨me de mouvement */
+  /* Fixer le problème de mouvement */
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -94,10 +94,12 @@
   margin-bottom: var(--space-md);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to prevent z-index issues */
   background-color: var(--surface-color);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
+  position: relative;
+  z-index: 1; /* Base z-index for form sections */
 }
 
 .form-section:hover {
@@ -121,6 +123,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
+  position: relative;
+  z-index: 2; /* Lower z-index than date picker */
 }
 
 .section-title {
@@ -156,6 +160,65 @@
 .section-content {
   padding: var(--space-md) var(--space-sm);
   background-color: var(--surface-color);
+  position: relative;
+  overflow: visible;
+  z-index: 3; /* Higher than header but lower than date picker */
+}
+
+/* ===== TYPE LOCALE FILTER STYLING ===== */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  
+  .select-all-row {
+    margin-bottom: var(--space-xs);
+    
+    .select-all {
+      font-weight: 500;
+      
+      &:hover {
+        background-color: var(--primary-50);
+      }
+    }
+  }
+  
+  .checkbox-options {
+    margin-left: var(--space-md);
+  }
+  
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    
+    &:hover {
+      background-color: var(--gray-50);
+    }
+    
+    input[type="checkbox"] {
+      margin-right: var(--space-sm);
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-color);
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      
+      .emoji-icon {
+        font-size: 1.1rem;
+        margin-right: var(--space-xs);
+      }
+    }
+  }
 }
 
 /* ===== CHEVRON STYLES ===== */
@@ -171,8 +234,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  z-index: 1;
+  z-index: 2; /* Lower than date picker */
   opacity: 0.7;
+  position: relative; /* Ensure it respects z-index */
   
   &.rotated {
     transform: rotate(180deg);
@@ -203,6 +267,7 @@
   height: 22px;
   cursor: pointer;
   flex-shrink: 0;
+  z-index: 2; /* Lower than date picker */
 }
 
 .toggle-switch input {
@@ -601,6 +666,177 @@ select:focus {
   height: 14px;
 }
 
+/* ===== LOADING SPINNERS ===== */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: var(--space-sm);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-top: 2px solid var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== CUSTOM DATE PICKER STYLES ===== */
+.date-field {
+  position: relative;
+  overflow: visible;
+
+  .custom-date-input {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.8rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  .picker {
+    position: absolute;
+    bottom: 110%; /* Pop up from top instead of bottom */
+    right: 0; /* Align to right edge to stay within form */
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-lg);
+    min-width: 220px;
+    z-index: 9999 !important; /* Highest z-index to appear above everything */
+    /* Add backdrop to prevent interaction with elements behind */
+    &::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      pointer-events: auto;
+    }
+  }
+
+  .picker-header {
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: var(--space-xs) 0 var(--space-sm) 0;
+    font-size: 0.8rem;
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--space-xs);
+    text-align: center;
+  }
+
+  .grid.years {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid.months {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid.days {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .cell {
+    padding: var(--space-xs) 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    color: var(--primary-color);
+    transition: all var(--transition-fast);
+    font-size: 0.8rem;
+
+    &:hover {
+      background: var(--primary-50);
+      color: var(--primary-600);
+    }
+  }
+
+  .dow {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: var(--space-xs) 0;
+  }
+
+  .empty {
+    visibility: hidden;
+  }
+}
+
+/* Additional rule to ensure date picker is always on top */
+.date-field .picker,
+.date-field .picker * {
+  position: relative;
+  z-index: 10000 !important;
+}
+
+/* Ensure other elements stay below date picker */
+.section-chevron,
+.toggle-switch,
+.loading-spinner {
+  z-index: 2 !important;
+}
+
+/* Amélioration de la stabilité du formulaire */
+form {
+  position: relative;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: auto;
+}
+
+/* Optimisation pour éviter les reflows */
+.form-section,
+.section-content,
+.form-group {
+  contain: layout style;
+}
+
+input[type="date"] {
+  width: 100%;
+  min-width: 100px;
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .filter-form-container {
@@ -640,6 +876,29 @@ select:focus {
   .control-label {
     font-size: 0.8rem;
   }
+
+  /* Responsive adjustments for date picker */
+  .date-field {
+    .picker {
+      min-width: 200px;
+      padding: var(--space-xs);
+      right: 0; /* Stay aligned to right on mobile */
+      left: auto;
+    }
+    
+    .grid.years,
+    .grid.months {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .cell {
+      font-size: 0.75rem;
+    }
+    
+    .picker-header {
+      font-size: 0.75rem;
+    }
+  }
 }
 
 @media (max-width: 480px) {
@@ -678,6 +937,15 @@ select:focus {
   .btn span {
     display: none;
   }
+
+  .date-field {
+    .picker {
+      min-width: 180px;
+      right: 0;
+      left: auto;
+      transform: none; /* Remove centering transform */
+    }
+  }
 }
 
 @media (max-width: 360px) {
@@ -686,75 +954,4 @@ select:focus {
     gap: var(--space-xs);
     align-items: flex-start;
   }
-}
-
-input[type="date"] {
-  width: 100%;
-  min-width: 100px;
-  padding: var(--space-sm) var(--space-md);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  background-color: var(--surface-color);
-  color: var(--text-primary);
-  font-size: 0.8rem;
-  transition: all var(--transition-fast);
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-/* AmÃ©lioration de la stabilitÃ© du formulaire */
-form {
-  position: relative;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: auto;
-}
-
-/* Optimisation pour Ã©viter les reflows */
-.form-section,
-.section-content,
-.form-group {
-  contain: layout style;
-}
-
-/* ===== LOADING SPINNERS ===== */
-.loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: var(--space-sm);
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--border-light);
-  border-top: 2px solid var(--primary-500);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Ensure section header layout accommodates spinner */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  flex: 1;
 }

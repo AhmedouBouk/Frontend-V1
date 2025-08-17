@@ -142,7 +142,7 @@
 
 /* ===== MAP CONTROLS ===== */
 .map-controls {
-  position: absolute;
+  position: fixed;
   top: calc(var(--space-xl) + 60px); /* Moved down by 60px */
   right: var(--space-xl);
   z-index: 1000;

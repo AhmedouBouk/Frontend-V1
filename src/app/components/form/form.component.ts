@@ -1,10 +1,12 @@
-import { Component, inject, type OnInit } from "@angular/core"
+import { Component, inject, OnDestroy, type OnInit } from "@angular/core"
 import { FormBuilder, type FormGroup, ReactiveFormsModule } from "@angular/forms"
 import { CommonModule } from "@angular/common"
 import { FormService } from "../../services/form.service"
 import { MapService } from "../../services/map.service"
+import { Subject, merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
-type DataSourceType = "dvf" | "dpe" | "parcelles"
+
 type FilterMode = "exact" | "range"
 
 @Component({
@@ -14,7 +16,7 @@ type FilterMode = "exact" | "range"
   templateUrl: "./form.component.html",
   styleUrls: ["./form.component.scss"],
 })
-export class FormComponent implements OnInit {
+export class FormComponent implements OnInit , OnDestroy {
   filterForm: FormGroup
   private readonly fb = inject(FormBuilder)
   private readonly formService = inject(FormService)
@@ -26,6 +28,7 @@ export class FormComponent implements OnInit {
   allSurfaceSelected = false
   allEnergySelected = false
   allConsumptionSelected = false
+  allTypeLocaleSelected = false
 
   // Section visibility states for chevrons (all start as false = closed)
   priceExpanded = false
@@ -33,6 +36,7 @@ export class FormComponent implements OnInit {
   surfaceExpanded = false
   energyExpanded = false
   consumptionExpanded = false
+  typeLocaleExpanded = false
 
   // Marker visibility state
   markersVisible = false
@@ -43,11 +47,20 @@ export class FormComponent implements OnInit {
   surfaceLoading = false
   energyLoading = false
   consumptionLoading = false
+  typeLocaleLoading = false
+
+  // Type de locale options
+  typeLocaleOptions = [
+    { value: 'Appartement', label: 'Appartement', icon: '🏠' },
+    { value: 'Maison', label: 'Maison', icon: '🏡' },
+    { value: 'Dépendance', label: 'Dépendance', icon: '🏘️' },
+    { value: 'Local industriel, commercial ou assimilé', label: 'Local industriel, commercial ou assimilé', icon: '🏢' }
+  ]
+  selectedTypeLocales: string[] = []
 
   constructor() {
     this.filterForm = this.fb.group({
-      // Source de données
-      dataSource: ["dvf"],
+     
 
       // Prix (DVF)
       usePriceFilter: [false],
@@ -86,6 +99,11 @@ export class FormComponent implements OnInit {
       exactConsumption: [null],
       minConsumption: [null],
       maxConsumption: [null],
+
+      // Type de local
+      useTypeLocaleFilter: [false],
+      typeLocale: [null],
+
     })
   }
 
@@ -93,6 +111,7 @@ export class FormComponent implements OnInit {
     // Restaurer l'état des filtres depuis localStorage
     this.formService.restoreFilterState()
     
+    this.mapService.refreshMap()
     // Synchroniser les propriétés locales avec FormService
     this.setupFormServiceSubscriptions()
     
@@ -106,6 +125,9 @@ export class FormComponent implements OnInit {
     setTimeout(() => {
       this.forceRadioButtonsState()
     }, 500)
+    setTimeout(() => {
+      this.mapService.refreshMap()
+    }, 1000) // this is 
 
     // Auto-trigger search when filters are enabled/disabled
     this.filterForm.get("usePriceFilter")?.valueChanges.subscribe((enabled: boolean) => {
@@ -115,13 +137,13 @@ export class FormComponent implements OnInit {
       if (!enabled) {
         this.formService.clearPriceFilter()
         // Trigger map refresh to remove markers for this filter
-        this.mapService.refreshMap()
+        
       } else {
-        // Set markers visible and trigger search immediately with default values
+        // Set markers visible and apply only price filter
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        // Trigger search with current form values (or defaults)
-        setTimeout(() => this.search(), 100)
+        // Apply only the price filter using current form values
+        setTimeout(() => this.applyPriceFilter(this.filterForm.value), 100)
       }
     })
 
@@ -132,12 +154,12 @@ export class FormComponent implements OnInit {
       if (!enabled) {
         this.formService.clearDateFilter()
         // Trigger map refresh to remove markers for this filter
-        this.mapService.refreshMap()
+        
       } else {
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        // Trigger search with current form values (or defaults)
-        setTimeout(() => this.search(), 100)
+        // Apply only the date filter
+        setTimeout(() => this.applyDateFilter(this.filterForm.value), 100)
       }
     })
 
@@ -147,13 +169,12 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearSurfaceFilter()
-        // Trigger map refresh to remove markers for this filter
-        this.mapService.refreshMap()
+        
       } else {
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        // Trigger search with current form values (or defaults)
-        setTimeout(() => this.search(), 100)
+        // Apply only the surface filter
+        setTimeout(() => this.applySurfaceFilter(this.filterForm.value), 100)
       }
     })
 
@@ -163,11 +184,11 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearEnergyClassFilter()
-        this.mapService.refreshMap()
+        
       } else {
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        setTimeout(() => this.search(), 100)
+        setTimeout(() => this.applyEnergyFilter(this.filterForm.value), 100)
       }
     })
 
@@ -177,27 +198,220 @@ export class FormComponent implements OnInit {
       
       if (!enabled) {
         this.formService.clearConsumptionFilter()
-        this.mapService.refreshMap()
+        
       } else {
         this.markersVisible = true
         this.formService.setMarkersVisible(true)
-        setTimeout(() => this.search(), 100)
+        setTimeout(() => this.applyConsumptionFilter(this.filterForm.value), 100)
       }
     })
 
-    // Update data source and trigger search if any filters are active
-    this.filterForm.get("dataSource")?.valueChanges.subscribe((source: DataSourceType) => {
-      this.formService.setDataSource(source)
-      if (this.hasActiveFilters()) {
-        setTimeout(() => this.search(), 100)
+    this.filterForm.get("useTypeLocaleFilter")?.valueChanges.subscribe((enabled: boolean) => {
+      // Update toggle state in FormService
+      this.formService.setTypeLocaleToggle(enabled)
+      
+      if (!enabled) {
+        this.formService.clearTypeLocaleFilter()
+        
+      } else {
+        this.markersVisible = true
+        this.formService.setMarkersVisible(true)
+        setTimeout(() => this.applyTypeLocaleFilter(this.filterForm.value), 100)
       }
     })
 
+    
     // Listen for value changes in input fields to trigger automatic search
     this.setupValueChangeListeners()
     this.setupAutoToggleActivation()
   }
+  private destroy$ = new Subject<void>();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  
+  
+// Date picker properties
+isExactDatePickerOpen = false;
+isStartDatePickerOpen = false;
+isEndDatePickerOpen = false;
 
+exactDateView: 'year' | 'month' | 'day' = 'year';
+startDateView: 'year' | 'month' | 'day' = 'year';
+endDateView: 'year' | 'month' | 'day' = 'year';
+
+exactDateSelectedYear: number | null = null;
+exactDateSelectedMonth: number = 0;
+exactDateSelectedDay: number | null = null;
+exactDateFormattedDate = '';
+
+startDateSelectedYear: number | null = null;
+startDateSelectedMonth: number = 0;
+startDateSelectedDay: number | null = null;
+startDateFormattedDate = '';
+
+endDateSelectedYear: number | null = null;
+endDateSelectedMonth: number = 0;
+endDateSelectedDay: number | null = null;
+endDateFormattedDate = '';
+
+years = [2020, 2021, 2022, 2023, 2024, 2025];
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+dows = ['D', 'L', 'M', 'M', 'J', 'V', 'S']; // French days of week
+
+exactDateFirstDayOfMonth = 0;
+exactDateDaysInMonth: number[] = [];
+
+startDateFirstDayOfMonth = 0;
+startDateDaysInMonth: number[] = [];
+
+endDateFirstDayOfMonth = 0;
+endDateDaysInMonth: number[] = [];
+
+// Add these methods to your FormComponent class:
+
+// Exact Date Picker Methods
+openExactDatePicker() {
+  this.isExactDatePickerOpen = true;
+  this.exactDateView = 'year';
+}
+
+selectExactDateYear(y: number) {
+  this.exactDateSelectedYear = y;
+  this.exactDateView = 'month';
+}
+
+selectExactDateMonth(m: number) {
+  this.exactDateSelectedMonth = m;
+  this.updateExactDateDays();
+  this.exactDateView = 'day';
+}
+
+selectExactDateDay(d: number) {
+  this.exactDateSelectedDay = d;
+  const dateValue = this.formatDateForInput(
+    this.exactDateSelectedYear!,
+    this.exactDateSelectedMonth!,
+    this.exactDateSelectedDay!
+  );
+  this.exactDateFormattedDate = this.formatDateForDisplay(
+    this.exactDateSelectedYear!,
+    this.exactDateSelectedMonth!,
+    this.exactDateSelectedDay!
+  );
+  
+  // Update form control
+  this.filterForm.patchValue({ exactDate: dateValue });
+  this.isExactDatePickerOpen = false;
+}
+
+updateExactDateDays() {
+  if (this.exactDateSelectedYear === null || this.exactDateSelectedMonth === null) return;
+  const first = new Date(this.exactDateSelectedYear, this.exactDateSelectedMonth, 1);
+  this.exactDateFirstDayOfMonth = first.getDay();
+  const days = new Date(this.exactDateSelectedYear, this.exactDateSelectedMonth + 1, 0).getDate();
+  this.exactDateDaysInMonth = Array.from({ length: days }, (_, i) => i + 1);
+}
+
+// Start Date Picker Methods
+openStartDatePicker() {
+  this.isStartDatePickerOpen = true;
+  this.startDateView = 'year';
+}
+
+selectStartDateYear(y: number) {
+  this.startDateSelectedYear = y;
+  this.startDateView = 'month';
+}
+
+selectStartDateMonth(m: number) {
+  this.startDateSelectedMonth = m;
+  this.updateStartDateDays();
+  this.startDateView = 'day';
+}
+
+selectStartDateDay(d: number) {
+  this.startDateSelectedDay = d;
+  const dateValue = this.formatDateForInput(
+    this.startDateSelectedYear!,
+    this.startDateSelectedMonth!,
+    this.startDateSelectedDay!
+  );
+  this.startDateFormattedDate = this.formatDateForDisplay(
+    this.startDateSelectedYear!,
+    this.startDateSelectedMonth!,
+    this.startDateSelectedDay!
+  );
+  
+  // Update form control
+  this.filterForm.patchValue({ startDate: dateValue });
+  this.isStartDatePickerOpen = false;
+}
+
+updateStartDateDays() {
+  if (this.startDateSelectedYear === null || this.startDateSelectedMonth === null) return;
+  const first = new Date(this.startDateSelectedYear, this.startDateSelectedMonth, 1);
+  this.startDateFirstDayOfMonth = first.getDay();
+  const days = new Date(this.startDateSelectedYear, this.startDateSelectedMonth + 1, 0).getDate();
+  this.startDateDaysInMonth = Array.from({ length: days }, (_, i) => i + 1);
+}
+
+// End Date Picker Methods
+openEndDatePicker() {
+  this.isEndDatePickerOpen = true;
+  this.endDateView = 'year';
+}
+
+selectEndDateYear(y: number) {
+  this.endDateSelectedYear = y;
+  this.endDateView = 'month';
+}
+
+selectEndDateMonth(m: number) {
+  this.endDateSelectedMonth = m;
+  this.updateEndDateDays();
+  this.endDateView = 'day';
+}
+
+selectEndDateDay(d: number) {
+  this.endDateSelectedDay = d;
+  const dateValue = this.formatDateForInput(
+    this.endDateSelectedYear!,
+    this.endDateSelectedMonth!,
+    this.endDateSelectedDay!
+  );
+  this.endDateFormattedDate = this.formatDateForDisplay(
+    this.endDateSelectedYear!,
+    this.endDateSelectedMonth!,
+    this.endDateSelectedDay!
+  );
+  
+  // Update form control
+  this.filterForm.patchValue({ endDate: dateValue });
+  this.isEndDatePickerOpen = false;
+}
+
+updateEndDateDays() {
+  if (this.endDateSelectedYear === null || this.endDateSelectedMonth === null) return;
+  const first = new Date(this.endDateSelectedYear, this.endDateSelectedMonth, 1);
+  this.endDateFirstDayOfMonth = first.getDay();
+  const days = new Date(this.endDateSelectedYear, this.endDateSelectedMonth + 1, 0).getDate();
+  this.endDateDaysInMonth = Array.from({ length: days }, (_, i) => i + 1);
+}
+
+// Utility methods
+formatDateForDisplay(y: number, m: number, d: number): string {
+  const jj = String(d).padStart(2, '0');
+  const mm = String(m + 1).padStart(2, '0');
+  return `${jj}/${mm}/${y}`;
+}
+
+formatDateForInput(y: number, m: number, d: number): string {
+  const jj = String(d).padStart(2, '0');
+  const mm = String(m + 1).padStart(2, '0');
+  return `${y}-${mm}-${jj}`;
+}
   /**
    * Setup listeners for mode changes to ensure they're correctly synced with FormService
    */
@@ -205,271 +419,189 @@ export class FormComponent implements OnInit {
     // Suivre les changements de mode pour les persister dans FormService
     this.filterForm.get('priceMode')?.valueChanges.subscribe((mode: string) => {
             this.formService.setPriceMode(mode as FilterMode)
+      // If price filter is active, apply only the price filter
+      if (this.filterForm.get('usePriceFilter')?.value) {
+        setTimeout(() => this.applyPriceFilter(this.filterForm.value), 100)
+      }
     })
     
     this.filterForm.get('dateMode')?.valueChanges.subscribe((mode: string) => {
             this.formService.setDateMode(mode as FilterMode)
+      // If date filter is active, apply only the date filter
+      if (this.filterForm.get('useDateFilter')?.value) {
+        setTimeout(() => this.applyDateFilter(this.filterForm.value), 100)
+      }
     })
     
     this.filterForm.get('surfaceMode')?.valueChanges.subscribe((mode: string) => {
             this.formService.setSurfaceMode(mode as FilterMode)
       
-      // If surface filter is active, trigger search to apply the new mode
+      // If surface filter is active, apply only the surface filter
       if (this.filterForm.get('useSurfaceFilter')?.value) {
-                setTimeout(() => this.search(), 100)
+        setTimeout(() => this.applySurfaceFilter(this.filterForm.value), 100)
       }
     })
     
     this.filterForm.get('consumptionMode')?.valueChanges.subscribe((mode: string) => {
             this.formService.setConsumptionMode(mode as FilterMode)
+      // If consumption filter is active, apply only the consumption filter
+      if (this.filterForm.get('useConsumptionFilter')?.value) {
+        setTimeout(() => this.applyConsumptionFilter(this.filterForm.value), 100)
+      }
     })
   }
 
-  /**
-   * Setup listeners for input field changes to trigger automatic search
-   */
   private setupValueChangeListeners(): void {
-    // Price filter value changes
-    this.filterForm.get('price')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'exact' && value) {
-        setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('minPrice')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'interval' && value && this.filterForm.get('maxPrice')?.value) {
-        setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('maxPrice')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('usePriceFilter')?.value && this.filterForm.get('priceMode')?.value === 'interval' && value && this.filterForm.get('minPrice')?.value) {
-        
-        setTimeout(() => this.search(), 300)
-      }
-    })
-
-    // Date filter value changes
-    this.filterForm.get('exactDate')?.valueChanges.subscribe((value) => {
-            if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'exact' && value) {
-                setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('startDate')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'interval' && value && this.filterForm.get('endDate')?.value) {
-        setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('endDate')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useDateFilter')?.value && this.filterForm.get('dateMode')?.value === 'interval' && value && this.filterForm.get('startDate')?.value) {
-        setTimeout(() => this.search(), 300)
-      }
-    })
-
-    // Surface filter value changes - FIXED TO MATCH PRICE/DATE PATTERN
-    this.filterForm.get('surface')?.valueChanges.subscribe((value) => {
-            if (this.filterForm.get('useSurfaceFilter')?.value && 
-          this.filterForm.get('surfaceMode')?.value === 'exact' && 
-          value !== null && value !== '') {
-                setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('minSurface')?.valueChanges.subscribe((value) => {
-            if (this.filterForm.get('useSurfaceFilter')?.value && 
-          this.filterForm.get('surfaceMode')?.value === 'range' && 
-          value !== null && value !== '' && 
-          this.filterForm.get('maxSurface')?.value !== null && 
-          this.filterForm.get('maxSurface')?.value !== '') {
-                setTimeout(() => this.search(), 300)
-      }
-    })
-
-    this.filterForm.get('maxSurface')?.valueChanges.subscribe((value) => {
-            if (this.filterForm.get('useSurfaceFilter')?.value && 
-          this.filterForm.get('surfaceMode')?.value === 'range' && 
-          value !== null && value !== '' && 
-          this.filterForm.get('minSurface')?.value !== null && 
-          this.filterForm.get('minSurface')?.value !== '') {
-                setTimeout(() => this.search(), 300)
-      }
-    })
-
-
-    this.filterForm.get('exactConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value &&
-          this.filterForm.get('consumptionMode')?.value === 'exact' &&
-          value !== null && value !== '') {
-        this.logFilter('Consumption:exact input', { exact: Number(value) });
-        setTimeout(() => this.search(), 300);
-      }
-    });
-  
-    // Consumption — range (fix 'interval' -> 'range' in both places)
-    this.filterForm.get('minConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value &&
-          this.filterForm.get('consumptionMode')?.value === 'range' &&  // fixed here
-          value !== null && value !== '' &&
-          this.filterForm.get('maxConsumption')?.value !== null &&
-          this.filterForm.get('maxConsumption')?.value !== '') {
-        this.logFilter('Consumption:range input', {
-          min: Number(this.filterForm.get('minConsumption')?.value),
-          max: Number(this.filterForm.get('maxConsumption')?.value)
-        });
-        setTimeout(() => this.search(), 300);
-      }
-    });
-  
-    this.filterForm.get('maxConsumption')?.valueChanges.subscribe((value) => {
-      if (this.filterForm.get('useConsumptionFilter')?.value &&
-          this.filterForm.get('consumptionMode')?.value === 'range' &&  // fixed here
-          value !== null && value !== '' &&
-          this.filterForm.get('minConsumption')?.value !== null &&
-          this.filterForm.get('minConsumption')?.value !== '') {
-        this.logFilter('Consumption:range input', {
-          min: Number(this.filterForm.get('minConsumption')?.value),
-          max: Number(this.filterForm.get('maxConsumption')?.value)
-        });
-        setTimeout(() => this.search(), 300);
-      }
-    });
-  
-
-    // Energy class checkboxes - trigger search when any checkbox changes
-    const energyClasses = ['energyClassA', 'energyClassB', 'energyClassC', 'energyClassD', 'energyClassE', 'energyClassF', 'energyClassG']
-    energyClasses.forEach(className => {
-      this.filterForm.get(className)?.valueChanges.subscribe((checked) => {
-        if (this.filterForm.get('useEnergyFilter')?.value && checked) {
-          setTimeout(() => this.search(), 300)
+    // ---------- PRICE ----------
+    this.filterForm.get('price')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('usePriceFilter')?.value &&
+            this.filterForm.get('priceMode')?.value === 'exact' &&
+            v !== null && v !== '') {
+          this.applyPriceFilter(this.filterForm.value);
         }
-      })
-    })
+      });
+  
+    this.filterForm.get('minPrice')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('usePriceFilter')?.value &&
+            this.filterForm.get('priceMode')?.value === 'range' &&
+            v !== null && v !== '' &&
+            this.filterForm.get('maxPrice')?.value !== null &&
+            this.filterForm.get('maxPrice')?.value !== '') {
+          this.applyPriceFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('maxSurface')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useSurfaceFilter')?.value &&
+            this.filterForm.get('surfaceMode')?.value === 'range' &&
+            v !== null && v !== '' &&
+            this.filterForm.get('minSurface')?.value !== null &&
+            this.filterForm.get('minSurface')?.value !== '') {
+          this.applySurfaceFilter(this.filterForm.value);
+        }
+      });
+  
+    // ---------- DATE ----------
+    this.filterForm.get('exactDate')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useDateFilter')?.value &&
+            this.filterForm.get('dateMode')?.value === 'exact' &&
+            v) {
+          this.applyDateFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('startDate')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.filterForm.get('useDateFilter')?.value &&
+            this.filterForm.get('dateMode')?.value === 'range' &&
+            this.filterForm.get('startDate')?.value &&
+            this.filterForm.get('endDate')?.value) {
+          this.applyDateFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('endDate')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.filterForm.get('useDateFilter')?.value &&
+            this.filterForm.get('dateMode')?.value === 'range' &&
+            this.filterForm.get('startDate')?.value &&
+            this.filterForm.get('endDate')?.value) {
+          this.applyDateFilter(this.filterForm.value);
+        }
+      });
+  
+    // ---------- SURFACE ----------
+    this.filterForm.get('surface')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useSurfaceFilter')?.value &&
+            this.filterForm.get('surfaceMode')?.value === 'exact' &&
+            v !== null && v !== '') {
+          this.applySurfaceFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('minSurface')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useSurfaceFilter')?.value &&
+            this.filterForm.get('surfaceMode')?.value === 'range' &&
+            v !== null && v !== '' &&
+            this.filterForm.get('maxSurface')?.value !== null &&
+            this.filterForm.get('maxSurface')?.value !== '') {
+          this.applySurfaceFilter(this.filterForm.value);
+        }
+      });
+  
+    // ---------- CONSUMPTION ----------
+    this.filterForm.get('exactConsumption')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useConsumptionFilter')?.value &&
+            this.filterForm.get('consumptionMode')?.value === 'exact' &&
+            v !== null && v !== '') {
+          this.applyConsumptionFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('minConsumption')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useConsumptionFilter')?.value &&
+            this.filterForm.get('consumptionMode')?.value === 'range' &&
+            v !== null && v !== '' &&
+            this.filterForm.get('maxConsumption')?.value !== null &&
+            this.filterForm.get('maxConsumption')?.value !== '') {
+          this.applyConsumptionFilter(this.filterForm.value);
+        }
+      });
+  
+    this.filterForm.get('maxConsumption')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useConsumptionFilter')?.value &&
+            this.filterForm.get('consumptionMode')?.value === 'range' &&
+            v !== null && v !== '' &&
+            this.filterForm.get('minConsumption')?.value !== null &&
+            this.filterForm.get('minConsumption')?.value !== '') {
+          this.applyConsumptionFilter(this.filterForm.value);
+        }
+      });
+  
+    // ---------- ENERGY CLASSES (batch updates into one call) ----------
+    const energyCtrls = [
+      'energyClassA','energyClassB','energyClassC',
+      'energyClassD','energyClassE','energyClassF','energyClassG'
+    ].map(k => this.filterForm.get(k)!.valueChanges);
+  
+    merge(...energyCtrls)
+      .pipe(debounceTime(150), takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.filterForm.get('useEnergyFilter')?.value) {
+          this.applyEnergyFilter(this.filterForm.value);
+        }
+      });
 
-    // Subscribe to loading states
-    this.formService.getPriceLoadingObservable().subscribe(loading => {
-      this.priceLoading = loading
-    })
-
-    this.formService.getDateLoadingObservable().subscribe(loading => {
-      this.dateLoading = loading
-    })
-
-    this.formService.getSurfaceLoadingObservable().subscribe(loading => {
-      this.surfaceLoading = loading
-    })
-
-    this.formService.getEnergyLoadingObservable().subscribe(loading => {
-      this.energyLoading = loading
-    })
-
-    this.formService.getConsumptionLoadingObservable().subscribe(loading => {
-      this.consumptionLoading = loading
-    })
-
-    // Souscriptions aux modes des filtres pour synchronisation UI
-    this.formService.getPriceModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ priceMode: mode }, { emitEvent: false })
-    })
-
-    this.formService.getDateModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ dateMode: mode }, { emitEvent: false })
-    })
-
-    this.formService.getSurfaceModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ surfaceMode: mode }, { emitEvent: false })
-    })
-
-    this.formService.getEnergyModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ energyMode: mode }, { emitEvent: false })
-    })
-
-    this.formService.getConsumptionModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ consumptionMode: mode }, { emitEvent: false })
-    })
-
-    // Souscription à l'état des marqueurs
-    this.formService.getMarkersVisibleObservable().subscribe(visible => {
-      this.markersVisible = visible
-    })
-
-    // Souscriptions aux valeurs des filtres pour synchronisation UI
-    this.formService.getPriceFilterObservable().subscribe(value => {
-      if (value) {
-        this.filterForm.patchValue({ 
-          minPrice: value[0], 
-          maxPrice: value[1] 
-        }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getExactPriceObservable().subscribe(value => {
-      if (value !== null) {
-        this.filterForm.patchValue({ price: value }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getDateFilterObservable().subscribe(value => {
-      if (value) {
-        this.filterForm.patchValue({ 
-          startDate: value[0], 
-          endDate: value[1] 
-        }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getExactDateObservable().subscribe(value => {
-            if (value !== null && value !== '') {
-                this.filterForm.patchValue({ exactDate: value }, { emitEvent: false })
-      } else {
-              }
-    })
-
-    this.formService.getSurfaceFilterObservable().subscribe(value => {
-      if (value) {
-        this.filterForm.patchValue({ 
-          minSurface: value[0], 
-          maxSurface: value[1] 
-        }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getExactSurfaceObservable().subscribe(value => {
-      if (value !== null) {
-        this.filterForm.patchValue({ surface: value }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getConsumptionFilterObservable().subscribe(value => {
-      if (value) {
-        this.filterForm.patchValue({ 
-          minConsumption: value[0], 
-          maxConsumption: value[1] 
-        }, { emitEvent: false })
-      }
-    })
-
-    this.formService.getExactConsumptionObservable().subscribe(value => {
-      if (value !== null) {
-        this.filterForm.patchValue({ exactConsumption: value }, { emitEvent: false })
-      }
-    })
-
-    // Souscription aux classes énergétiques sélectionnées
-    this.formService.getSelectedEnergyClassesObservable().subscribe(classes => {
-      const energyUpdates = {
-        energyClassA: classes ? classes.includes('A') : false,
-        energyClassB: classes ? classes.includes('B') : false,
-        energyClassC: classes ? classes.includes('C') : false,
-        energyClassD: classes ? classes.includes('D') : false,
-        energyClassE: classes ? classes.includes('E') : false,
-        energyClassF: classes ? classes.includes('F') : false,
-        energyClassG: classes ? classes.includes('G') : false
-      }
-      this.filterForm.patchValue(energyUpdates, { emitEvent: false })
-    })
+    // ---------- TYPE LOCALE ----------
+    this.filterForm.get('typeLocale')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('useTypeLocaleFilter')?.value) {
+          this.applyTypeLocaleFilter(this.filterForm.value);
+        }
+      });
   }
+  
 
 
 
@@ -497,13 +629,20 @@ export class FormComponent implements OnInit {
       const hasMax = values.maxPrice && values.maxPrice !== '' && values.maxPrice !== null
       
       if (hasMin || hasMax) {
-        const min = hasMin ? Number(values.minPrice) : 0
-        const max = hasMax ? Number(values.maxPrice) : 2000000
-        this.formService.setPriceFilter(min, max)
-              } else {
+        const min = hasMin ? Number(values.minPrice) : undefined
+        const max = hasMax ? Number(values.maxPrice) : undefined
+        // Only set filter if we have actual values, not defaults
+        if (min !== undefined && max !== undefined) {
+          this.formService.setPriceFilter(min, max)
+        } else if (min !== undefined) {
+          this.formService.setPriceFilter(min, 2000000) // Use reasonable upper bound only when min is set
+        } else if (max !== undefined) {
+          this.formService.setPriceFilter(0, max) // Use 0 as lower bound only when max is set
+        }
+      } else {
         // No values provided - clear filter to enable SELECT * behavior
         this.formService.clearPriceFilter()
-              }
+      }
     }
   }
 
@@ -634,23 +773,31 @@ private applySurfaceFilter(values: any): void {
   }
 
   /**
-   * Apply all filters and refresh the map with multiple data sources support
+   * Handle type locale filter application
    */
-  search() {
-    const values = this.filterForm.value
-  
-    // Apply all active filters - the map component will determine which data sources to load
-    this.applyPriceFilter(values)
-    this.applyDateFilter(values)
-    this.applySurfaceFilter(values)
-    this.applyEnergyFilter(values)
-    this.applyConsumptionFilter(values)
+  private applyTypeLocaleFilter(values: any): void {
+    if (!values.useTypeLocaleFilter) {
+      this.formService.clearTypeLocaleFilter()
+      this.selectedTypeLocales = []
+      this.allTypeLocaleSelected = false
+      return
+    }
 
-    // Set markers as visible since we're searching
-    this.markersVisible = true
-
-    // Refresh map - it will automatically load the appropriate data sources based on active filters
-    this.mapService.refreshMap()
+    const selectedTypeLocales = values.typeLocale || []
+    
+    // Update the selectedTypeLocales array for UI binding
+    this.selectedTypeLocales = Array.isArray(selectedTypeLocales) ? [...selectedTypeLocales] : []
+    
+    // Update the "Tous les types" checkbox state
+    this.allTypeLocaleSelected = this.selectedTypeLocales.length === this.typeLocaleOptions.length
+    
+    // Apply the filter
+    if (this.selectedTypeLocales.length > 0) {
+      this.formService.setSelectedTypeLocales(this.selectedTypeLocales)
+    } else {
+      // No locales selected - clear filter to enable SELECT * behavior
+      this.formService.clearTypeLocaleFilter()
+    }
   }
 
   /**
@@ -728,11 +875,8 @@ private applySurfaceFilter(values: any): void {
       this.formService.setSurfaceToggle(true)
       this.formService.setSurfaceMode("range")
       
-      // Apply the filter - will trigger SELECT * behavior since no values provided
+      // Apply only the surface filter - SELECT * behavior since no values provided
       this.applySurfaceFilter(this.filterForm.value)
-      
-      // Trigger immediate search for SELECT * behavior
-            setTimeout(() => this.search(), 100)
       
           } else {
       this.filterForm.patchValue({
@@ -783,7 +927,7 @@ private applySurfaceFilter(values: any): void {
         useConsumptionFilter: true,
         consumptionMode: "range",
         minConsumption: 0,
-        maxConsumption: 1000,
+        maxConsumption: 10000000,
       })
       // Apply the filter with default values immediately
       this.applyConsumptionFilter(this.filterForm.value)
@@ -799,6 +943,68 @@ private applySurfaceFilter(values: any): void {
   }
 
   /**
+   * Toggle all type locale filter options
+   */
+  toggleAllTypeLocaleOptions(): void {
+    this.allTypeLocaleSelected = !this.allTypeLocaleSelected
+
+    if (this.allTypeLocaleSelected) {
+      // Select all type locales
+      const allValues = this.typeLocaleOptions.map(option => option.value)
+      this.selectedTypeLocales = [...allValues]
+      this.filterForm.patchValue({
+        useTypeLocaleFilter: true,
+        typeLocale: allValues,
+      })
+      // Apply the filter with all type locales selected immediately
+      this.applyTypeLocaleFilter(this.filterForm.value)
+    } else {
+      // Deselect all type locales but keep the filter active
+      this.selectedTypeLocales = []
+      this.filterForm.patchValue({
+        typeLocale: [],
+      })
+      // Apply the empty filter (will trigger SELECT * behavior)
+      this.applyTypeLocaleFilter(this.filterForm.value)
+    }
+  }
+
+  /**
+   * Handle individual type locale checkbox change
+   * @param event The checkbox change event
+   * @param localeValue The locale value that was changed
+   */
+  onTypeLocaleCheckboxChange(event: Event, localeValue: string): void {
+    const checkbox = event.target as HTMLInputElement
+    const checked = checkbox.checked
+    
+    // Update the selectedTypeLocales array
+    if (checked && !this.selectedTypeLocales.includes(localeValue)) {
+      this.selectedTypeLocales.push(localeValue)
+    } else if (!checked && this.selectedTypeLocales.includes(localeValue)) {
+      this.selectedTypeLocales = this.selectedTypeLocales.filter(value => value !== localeValue)
+    }
+    
+    // Update the form control value
+    this.filterForm.patchValue({
+      typeLocale: [...this.selectedTypeLocales]
+    })
+    
+    // Update the "Tous les types" checkbox state
+    this.allTypeLocaleSelected = this.selectedTypeLocales.length === this.typeLocaleOptions.length
+    
+    // Activate the filter if it's not already active
+    if (this.selectedTypeLocales.length > 0 && !this.filterForm.get('useTypeLocaleFilter')?.value) {
+      this.filterForm.patchValue({
+        useTypeLocaleFilter: true
+      })
+    }
+    
+    // Apply the filter
+    this.applyTypeLocaleFilter(this.filterForm.value)
+  }
+
+  /**
    * Check if any filters are currently active
    */
   hasActiveFilters(): boolean {
@@ -806,33 +1012,14 @@ private applySurfaceFilter(values: any): void {
            this.filterForm.get('useDateFilter')?.value ||
            this.filterForm.get('useSurfaceFilter')?.value ||
            this.filterForm.get('useEnergyFilter')?.value ||
-           this.filterForm.get('useConsumptionFilter')?.value
+           this.filterForm.get('useConsumptionFilter')?.value ||
+           this.filterForm.get('useTypeLocaleFilter')?.value
   }
 
-  /**
-   * Toggle markers visibility on the map
-   */
-  toggleMarkers(): void {
-    this.markersVisible = !this.markersVisible
-    
-    // Update the FormService with the new state
-    this.formService.setMarkersVisible(this.markersVisible)
-    
-    if (this.markersVisible) {
-      // Show markers with current active filters
-      if (this.hasActiveFilters()) {
-        this.search()
-      } else {
-      }
-    } else {
-      // Just hide markers without clearing filters - clear map data only
-      this.mapService.refreshMap()
-    }
-  }
-
+ 
   
 
-  // ===== MÉTHODES DE SYNCHRONISATION AVEC FORMSERVICE =====
+  
 
   /**
    * Configure toutes les souscriptions aux observables du FormService
@@ -859,6 +1046,10 @@ private applySurfaceFilter(values: any): void {
       this.consumptionExpanded = expanded
     })
 
+    this.formService.getTypeLocaleExpandedObservable().subscribe(expanded => {
+      this.typeLocaleExpanded = expanded
+    })
+
     // Souscriptions aux états des toggles
     this.formService.getPriceToggleObservable().subscribe(active => {
       this.allPriceSelected = active
@@ -875,10 +1066,6 @@ private applySurfaceFilter(values: any): void {
       this.filterForm.patchValue({ useSurfaceFilter: active }, { emitEvent: false })
     })
 
-    this.formService.getSurfaceToggleObservable().subscribe(active => {
-      this.allSurfaceSelected = active
-      this.filterForm.patchValue({ useSurfaceFilter: active }, { emitEvent: false })
-    })
 
     this.formService.getEnergyToggleObservable().subscribe(active => {
       this.allEnergySelected = active
@@ -888,6 +1075,11 @@ private applySurfaceFilter(values: any): void {
     this.formService.getConsumptionToggleObservable().subscribe(active => {
       this.allConsumptionSelected = active
       this.filterForm.patchValue({ useConsumptionFilter: active }, { emitEvent: false })
+    })
+
+    this.formService.getTypeLocaleToggleObservable().subscribe(active => {
+      this.allTypeLocaleSelected = active
+      this.filterForm.patchValue({ useTypeLocaleFilter: active }, { emitEvent: false })
     })
 
     // Souscriptions aux états de chargement
@@ -911,6 +1103,10 @@ private applySurfaceFilter(values: any): void {
       this.consumptionLoading = loading
     })
 
+    this.formService.getTypeLocaleLoadingObservable().subscribe(loading => {
+      this.typeLocaleLoading = loading
+    })
+
     // Souscription à l'état de visibilité des marqueurs
     this.formService.getMarkersVisibleObservable().subscribe(visible => {
       this.markersVisible = visible
@@ -929,22 +1125,39 @@ private applySurfaceFilter(values: any): void {
       this.filterForm.patchValue({ surfaceMode: mode }, { emitEvent: false })
     })
 
-    this.formService.getEnergyModeObservable().subscribe(mode => {
-      this.filterForm.patchValue({ energyMode: mode }, { emitEvent: false })
-    })
-
     this.formService.getConsumptionModeObservable().subscribe(mode => {
       this.filterForm.patchValue({ consumptionMode: mode }, { emitEvent: false })
     })
+
+    // Type Locale filter subscriptions
+    this.formService.getTypeLocaleToggleObservable().subscribe(enabled => {
+      this.filterForm.get('useTypeLocaleFilter')?.setValue(enabled, { emitEvent: false })
+      this.typeLocaleExpanded = enabled ? true : this.typeLocaleExpanded
+    })
+
+    this.formService.getTypeLocaleExpandedObservable().subscribe(expanded => {
+      this.typeLocaleExpanded = expanded
+    })
+
+    this.formService.getSelectedTypeLocalesObservable().subscribe(typeLocales => {
+      if (typeLocales !== null) {
+        this.selectedTypeLocales = [...typeLocales]
+        this.allTypeLocaleSelected = this.selectedTypeLocales.length === this.typeLocaleOptions.length
+        this.filterForm.patchValue({ typeLocale: typeLocales }, { emitEvent: false })
+      } else {
+        this.selectedTypeLocales = []
+        this.allTypeLocaleSelected = false
+        this.filterForm.patchValue({ typeLocale: [] }, { emitEvent: false })
+      }
+    })
+
+    this.formService.getTypeLocaleLoadingObservable().subscribe(loading => {
+      this.typeLocaleLoading = loading
+    })
   }
 
-  /**
-   * Restaure l'état du formulaire depuis les valeurs du FormService
-   */
-  /**
-   * Force l'état des boutons radio en utilisant le ViewChild pour sélectionner directement les éléments DOM
-   * Cette approche est plus robuste que de compter sur Angular Forms
-   */
+  
+  
   private forceRadioButtonsState(): void {
     
     // Obtenir les valeurs actuelles des modes
@@ -1103,6 +1316,13 @@ private applySurfaceFilter(values: any): void {
         }
       }).unsubscribe()
 
+      // Type de local
+      this.formService.getTypeLocaleFilterObservable().pipe().subscribe(value => {
+        if (value) {
+          formUpdates.typeLocale = value
+        }
+      }).unsubscribe()
+
       // Appliquer toutes les mises à jour en une fois
       if (Object.keys(formUpdates).length > 0) {
         this.filterForm.patchValue(formUpdates, { emitEvent: false })
@@ -1138,11 +1358,12 @@ private applySurfaceFilter(values: any): void {
     this.formService.setConsumptionExpanded(this.consumptionExpanded)
   }
 
-  /** Small helper to keep logs tidy */
-private logFilter(tag: string, payload: any) {
-  // You can silence all logs by switching to console.debug in prod
-  console.log(`🧪 [Filter:${tag}]`, payload);
-}
+  toggleTypeLocaleExpanded(): void {
+    this.typeLocaleExpanded = !this.typeLocaleExpanded
+    this.formService.setTypeLocaleExpanded(this.typeLocaleExpanded)
+  }
+
+
 // Add this new method to automatically activate toggles when user starts typing
 private setupAutoToggleActivation(): void {
   // Price filter inputs - activate toggle when user starts typing
@@ -1257,6 +1478,16 @@ private setupAutoToggleActivation(): void {
     }
   });
 
+  // Type locale filter inputs - activate toggle when user starts typing
+  this.filterForm.get('typeLocale')?.valueChanges.subscribe((value) => {
+    if (value !== null && value !== '' && !this.filterForm.get('useTypeLocaleFilter')?.value) {
+      this.filterForm.patchValue({ useTypeLocaleFilter: true }, { emitEvent: false });
+      this.formService.setTypeLocaleToggle(true);
+      this.markersVisible = true;
+      this.formService.setMarkersVisible(true);
+    }
+  });
+
   // Energy class checkboxes - activate toggle when user checks any checkbox
   const energyClasses = ['energyClassA', 'energyClassB', 'energyClassC', 'energyClassD', 'energyClassE', 'energyClassF', 'energyClassG'];
   energyClasses.forEach(className => {
@@ -1271,9 +1502,4 @@ private setupAutoToggleActivation(): void {
   });
 }
 
-
-
 }
-
-
-

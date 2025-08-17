@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core"
 import { BehaviorSubject, type Observable, Subject } from "rxjs"
 
+
+
+
 export interface MapCoordinates {
   topLeft: [number, number]
   topRight: [number, number]
@@ -30,6 +33,7 @@ export class MapService {
 
   constructor() {}
 
+  
   // Convertit des coordonnées WGS84 (latitude, longitude) en Lambert93
   toLambert93(lat: number, lng: number): [number, number] {
   
