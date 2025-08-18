@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   forward:
     external:
@@ -15,4 +13,3 @@ services:
     networks:
       - forward
     restart: unless-stopped
-

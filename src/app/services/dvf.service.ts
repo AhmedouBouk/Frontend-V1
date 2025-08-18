@@ -17,12 +17,8 @@ export class DvfService {
    * @param priceRange Plage de prix [min, max] ou null si désactivé
    * @param exactPrice Prix exact ou null si désactivé
    * @param dateRange Plage de dates [début, fin] ou null si désactivé
+   * @param typeLocaleFilter Liste des types de locaux sélectionnés ou null si désactivé
    * @param exactDate Date exacte ou null si désactivé
-   * @param surfaceRange Plage de surface [min, max] ou null si désactivé
-   * @param exactSurface Surface exacte ou null si désactivé
-   * @param energyClassRange Plage de classes énergétiques [min, max] ou null si désactivé
-   * @param exactEnergyClass Classe énergétique exacte ou null si désactivé
-   * @param selectedEnergyClasses Liste des classes énergétiques sélectionnées ou null si désactivé
    */
   getDvfProperties(
     topLeft: [number, number],
@@ -30,20 +26,15 @@ export class DvfService {
     priceRange: [number, number] | null,
     exactPrice: number | null = null,
     dateRange: [string, string] | null = null,
-    exactDate: string | null = null,
-    surfaceRange: [number, number] | null = null,
-    exactSurface: number | null = null,
-    energyClassRange: [string, string] | null = null,
-    exactEnergyClass: string | null = null,
-    selectedEnergyClasses: string[] | null = null,
-    limit: number = 500 // Add pagination limit with default of 500 results
+    typeLocaleFilter: string[] | null = null,
+    exactDate: string | null = null
   ): Observable<DvfProperty[]> {
     const params: any = {
       lat_min: bottomRight[0],
       lat_max: topLeft[0],
       lon_min: topLeft[1],
       lon_max: bottomRight[1],
-      limit: limit // Add pagination limit parameter
+      limit: 500 // Add pagination limit with default of 500 results
     };
 
     // 💰 Price filter handling - exact price takes priority
@@ -64,22 +55,12 @@ export class DvfService {
           } else {
           }
     
-    // Gestion du filtre de surface
-    if (exactSurface) {
-      params.surface_exacte = exactSurface;
-    } else if (surfaceRange) {
-      params.surface_min = surfaceRange[0];
-      params.surface_max = surfaceRange[1];
-    }
-    
-    // Gestion du filtre de classe énergétique
-    if (exactEnergyClass) {
-      params.energy_classe_exacte = exactEnergyClass;
-    } else if (energyClassRange) {
-      params.energy_classe_min = energyClassRange[0];
-      params.energy_classe_max = energyClassRange[1];
-    } else if (selectedEnergyClasses && selectedEnergyClasses.length > 0) {
-      params.energy_classes = selectedEnergyClasses;
+    // 🏠 Type locale filter handling
+    if (typeLocaleFilter && typeLocaleFilter.length > 0) {
+      params.type_local = typeLocaleFilter.join(',');
+      console.log('🏠 DVF Service: Type locale filter added:', params.type_local);
+    } else {
+      console.log('🏠 DVF Service: No type locale filter provided');
     }
 
     const apiUrl = `${environment.apiUrl}/dvf/filtrer`;
@@ -122,7 +103,7 @@ export class DvfService {
             id_mutation: item.id_mutation ?? '',
             date_mutation: item.date_mutation ?? '',
             valeur_fonciere: isNaN(valeur) ? 0 : valeur,
-            type_local: 'Maison',
+            type_local: item.type_local ?? 'Non spécifié',
             latitude: isNaN(latitude) ? 0 : latitude,
             longitude: isNaN(longitude) ? 0 : longitude,
             adresse_numero: item.adresse_numero ?? '',

@@ -99,8 +99,9 @@ export class DpeService {
     dateRange?: [string, string] | null;
     consumptionFilter?: [number, number] | null;
     exactConsumption?: number | null;
+    typeLocaleFilter?: string[] | null;
   }): Record<string, any> {
-    const { surfaceRange, exactDate, dateRange, consumptionFilter, exactConsumption } = options;
+    const { surfaceRange, exactDate, dateRange, consumptionFilter, exactConsumption, typeLocaleFilter } = options;
     const enhancedParams = { ...params };
     
     // Ajout des filtres de date si présents
@@ -136,7 +137,15 @@ export class DpeService {
               }
     } else {
           }
-    
+
+    // 🏠 Type Locale filter - Fix parameter name to match backend API
+    if (typeLocaleFilter && typeLocaleFilter.length > 0) {
+      enhancedParams['type_local'] = typeLocaleFilter.join(',');
+      console.log('🏠 DPE Service: Type locale filter added:', typeLocaleFilter.join(','));
+    } else {
+      console.log('🏠 DPE Service: No type locale filter provided');
+    }
+
     return enhancedParams;
   }
   
@@ -145,15 +154,15 @@ export class DpeService {
    * @param topLeft Top left coordinates [lat, lng]
    * @param bottomRight Bottom right coordinates [lat, lng]
    * @param options Filter options including energy, surface, consumption and date
+   * @param typeLocaleFilter Filter options for type locale
    * @returns Observable of DPE properties within bounds and matching filters
    */
-  // ... same imports and class up to getDpeProperties()
-
-getDpeProperties(
-  topLeft: [number, number],
-  bottomRight: [number, number],
-  options: DpeFilterOptions = {}
-): Observable<DpeProperty[]> {
+  getDpeProperties(
+    topLeft: [number, number],
+    bottomRight: [number, number],
+    filterOptions: DpeFilterOptions = {},
+    typeLocaleFilter: string[] | null = null
+  ): Observable<DpeProperty[]> {
   const {
     energyFilter = null,
     filterMode = 'class',
@@ -162,7 +171,7 @@ getDpeProperties(
     dateRange = null,
     consumptionFilter = null,
     exactConsumption = null
-  } = options;
+  } = filterOptions;
 
   const topConverted = this.convertLatLonToProjected(topLeft);
   const bottomConverted = this.convertLatLonToProjected(bottomRight);
@@ -194,15 +203,17 @@ getDpeProperties(
     exactDate,
     dateRange,
     consumptionFilter,
-    exactConsumption
+    exactConsumption,
+    typeLocaleFilter
   });
 
   const apiUrl = `${environment.apiUrl}/dpe`;
 
-  // ✅ DEBUG LOG — FULL API REQUEST INCLUDING CONSUMPTION FILTERS
+  // ✅ DEBUG LOG — FULL API REQUEST INCLUDING TYPE LOCALE FILTER
   console.log('📡 DPE API Request:');
   console.log('URL:', apiUrl);
   console.log('Parameters:', enhancedParams);
+  console.log('Type Locale Filter:', typeLocaleFilter);
 
   // Optional: Build a preview full GET URL
   const urlWithParams = new URL(apiUrl);
@@ -222,6 +233,55 @@ getDpeProperties(
   );
 }
 
+  /**
+   * Get DPE properties filtered by classe energie only
+   */
+  getDpePropertiesByClasse(
+    topLeft: [number, number],
+    bottomRight: [number, number],
+    classeFilter: string[] | null = null,
+    typeLocaleFilter: string[] | null = null
+  ): Observable<DpeProperty[]> {
+    const filterOptions: DpeFilterOptions = {
+      energyFilter: classeFilter,
+      filterMode: 'class'
+    };
+    return this.getDpeProperties(topLeft, bottomRight, filterOptions, typeLocaleFilter);
+  }
+
+  /**
+   * Get DPE properties filtered by consumption only
+   */
+  getDpePropertiesByConsumption(
+    topLeft: [number, number],
+    bottomRight: [number, number],
+    consumptionFilter: [number, number] | null = null,
+    exactConsumption: number | null = null,
+    typeLocaleFilter: string[] | null = null
+  ): Observable<DpeProperty[]> {
+    const filterOptions: DpeFilterOptions = {
+      consumptionFilter,
+      exactConsumption
+    };
+    return this.getDpeProperties(topLeft, bottomRight, filterOptions, typeLocaleFilter);
+  }
+
+  /**
+   * Get DPE properties filtered by valeur DPE only
+   */
+  getDpePropertiesByValeur(
+    topLeft: [number, number],
+    bottomRight: [number, number],
+    valeurFilter: [number, number] | null = null,
+    exactValeur: number | null = null,
+    typeLocaleFilter: string[] | null = null
+  ): Observable<DpeProperty[]> {
+    const filterOptions: DpeFilterOptions = {
+      energyFilter: valeurFilter || exactValeur,
+      filterMode: exactValeur ? 'exact' : 'interval'
+    };
+    return this.getDpeProperties(topLeft, bottomRight, filterOptions, typeLocaleFilter);
+  }
 
   /**
    * Maps the backend response to DpeProperty objects
@@ -263,7 +323,8 @@ getDpeProperties(
         city: item.ban_city ?? item.nom_commune_brut ?? '',
         postalCode: item.ban_postcode ?? item.code_postal_brut ?? '',
         ep_conso_5_usages: item.ep_conso_5_usages ?? undefined,
-        periode_construction: item.periode_construction ?? null // Add period for different markers
+        periode_construction: item.periode_construction ?? null, // Add period for different markers
+        type_batiment: item.type_batiment ?? 'Non spécifié' // Add type_batiment field
       } as DpeProperty;
     });
   }

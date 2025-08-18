@@ -61,8 +61,8 @@ export class ParcelleService {
   getParcelleProperties(
     topLeft: [number, number],
     bottomRight: [number, number],
-    surfaceRange: [number, number] | null = null,
-    filterMode: 'exact' | 'interval' = 'interval'
+    surfaceFilter: [number, number] | number | string | null = null,
+    typeLocaleFilter: string[] | null = null
   ): Observable<ParcelleProperty[]> {
 
     // -- 1. Conversion des coordonnees lat/lon vers coordonnees projetees ----
@@ -93,21 +93,39 @@ export class ParcelleService {
       .set('bottomRight', bottomRightParam);
 
     // Format surface selon le format attendu par le backend
-    if (surfaceRange) {
-      // Check if this is an exact surface value (both min and max are the same)
-      if (surfaceRange[0] === surfaceRange[1] && surfaceRange[0] !== 0) {
-        // This is an exact surface value
-        params = params.set('surface_exact', `${surfaceRange[0]}`);
-              } else if (surfaceRange[0] !== 0 || surfaceRange[1] !== 0) {
-        // This is a range with actual values
-        params = params.set('surface_min', `${surfaceRange[0]}`);
-        params = params.set('surface_max', `${surfaceRange[1]}`);
-              } else {
-        // Both values are 0, don't send any surface parameters (SELECT * behavior)
-              }
-    } else {
-          }
+    if (surfaceFilter) {
+      if (Array.isArray(surfaceFilter) && surfaceFilter.length === 2) {
+        // Check if this is an exact surface value (both min and max are the same)
+        if (surfaceFilter[0] === surfaceFilter[1] && surfaceFilter[0] !== 0) {
+          // This is an exact surface value
+          params = params.set('surface_exact', `${surfaceFilter[0]}`);
+        } else if (surfaceFilter[0] !== 0 || surfaceFilter[1] !== 0) {
+          // This is a range with actual values
+          params = params.set('surface_min', `${surfaceFilter[0]}`);
+          params = params.set('surface_max', `${surfaceFilter[1]}`);
+        } else {
+          // Both values are 0, don't send any surface parameters (SELECT * behavior)
+        }
+      } else if (typeof surfaceFilter === 'number') {
+        // Single number value - treat as exact
+        params = params.set('surface_exact', `${surfaceFilter}`);
+      } else if (typeof surfaceFilter === 'string') {
+        // String format like "min,max"
+        const range = surfaceFilter.split(',').map(Number);
+        if (range.length === 2 && !range.some(isNaN)) {
+          params = params.set('surface_min', `${range[0]}`);
+          params = params.set('surface_max', `${range[1]}`);
+        }
+      }
+    }
     
+    // Add Type Locale filter if provided
+    if (typeLocaleFilter && typeLocaleFilter.length > 0) {
+      params = params.set('type_local', typeLocaleFilter.join(','));
+      console.log('🏠 Parcelle Service: Type locale filter added:', typeLocaleFilter.join(','));
+    } else {
+      console.log('🏠 Parcelle Service: No type locale filter provided');
+    }
 
     // Construction de l'URL de l'API pour les parcelles
     const apiUrl = `${environment.apiUrl}/parcelles`;
@@ -154,7 +172,8 @@ export class ParcelleService {
           surface:     Number(item.contenance) || 0,  // contenance = surface en m²
           address:     item.nom_voie        ?? '',
           city:        item.code_commune   ?? '',
-          postalCode:  item.code_commune   ?? ''   // Utiliser code_commune comme postal code temporaire
+          postalCode:  item.code_commune   ?? '',   // Utiliser code_commune comme postal code temporaire
+          typeLocale:  item.type_local     ?? ''    // Add typeLocale field
         } as ParcelleProperty;
       })),
       catchError(err => {

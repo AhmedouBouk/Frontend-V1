@@ -13,6 +13,7 @@ export interface FilterState {
   surfaceToggle: boolean
   energyToggle: boolean
   consumptionToggle: boolean
+  typeLocaleToggle: boolean
   
   // États d'expansion des chevrons
   priceExpanded: boolean
@@ -20,6 +21,7 @@ export interface FilterState {
   surfaceExpanded: boolean
   energyExpanded: boolean
   consumptionExpanded: boolean
+  typeLocaleExpanded: boolean
   
   // Valeurs des filtres
   priceFilter: [number, number] | null
@@ -33,6 +35,7 @@ export interface FilterState {
   selectedEnergyClasses: string[] | null
   consumptionFilter: [number, number] | null
   exactConsumption: number | null
+  selectedTypeLocales: string[] | null
   
   // Modes des filtres
   priceMode: FilterMode
@@ -71,6 +74,9 @@ export class FormService {
   private readonly consumptionFilterSubject = new BehaviorSubject<[number, number] | null>(null)
   private readonly exactConsumptionSubject = new BehaviorSubject<number | null>(null)
   
+  // Filtres de type de local
+  private readonly selectedTypeLocalesSubject = new BehaviorSubject<string[] | null>(null)
+  
   // État de visibilité des marqueurs
   private readonly markersVisibleSubject = new BehaviorSubject<boolean>(true)
   
@@ -80,6 +86,7 @@ export class FormService {
   private readonly surfaceToggleSubject = new BehaviorSubject<boolean>(false)
   private readonly energyToggleSubject = new BehaviorSubject<boolean>(false)
   private readonly consumptionToggleSubject = new BehaviorSubject<boolean>(false)
+  private readonly typeLocaleToggleSubject = new BehaviorSubject<boolean>(false)
 
   // États de chargement des filtres
   private readonly priceLoadingSubject = new BehaviorSubject<boolean>(false)
@@ -87,6 +94,7 @@ export class FormService {
   private readonly surfaceLoadingSubject = new BehaviorSubject<boolean>(false)
   private readonly energyLoadingSubject = new BehaviorSubject<boolean>(false)
   private readonly consumptionLoadingSubject = new BehaviorSubject<boolean>(false)
+  private readonly typeLocaleLoadingSubject = new BehaviorSubject<boolean>(false)
 
   // États d'expansion des sections de filtres (chevrons)
   private readonly priceExpandedSubject = new BehaviorSubject<boolean>(false)
@@ -94,6 +102,7 @@ export class FormService {
   private readonly surfaceExpandedSubject = new BehaviorSubject<boolean>(false)
   private readonly energyExpandedSubject = new BehaviorSubject<boolean>(false)
   private readonly consumptionExpandedSubject = new BehaviorSubject<boolean>(false)
+  private readonly typeLocaleExpandedSubject = new BehaviorSubject<boolean>(false)
 
   // Modes des filtres
   private readonly priceModeSubject = new BehaviorSubject<FilterMode>('range')
@@ -106,7 +115,7 @@ export class FormService {
   private readonly leftSidebarOpenSubject = new BehaviorSubject<boolean>(true)
   private readonly tableCollapsedSubject = new BehaviorSubject<boolean>(false)
 
-  private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('none')
+  private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('dvf')
 
   // ✅ Auto-reload trigger - émet un événement à chaque changement de paramètre
   private readonly reloadTriggerSubject = new BehaviorSubject<number>(0)
@@ -152,6 +161,14 @@ export class FormService {
     return this.exactConsumptionSubject.asObservable()
   }
 
+  getTypeLocaleFilterObservable(): Observable<string[] | null> {
+    return this.selectedTypeLocalesSubject.asObservable()
+  }
+
+  getSelectedTypeLocalesObservable(): Observable<string[] | null> {
+    return this.selectedTypeLocalesSubject.asObservable()
+  }
+
   // 🔥 Getter methods for current values
   getCurrentConsumptionFilter(): [number, number] | null {
     return this.consumptionFilterSubject.value
@@ -176,6 +193,10 @@ export class FormService {
 
   getCurrentSurfaceMode(): FilterMode {
     return this.surfaceModeSubject.value
+  }
+
+  getTypeLocaleFilter(): string[] | null {
+    return this.selectedTypeLocalesSubject.value
   }
 
   getDataSourceObservable(): Observable<DataSourceType> {
@@ -207,6 +228,10 @@ export class FormService {
     return this.consumptionToggleSubject.asObservable()
   }
 
+  getTypeLocaleToggleObservable(): Observable<boolean> {
+    return this.typeLocaleToggleSubject.asObservable()
+  }
+
   // Loading state observables
   getPriceLoadingObservable(): Observable<boolean> {
     return this.priceLoadingSubject.asObservable()
@@ -228,6 +253,10 @@ export class FormService {
     return this.consumptionLoadingSubject.asObservable()
   }
 
+  getTypeLocaleLoadingObservable(): Observable<boolean> {
+    return this.typeLocaleLoadingSubject.asObservable()
+  }
+
   // Observables pour les états d'expansion des chevrons
   getPriceExpandedObservable(): Observable<boolean> {
     return this.priceExpandedSubject.asObservable()
@@ -247,6 +276,10 @@ export class FormService {
 
   getConsumptionExpandedObservable(): Observable<boolean> {
     return this.consumptionExpandedSubject.asObservable()
+  }
+
+  getTypeLocaleExpandedObservable(): Observable<boolean> {
+    return this.typeLocaleExpandedSubject.asObservable()
   }
 
   // Observables pour les modes des filtres
@@ -298,7 +331,8 @@ export class FormService {
   // ✅ Auto-reload trigger method
   triggerReload(): void {
     const currentCount = this.reloadTriggerSubject.value
-        this.reloadTriggerSubject.next(currentCount + 1)
+    console.log('🔄 FormService: triggerReload() called, incrementing count from', currentCount, 'to', currentCount + 1)
+    this.reloadTriggerSubject.next(currentCount + 1)
   }
 
   setPriceFilter(minPrice: number, maxPrice: number): void {
@@ -354,6 +388,18 @@ export class FormService {
     this.energyClassRangeSubject.next([min, max])
     this.exactEnergyClassSubject.next(null)
     this.selectedEnergyClassesSubject.next(null)
+    this.triggerReload()
+  }
+
+  setTypeLocaleFilter(typeLocales: string[]): void {
+    this.selectedTypeLocalesSubject.next(typeLocales)
+    this.saveCurrentState()
+    this.triggerReload()
+  }
+
+  setSelectedTypeLocales(typeLocales: string[]): void {
+    this.selectedTypeLocalesSubject.next(typeLocales)
+    this.saveCurrentState()
     this.triggerReload()
   }
 
@@ -429,6 +475,14 @@ export class FormService {
         this.triggerReload()
   }
 
+  setTypeLocaleToggle(active: boolean): void {
+    this.typeLocaleToggleSubject.next(active)
+    this.saveCurrentState()
+    // Trigger reload when type locale filter is toggled (regardless of value)
+    // This ensures true SELECT * behavior when activating the filter
+        this.triggerReload()
+  }
+
   // Setters pour les états d'expansion des chevrons
   setPriceExpanded(expanded: boolean): void {
     this.priceExpandedSubject.next(expanded)
@@ -452,6 +506,11 @@ export class FormService {
 
   setConsumptionExpanded(expanded: boolean): void {
     this.consumptionExpandedSubject.next(expanded)
+    this.saveCurrentState()
+  }
+
+  setTypeLocaleExpanded(expanded: boolean): void {
+    this.typeLocaleExpandedSubject.next(expanded)
     this.saveCurrentState()
   }
 
@@ -513,6 +572,10 @@ export class FormService {
     this.consumptionLoadingSubject.next(loading)
   }
 
+  setTypeLocaleLoading(loading: boolean): void {
+    this.typeLocaleLoadingSubject.next(loading)
+  }
+
   clearPriceFilter(): void {
     this.priceFilterSubject.next(null)
   }
@@ -544,6 +607,12 @@ export class FormService {
     this.triggerReload()
   }
 
+  clearTypeLocaleFilter(): void {
+    this.selectedTypeLocalesSubject.next(null)
+    this.saveCurrentState()
+    this.triggerReload()
+  }
+
 
   // ===== MÉTHODES DE PERSISTANCE =====
 
@@ -559,6 +628,7 @@ export class FormService {
         surfaceToggle: this.surfaceToggleSubject.value,
         energyToggle: this.energyToggleSubject.value,
         consumptionToggle: this.consumptionToggleSubject.value,
+        typeLocaleToggle: this.typeLocaleToggleSubject.value,
         
         // États d'expansion des chevrons
         priceExpanded: this.priceExpandedSubject.value,
@@ -566,6 +636,7 @@ export class FormService {
         surfaceExpanded: this.surfaceExpandedSubject.value,
         energyExpanded: this.energyExpandedSubject.value,
         consumptionExpanded: this.consumptionExpandedSubject.value,
+        typeLocaleExpanded: this.typeLocaleExpandedSubject.value,
         
         // Valeurs des filtres
         priceFilter: this.priceFilterSubject.value,
@@ -579,6 +650,7 @@ export class FormService {
         selectedEnergyClasses: this.selectedEnergyClassesSubject.value,
         consumptionFilter: this.consumptionFilterSubject.value,
         exactConsumption: this.exactConsumptionSubject.value,
+        selectedTypeLocales: this.selectedTypeLocalesSubject.value,
         
         // Modes des filtres
         priceMode: this.priceModeSubject.value,
@@ -630,6 +702,7 @@ export class FormService {
       this.surfaceToggleSubject.next(savedState.surfaceToggle)
       this.energyToggleSubject.next(savedState.energyToggle)
       this.consumptionToggleSubject.next(savedState.consumptionToggle)
+      this.typeLocaleToggleSubject.next(savedState.typeLocaleToggle)
 
       // Restaurer les états d'expansion des chevrons
       this.priceExpandedSubject.next(savedState.priceExpanded)
@@ -637,6 +710,7 @@ export class FormService {
       this.surfaceExpandedSubject.next(savedState.surfaceExpanded)
       this.energyExpandedSubject.next(savedState.energyExpanded)
       this.consumptionExpandedSubject.next(savedState.consumptionExpanded)
+      this.typeLocaleExpandedSubject.next(savedState.typeLocaleExpanded)
 
       // Restaurer les valeurs des filtres
       this.priceFilterSubject.next(savedState.priceFilter)
@@ -650,6 +724,7 @@ export class FormService {
       this.selectedEnergyClassesSubject.next(savedState.selectedEnergyClasses)
       this.consumptionFilterSubject.next(savedState.consumptionFilter)
       this.exactConsumptionSubject.next(savedState.exactConsumption)
+      this.selectedTypeLocalesSubject.next(savedState.selectedTypeLocales)
 
       // Restaurer les modes des filtres
       this.priceModeSubject.next(savedState.priceMode)
@@ -678,7 +753,8 @@ export class FormService {
            this.dateToggleSubject.value ||
            this.surfaceToggleSubject.value ||
            this.energyToggleSubject.value ||
-           this.consumptionToggleSubject.value
+           this.consumptionToggleSubject.value ||
+           this.typeLocaleToggleSubject.value
   }
 
   /**
@@ -691,6 +767,7 @@ export class FormService {
     this.surfaceToggleSubject.next(false)
     this.energyToggleSubject.next(false)
     this.consumptionToggleSubject.next(false)
+    this.typeLocaleToggleSubject.next(false)
 
     // Effacer toutes les valeurs de filtres
     this.clearPriceFilter()
@@ -698,6 +775,7 @@ export class FormService {
     this.clearSurfaceFilter()
     this.clearEnergyClassFilter()
     this.clearConsumptionFilter()
+    this.clearTypeLocaleFilter()
 
     // Fermer tous les chevrons
     this.priceExpandedSubject.next(false)
@@ -705,6 +783,7 @@ export class FormService {
     this.surfaceExpandedSubject.next(false)
     this.energyExpandedSubject.next(false)
     this.consumptionExpandedSubject.next(false)
+    this.typeLocaleExpandedSubject.next(false)
 
     // Réinitialiser les modes par défaut
     this.priceModeSubject.next('range')

@@ -1,0 +1,107 @@
+/* Minimal Leaflet CSS to avoid PNG bundling issues */
+
+/* Essential Leaflet container styles */
+.leaflet-container {
+    position: relative;
+    overflow: hidden;
+    -ms-touch-action: none;
+    touch-action: none;
+  }
+  
+  .leaflet-container * {
+    box-sizing: content-box;
+  }
+  
+  /* Map layers and tiles */
+  .leaflet-layer,
+  .leaflet-control-layers-overlays,
+  .leaflet-control-layers-base {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  
+  .leaflet-clickable {
+    cursor: pointer;
+  }
+  
+  .leaflet-container a {
+    color: #0078A8;
+  }
+  
+  /* Zoom controls */
+  .leaflet-control-zoom {
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    border-radius: 5px;
+  }
+  
+  .leaflet-control-zoom a {
+    background-color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+  }
+  
+  .leaflet-control-zoom a:hover {
+    background-color: #f4f4f4;
+  }
+  
+  /* Markers */
+  .leaflet-marker-icon,
+  .leaflet-marker-shadow {
+    display: block;
+  }
+  
+  .leaflet-marker-icon {
+    margin-left: -12px;
+    margin-top: -41px;
+  }
+  
+  .leaflet-marker-shadow {
+    margin-left: -12px;
+    margin-top: -18px;
+  }
+  
+  /* Popups */
+  .leaflet-popup {
+    position: absolute;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .leaflet-popup-content-wrapper {
+    padding: 1px;
+    text-align: left;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+  }
+  
+  .leaflet-popup-content {
+    margin: 14px 20px;
+    line-height: 1.4;
+  }
+  
+  /* Attribution */
+  .leaflet-control-attribution {
+    background: #fff;
+    background: rgba(255,255,255,0.7);
+    margin: 0;
+    padding: 0 5px;
+    font-size: 11px;
+    color: #333;
+  }
+  
+  /* Remove problematic layer control styles */
+  .leaflet-control-layers {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+    padding: 6px 8px;
+  }
+  

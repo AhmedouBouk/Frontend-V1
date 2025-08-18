@@ -6,11 +6,16 @@
       </svg>
     </div>
     <div class="alert-message">
-      <strong>{{ resultCount }}+ résultats trouvés</strong>
-      <span class="filter-info" *ngIf="activeFilters.length > 0">
-        
-      </span>
-      - Zoomez pour affiner
+      <!-- Message pour desktop -->
+      <div class="desktop-message">
+        Il y a plus de 500 résultats de certains filtres répondant à votre recherche. Zoomez pour limiter la zone de recherche ou affinez vos critères de recherche.
+      </div>
+      
+      <!-- Message pour mobile -->
+      <div class="mobile-message">
+        <div class="line1">Il y a plus de 500 résultats de certains filtres répondant à votre recherche.</div>
+        <div class="line2">Zoomez pour limiter la zone de recherche ou affinez vos critères de recherche.</div>
+      </div>
     </div>
     <button class="alert-close" (click)="closeAlert()" aria-label="Fermer l'alerte">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

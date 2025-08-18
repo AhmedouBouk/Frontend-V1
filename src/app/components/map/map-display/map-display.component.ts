@@ -23,9 +23,9 @@ import { MapStateService, type MapState } from "../../../services/map-state.serv
 
 // Create a default icon for Leaflet markers
 const defaultIcon = L.icon({
-  iconUrl: "assets/marker-icon.png",
-  iconRetinaUrl: "assets/marker-icon-2x.png",
-  shadowUrl: "assets/marker-shadow.png",
+  iconUrl: "assets/leaflet/marker-icon.png",
+  iconRetinaUrl: "assets/leaflet/marker-icon-2x.png",
+  shadowUrl: "assets/leaflet/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -106,10 +106,27 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         return
       }
 
+      // Debug: Check container dimensions
+      const containerElement = this.mapContainer.nativeElement
+      const containerRect = containerElement.getBoundingClientRect()
+      console.log('🗺️ DEBUG: Map container dimensions:', {
+        width: containerRect.width,
+        height: containerRect.height,
+        visible: containerRect.width > 0 && containerRect.height > 0
+      })
+
       // Récupérer l'état sauvegardé ou utiliser l'état par défaut
       const savedState = this.mapStateService.getMapState()
       const defaultState = this.mapStateService.getDefaultMapState()
       const mapState = savedState || defaultState
+
+      // Debug: Log map state being used
+      console.log('🗺️ DEBUG: Map state:', {
+        center: mapState.center,
+        zoom: mapState.zoom,
+        mapType: mapState.mapType,
+        isDefault: !savedState
+      })
 
       // Create the map with restored state
       this.map = L.map(this.mapContainer.nativeElement, {
@@ -118,6 +135,9 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         zoomControl: false,
         attributionControl: false,
       })
+
+      // Debug: Log map creation
+      console.log('🗺️ DEBUG: Map created with center:', this.map.getCenter(), 'zoom:', this.map.getZoom())
 
       // Add attribution control
       const attributionControl = L.control({
@@ -153,15 +173,54 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         }),
       }
 
+      // Debug: Add tile loading event listeners
+      const streetLayer = this.baseLayers.street
+      streetLayer.on('loading', () => {
+        console.log('🗺️ DEBUG: Street tiles loading started')
+      })
+      streetLayer.on('load', () => {
+        console.log('🗺️ DEBUG: Street tiles loading completed')
+      })
+      streetLayer.on('tileerror', (e: any) => {
+        console.error('🗺️ DEBUG: Street tile loading error:', e)
+      })
+
       // Create feature group for markers
       this.featureGroup = (L as any).layerGroup().addTo(this.map)
+      
 
       // Add the restored layer type to the map
       const layerType = mapState.mapType || 'street'
       this.currentLayer = this.baseLayers[layerType].addTo(this.map)
 
+      // Debug: Log active layer
+      console.log('🗺️ DEBUG: Active layer type:', layerType)
+
       // Force a map resize to ensure it displays correctly
       this.map.invalidateSize(true)
+
+      // Debug: Log map bounds after initialization
+      setTimeout(() => {
+        const bounds = this.map.getBounds()
+        console.log('🗺️ DEBUG: Map bounds after init:', {
+          north: bounds.getNorth(),
+          south: bounds.getSouth(),
+          east: bounds.getEast(),
+          west: bounds.getWest(),
+          center: this.map.getCenter(),
+          zoom: this.map.getZoom()
+        })
+
+        // Check if map container is properly sized
+        const finalRect = containerElement.getBoundingClientRect()
+        console.log('🗺️ DEBUG: Final container dimensions:', {
+          width: finalRect.width,
+          height: finalRect.height
+        })
+
+        // Add debug control to map
+        this.addDebugControl()
+      }, 500)
 
       // Set up event listeners for map movement and zoom with state saving
       this.map.on("moveend", () => {
@@ -182,8 +241,6 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       }, 300)
     }, 100)
   }
-
-  
 
   // Method to get map bounds - accounting for both bottom and left sidebar coverage
   getMapBounds(): any {
@@ -330,27 +387,46 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   // Update markers when properties change
   ngOnChanges(): void {
     if (this.map) {
-      this.updateMarkers()
+      // Laisse Leaflet/DOM terminer le cycle avant de repeindre
+      setTimeout(() => this.updateMarkers(), 0);
+    }
+  }
+  
+  // Public method to force marker updates - called by parent component
+  forceUpdateMarkers(): void {
+    if (this.map) {
+      this.updateMarkers();
     }
   }
 
   private updateMarkers(): void {
+    console.log('🗺️ MapDisplay: updateMarkers() called')
+    console.log('🗺️ MapDisplay: visibleDvfProperties:', this.visibleDvfProperties.length)
+    console.log('🗺️ MapDisplay: visibleDpeProperties:', this.visibleDpeProperties.length)
+    console.log('🗺️ MapDisplay: visibleParcelleProperties:', this.visibleParcelleProperties.length)
+    console.log('🗺️ MapDisplay: activeDataSources:', this.activeDataSources)
+    console.log('🗺️ MapDisplay: currentDataSource:', this.currentDataSource)
+    
     this.clearMarkers()
 
     // Déterminer quelles sources afficher
     const sourcesToShow = this.activeDataSources.length > 0 ? this.activeDataSources : [this.currentDataSource]
     
-    
+    console.log('🗺️ MapDisplay: sourcesToShow:', sourcesToShow)
 
     // Afficher les marqueurs DVF si la source est active
     if (sourcesToShow.includes('dvf') && this.visibleDvfProperties.length > 0) {
+      console.log('🗺️ MapDisplay: Adding', this.visibleDvfProperties.length, 'DVF markers')
       this.visibleDvfProperties.forEach((property) => {
         this.addDvfMarker(property)
       })
+    } else {
+      console.log('🗺️ MapDisplay: Not adding DVF markers - sourcesToShow includes dvf:', sourcesToShow.includes('dvf'), 'visibleDvfProperties.length:', this.visibleDvfProperties.length)
     }
 
     // Afficher les marqueurs DPE si la source est active
     if (sourcesToShow.includes('dpe') && this.visibleDpeProperties.length > 0) {
+      console.log('🗺️ MapDisplay: Adding', this.visibleDpeProperties.length, 'DPE markers')
       this.visibleDpeProperties.forEach((property) => {
         this.addDpeMarker(property)
       })
@@ -358,11 +434,13 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     // Afficher les marqueurs Parcelles si la source est active
     if (sourcesToShow.includes('parcelles') && this.visibleParcelleProperties.length > 0) {
+      console.log('🗺️ MapDisplay: Adding', this.visibleParcelleProperties.length, 'Parcelle markers')
       this.visibleParcelleProperties.forEach((property) => {
         this.addParcelleMarker(property)
       })
     }
-
+    
+    console.log('🗺️ MapDisplay: Total markers after update:', this.markers.length)
   }
 
   private clearMarkers(): void {
@@ -400,8 +478,8 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
     } else {
       // No filters active - use default marker
-      markerIcon = "📍"
-      popupTitle = `📍 Propriété`
+      markerIcon = ""
+      popupTitle = ``
     }
   
 
@@ -443,29 +521,29 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     // pick gradient for A..G
     const { bg } = this.getEnergyPalette(energyClass);
   
-    // inline-styled chip (24x24), no blue halo, white text
+    // inline-styled chip (12x12 - half the original size), no blue halo, white text
     const html = `
       <div style="
-        width:24px;height:24px;border-radius:6px;
+        width:12px;height:12px;border-radius:3px;
         display:grid;place-items:center;
         font-weight:800;letter-spacing:.02em;line-height:1;
         border:1px solid rgba(0,0,0,.15);
         box-shadow:
-          0 1px 3px rgba(0,0,0,.35),
+          0 1px 2px rgba(0,0,0,.25),
           inset 0 1px 0 rgba(255,255,255,.25);
         background:${bg};
         color:#ffffff;
         user-select:none;
       ">
-        <span style="font-size:${isConsumption ? '13px' : '12px'};transform:translateY(.5px)">${iconChar}</span>
+        <span style="font-size:${isConsumption ? '7px' : '6px'};transform:translateY(.25px)">${iconChar}</span>
       </div>`;
   
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: `leaflet-dpe-chip energy-${energyClass.toLowerCase()} ${isConsumption ? 'is-consumption' : ''}`,
         html,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
+        iconSize: [13, 13], // Half of original 26x26
+        iconAnchor: [6.5, 6.5], // Half of original 13x13
       }),
     }).addTo(this.featureGroup);
   
@@ -522,7 +600,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
         className: "emoji-marker parcelle-marker",
-        html: `<div class="emoji-marker parcelle-marker">📐</div>`,
+        html: `<div class="emoji-marker parcelle-marker">📌</div>`,
         iconSize: [20, 20], // Fixed small size for emoji only
         iconAnchor: [10, 10], // Center the emoji exactly on the position
       }),
@@ -530,7 +608,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     marker.bindPopup(`
       <div class="property-popup">
-        <h3>📐 Parcelle ${property.number}</h3>
+        <h3>📌 Parcelle ${property.number}</h3>
         <p><strong>Surface:</strong> ${property.surface.toLocaleString()} m²</p>
         <p><strong>Adresse:</strong> ${property.address}</p>
         <p><strong>Commune:</strong> ${property.city}</p>
@@ -577,5 +655,34 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     }
     
     this.mapStateService.saveMapState(mapState)
+  }
+
+  private addDebugControl(): void {
+    const debugControl = L.control({
+      position: "bottomright",
+    }) as any
+    debugControl.onAdd = () => {
+      const div = L.DomUtil.create("div", "leaflet-control-debug")
+      div.innerHTML = `
+        <button id="debug-toggle-map-bounds">Toggle Map Bounds</button>
+        <button id="debug-toggle-map-state">Toggle Map State</button>
+      `
+      return div
+    }
+    debugControl.addTo(this.map)
+
+    const debugToggleMapBoundsButton = document.getElementById("debug-toggle-map-bounds")
+    if (debugToggleMapBoundsButton) {
+      debugToggleMapBoundsButton.addEventListener("click", () => {
+        console.log('🗺️ DEBUG: Map bounds:', this.map.getBounds())
+      })
+    }
+
+    const debugToggleMapStateButton = document.getElementById("debug-toggle-map-state")
+    if (debugToggleMapStateButton) {
+      debugToggleMapStateButton.addEventListener("click", () => {
+        console.log('🗺️ DEBUG: Map state:', this.mapStateService.getMapState())
+      })
+    }
   }
 }

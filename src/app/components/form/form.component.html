@@ -1,6 +1,45 @@
 <div class="filter-form-container">
   <form [formGroup]="filterForm" aria-label="Formulaire de filtres de recherche">
   
+    <!-- Section Type de Locale - MOVED TO TOP -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="icon-container">
+            <img src="assets/icons/logo.png" alt="Type de locale" class="section-icon-img">
+          </div>
+          <h3>Type de locale</h3>
+        </div>
+        
+        <img src="assets/icons/down.png" 
+             alt="Expand section" 
+             class="section-chevron" 
+             [class.rotated]="typeLocaleExpanded"
+             (click)="toggleTypeLocaleExpanded()">
+        <label class="toggle-switch" for="useTypeLocaleFilter">
+          <input type="checkbox" formControlName="useTypeLocaleFilter" id="useTypeLocaleFilter">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="section-content" *ngIf="typeLocaleExpanded">
+        <div class="checkbox-group">
+          <div class="checkbox-options" *ngFor="let option of typeLocaleOptions">
+            <label class="checkbox-item">
+              <input type="checkbox" 
+                     [value]="option.value" 
+                     [checked]="selectedTypeLocales.includes(option.value)"
+                     (change)="onTypeLocaleCheckboxChange($event, option.value)">
+              <span class="checkbox-label">
+                <span class="emoji-icon">{{ option.icon }}</span>
+                {{ option.label }}
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section Prix -->
     <div class="form-section">
       <div class="section-header">
@@ -39,7 +78,7 @@
         <div class="price-exact" *ngIf="filterForm.get('priceMode')?.value === 'exact'">
           <div class="form-group">
             <label for="price">Montant (€)</label>
-            <input type="number" id="price" formControlName="price" placeholder="ex: 150000">
+            <input type="number" id="price" formControlName="price" >
           </div>
         </div>
   
@@ -47,11 +86,11 @@
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minPrice">Min (€)</label>
-              <input type="number" id="minPrice" formControlName="minPrice" placeholder="100000">
+              <input type="number" id="minPrice" formControlName="minPrice">
             </div>
             <div class="form-group">
               <label for="maxPrice">Max (€)</label>
-              <input type="number" id="maxPrice" formControlName="maxPrice" placeholder="300000">
+              <input type="number" id="maxPrice" formControlName="maxPrice">
             </div>
           </div>
         </div>
@@ -96,7 +135,7 @@
         <div class="surface-exact" *ngIf="filterForm.get('surfaceMode')?.value === 'exact'">
           <div class="form-group">
             <label for="surface">Surface (m²)</label>
-            <input type="number" id="surface" formControlName="surface" placeholder="ex: 150">
+            <input type="number" id="surface" formControlName="surface">
           </div>
         </div>
   
@@ -104,11 +143,11 @@
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minSurface">Min (m²)</label>
-              <input type="number" id="minSurface" formControlName="minSurface" placeholder="100">
+              <input type="number" id="minSurface" formControlName="minSurface">
             </div>
             <div class="form-group">
               <label for="maxSurface">Max (m²)</label>
-              <input type="number" id="maxSurface" formControlName="maxSurface" placeholder="1000">
+              <input type="number" id="maxSurface" formControlName="maxSurface">
             </div>
           </div>
         </div>
@@ -210,7 +249,7 @@
         <div class="consumption-exact" *ngIf="filterForm.get('consumptionMode')?.value === 'exact'">
           <div class="form-group">
             <label for="exactConsumption">Consommation (kWh/m²/an)</label>
-            <input type="number" id="exactConsumption" formControlName="exactConsumption" placeholder="ex: 150">
+            <input type="number" id="exactConsumption" formControlName="exactConsumption" >
           </div>
         </div>
 
@@ -218,11 +257,11 @@
           <div class="input-row-compact">
             <div class="form-group">
               <label for="minConsumption">Min (kWh/m²/an)</label>
-              <input type="number" id="minConsumption" formControlName="minConsumption" placeholder="50">
+              <input type="number" id="minConsumption" formControlName="minConsumption">
             </div>
             <div class="form-group">
               <label for="maxConsumption">Max (kWh/m²/an)</label>
-              <input type="number" id="maxConsumption" formControlName="maxConsumption" placeholder="300">
+              <input type="number" id="maxConsumption" formControlName="maxConsumption">
             </div>
           </div>
         </div>
@@ -251,7 +290,7 @@
           <span class="slider"></span>
         </label>
       </div>
-  
+
       <div class="section-content" *ngIf="dateExpanded">
         <div class="radio-group-inline">
           <label class="radio-item">
@@ -263,28 +302,199 @@
             <span class="radio-label">Intervalle</span>
           </label>
         </div>
-  
+
         <div class="date-exact" *ngIf="filterForm.get('dateMode')?.value === 'exact'">
           <div class="form-group">
             <label for="exactDate">Date</label>
-            <input type="date" id="exactDate" formControlName="exactDate">
+            <div class="date-field">
+              <input
+                type="text"
+                placeholder="jj/mm/aaaa"
+                [value]="exactDateFormattedDate"
+                readonly
+                (click)="openExactDatePicker()"
+                class="custom-date-input"
+              />
+
+              <div class="picker" *ngIf="isExactDatePickerOpen">
+                <!-- Year View -->
+                <ng-container *ngIf="exactDateView === 'year'">
+                  <div class="grid years">
+                    <div
+                      class="cell"
+                      *ngFor="let y of years"
+                      (click)="selectExactDateYear(y)"
+                    >
+                      {{ y }}
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- Month View -->
+                <ng-container *ngIf="exactDateView === 'month'">
+                  <div class="picker-header">{{ exactDateSelectedYear }}</div>
+                  <div class="grid months">
+                    <div
+                      class="cell"
+                      *ngFor="let m of months; let i = index"
+                      (click)="selectExactDateMonth(i)"
+                    >
+                      {{ m }}
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- Day View -->
+                <ng-container *ngIf="exactDateView === 'day'">
+                  <div class="picker-header">
+                    {{ exactDateSelectedMonth !== null ? months[exactDateSelectedMonth] : '' }}
+                    {{ exactDateSelectedYear }}
+                  </div>
+                  <div class="grid days">
+                    <div class="dow" *ngFor="let d of dows">{{ d }}</div>
+                    <div class="empty" *ngFor="let e of [].constructor(exactDateFirstDayOfMonth)"></div>
+                    <div
+                      class="cell"
+                      *ngFor="let d of exactDateDaysInMonth"
+                      (click)="selectExactDateDay(d)"
+                    >
+                      {{ d }}
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
           </div>
         </div>
-  
+
         <div class="date-interval" *ngIf="filterForm.get('dateMode')?.value === 'range'">
           <div class="input-row-compact">
             <div class="form-group">
               <label for="startDate">Début</label>
-              <input type="date" id="startDate" formControlName="startDate">
+              <div class="date-field">
+                <input
+                  type="text"
+                  placeholder="jj/mm/aaaa"
+                  [value]="startDateFormattedDate"
+                  readonly
+                  (click)="openStartDatePicker()"
+                  class="custom-date-input"
+                />
+
+                <div class="picker" *ngIf="isStartDatePickerOpen">
+                  <!-- Year View -->
+                  <ng-container *ngIf="startDateView === 'year'">
+                    <div class="grid years">
+                      <div
+                        class="cell"
+                        *ngFor="let y of years"
+                        (click)="selectStartDateYear(y)"
+                      >
+                        {{ y }}
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <!-- Month View -->
+                  <ng-container *ngIf="startDateView === 'month'">
+                    <div class="picker-header">{{ startDateSelectedYear }}</div>
+                    <div class="grid months">
+                      <div
+                        class="cell"
+                        *ngFor="let m of months; let i = index"
+                        (click)="selectStartDateMonth(i)"
+                      >
+                        {{ m }}
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <!-- Day View -->
+                  <ng-container *ngIf="startDateView === 'day'">
+                    <div class="picker-header">
+                      {{ startDateSelectedMonth !== null ? months[startDateSelectedMonth] : '' }}
+                      {{ startDateSelectedYear }}
+                    </div>
+                    <div class="grid days">
+                      <div class="dow" *ngFor="let d of dows">{{ d }}</div>
+                      <div class="empty" *ngFor="let e of [].constructor(startDateFirstDayOfMonth)"></div>
+                      <div
+                        class="cell"
+                        *ngFor="let d of startDateDaysInMonth"
+                        (click)="selectStartDateDay(d)"
+                      >
+                        {{ d }}
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
             </div>
+
             <div class="form-group">
               <label for="endDate">Fin</label>
-              <input type="date" id="endDate" formControlName="endDate">
+              <div class="date-field">
+                <input
+                  type="text"
+                  placeholder="jj/mm/aaaa"
+                  [value]="endDateFormattedDate"
+                  readonly
+                  (click)="openEndDatePicker()"
+                  class="custom-date-input"
+                />
+
+                <div class="picker" *ngIf="isEndDatePickerOpen">
+                  <!-- Year View -->
+                  <ng-container *ngIf="endDateView === 'year'">
+                    <div class="grid years">
+                      <div
+                        class="cell"
+                        *ngFor="let y of years"
+                        (click)="selectEndDateYear(y)"
+                      >
+                        {{ y }}
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <!-- Month View -->
+                  <ng-container *ngIf="endDateView === 'month'">
+                    <div class="picker-header">{{ endDateSelectedYear }}</div>
+                    <div class="grid months">
+                      <div
+                        class="cell"
+                        *ngFor="let m of months; let i = index"
+                        (click)="selectEndDateMonth(i)"
+                      >
+                        {{ m }}
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <!-- Day View -->
+                  <ng-container *ngIf="endDateView === 'day'">
+                    <div class="picker-header">
+                      {{ endDateSelectedMonth !== null ? months[endDateSelectedMonth] : '' }}
+                      {{ endDateSelectedYear }}
+                    </div>
+                    <div class="grid days">
+                      <div class="dow" *ngFor="let d of dows">{{ d }}</div>
+                      <div class="empty" *ngFor="let e of [].constructor(endDateFirstDayOfMonth)"></div>
+                      <div
+                        class="cell"
+                        *ngFor="let d of endDateDaysInMonth"
+                        (click)="selectEndDateDay(d)"
+                      >
+                        {{ d }}
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  
   </form>
 </div>

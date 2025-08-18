@@ -4,18 +4,16 @@
   left: 20px;
   z-index: 1000;
   display: flex;
-  flex-direction: column; // Vertical alignment
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: flex-end;
   gap: 8px;
-  
-  // Dynamic positioning based on sidebar state
   transition: bottom 0.3s ease;
 }
 
-/* Desktop: Position above map-results when it exists */
+/* Desktop */
 @media (min-width: 769px) {
   .map-search-container {
-    bottom: calc(40vh + 20px); /* Position above the map-results container */
+    bottom: calc(40vh + 20px);
   }
 }
 
@@ -28,53 +26,47 @@
 
 .search-toggle-btn,
 .location-btn {
-  /* Même style que le toggle sidebar et les autres contrôles */
   width: 48px;
   height: 48px;
   background: var(--surface-color, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: 8px; /* var(--radius-lg) */
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--text-secondary, #6b7280);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* var(--shadow-md) */
-  
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
   &:hover {
     background: var(--surface-hover, #f9fafb);
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* var(--shadow-lg) */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   &.active {
-    background: linear-gradient(135deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
+    background: linear-gradient(
+      135deg,
+      var(--primary-500, #3b82f6),
+      var(--primary-600, #2563eb)
+    );
     border-color: var(--primary-500, #3b82f6);
     color: white;
   }
-  
+
   svg {
     transition: transform 0.2s ease;
   }
-  
+
   &:hover svg {
     transform: scale(1.05);
-  }
-}
-
-.location-btn {
-  background: var(--success-50, #f0fdf4);
-  border-color: var(--success-200, #bbf7d0);
-  color: var(--success-600, #16a34a);
-  
-  &:hover {
-    background: var(--success-100, #dcfce7);
-    border-color: var(--success-300, #86efac);
   }
 }
 
@@ -83,7 +75,7 @@
   overflow: visible;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
-  
+
   &.open {
     width: 320px;
     opacity: 1;
@@ -95,26 +87,33 @@
   background: var(--surface-color, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
   border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .search-input {
   width: 100%;
-  height: 48px; /* Même hauteur que les boutons */
+  height: 48px;
   padding: 0 40px 0 16px;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+
+  /* ✅ Fix iOS zoom */
+  font-size: 16px;
+
   color: var(--text-color, #374151);
   background: transparent;
   outline: none;
-  
+
   &::placeholder {
     color: var(--text-muted, #9ca3af);
   }
-  
+
+  /* ✅ Remove blue glow */
   &:focus {
-    box-shadow: 0 0 0 3px var(--primary-100, #dbeafe);
+    outline: none;
+    box-shadow: none;
+    border: none;
   }
 }
 
@@ -124,7 +123,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--primary-500, #3b82f6);
-  
+
   svg {
     animation: spin 1s linear infinite;
   }
@@ -136,16 +135,16 @@
   right: 0;
   background: var(--surface-color, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   max-height: 200px;
   overflow-y: auto;
   z-index: 1001;
   border-radius: 8px;
 }
 
-/* Résultats au-dessus de l'input pour être visibles */
 .search-results-top {
-  bottom: calc(100% + 8px); /* Plus d'espacement pour éviter le chevauchement */
+  bottom: calc(100% + 8px);
   border-radius: 8px;
 }
 
@@ -157,20 +156,20 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid var(--border-light, #f3f4f6);
-  
+
   &:first-child {
     border-radius: 8px 8px 0 0;
   }
-  
+
   &:last-child {
     border-bottom: none;
     border-radius: 0 0 8px 8px;
   }
-  
+
   &:only-child {
     border-radius: 8px;
   }
-  
+
   &:hover {
     background: var(--hover-color, #f9fafb);
   }
@@ -191,7 +190,7 @@
   white-space: nowrap;
 }
 
-// Dark theme support
+/* --- Dark theme --- */
 [cds-theme="dark"] {
   .search-toggle-btn,
   .location-btn,
@@ -201,97 +200,78 @@
     border-color: var(--border-dark, #374151);
     color: var(--text-dark, #f9fafb);
   }
-  
+
   .search-input::placeholder {
     color: var(--text-muted-dark, #6b7280);
   }
-  
+
   .search-result-item:hover {
     background: var(--hover-dark, #374151);
   }
-  
-  .location-btn {
-    background: var(--success-900, #14532d);
-    border-color: var(--success-700, #15803d);
-    color: var(--success-400, #4ade80);
-    
-    &:hover {
-      background: var(--success-800, #166534);
-    }
-  }
 }
 
-// Responsive design
+/* --- Responsive design --- */
 @media (max-width: 768px) {
   .map-search-container {
     position: fixed;
     left: 20px;
     z-index: 999;
-    
-    // Move higher up to avoid covering map results
-    bottom: calc(50vh + 80px); // Moved much higher
-    
-    // When sidebar is open, position above it
+    bottom: calc(50vh + 80px);
+
     &.with-sidebar {
-      bottom: calc(40vh + 80px); // Higher when sidebar is open
+      bottom: calc(40vh + 80px);
     }
-    
-    // Keep vertical layout on mobile
-    flex-direction: column;
-    align-items: flex-start;
+
+    flex-direction: row;
+    align-items: flex-end;
   }
-  
+
   .search-controls {
-    flex-direction: column; // Keep vertical on mobile
+    flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .search-bar {
-    order: -1; // Put search bar at the top when open
-    
     &.open {
       width: 280px;
-      margin-bottom: 8px;
     }
   }
-  
+
   .search-toggle-btn,
   .location-btn {
     width: 48px;
     height: 48px;
   }
-  
+
   .search-input {
     height: 48px;
-    font-size: 14px;
+    font-size: 16px; /* toujours ≥16px */
   }
 }
 
 @media (max-width: 480px) {
   .map-search-container {
     left: 10px;
-    
-    // Higher position for small screens to avoid covering results
     bottom: calc(50vh + 70px);
-    
+
     &.with-sidebar {
       bottom: calc(40vh + 70px);
     }
   }
-  
+
   .search-bar.open {
-    width: 260px; // Fixed width for small screens
+    width: 280px;
   }
-  
+
   .search-toggle-btn,
   .location-btn {
-    width: 44px; // Slightly smaller on very small screens
+    width: 44px;
     height: 44px;
   }
 }
 
-// Animations
+/* --- Animations --- */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -301,7 +281,7 @@
   }
 }
 
-// Scrollbar styling for search results
+/* --- Scrollbar --- */
 .search-results::-webkit-scrollbar {
   width: 6px;
 }
