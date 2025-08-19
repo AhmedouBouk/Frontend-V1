@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Silent SSO</title>
+  </head>
+  <body>
+    <script>
+      // Keycloak expects to post a message back to the parent window
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

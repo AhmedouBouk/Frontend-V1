@@ -7,7 +7,7 @@ import { FormComponent } from "./components/form/form.component"
 import { MapService } from "./services/map.service"
 import { FormService } from "./services/form.service"
 import { MapComponent } from "./components/map/map.component"
-import { AuthService } from "./services/auth.service"
+import { KeycloakAuthService } from "./services/keycloak-auth.service"
 
 interface NominatimResult {
   display_name: string
@@ -39,11 +39,11 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly formService = inject(FormService)
   private readonly http = inject(HttpClient)
   private readonly subscriptions: Subscription[] = []
-  private readonly auth = inject(AuthService)
+  private readonly kcAuth = inject(KeycloakAuthService)
 
   ngOnInit(): void {
-    // Initialize auth (reads forwarded headers from Traefik / oauth2-proxy)
-    this.auth.init()
+    // Initialize Keycloak auth (direct integration)
+    this.kcAuth.init()
     setTimeout(() => {
       window.location.reload();
     }, 300000);
@@ -209,17 +209,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isSearchOpen = false
   }
 
-  // Auth bindings for template
+  // Auth bindings for template (Keycloak)
   get isAuthenticated(): boolean {
-    return this.auth.isAuthenticated()
+    return this.kcAuth.isAuthenticated()
   }
 
   get userName(): string {
-    const u = this.auth.user()
+    const u = this.kcAuth.user()
     return u?.name || u?.preferred_username || 'Utilisateur'
   }
 
   logout(): void {
-    this.auth.logout()
+    this.kcAuth.logout()
   }
 }

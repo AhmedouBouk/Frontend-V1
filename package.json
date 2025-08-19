@@ -24,6 +24,8 @@
     "dvf-map": "file:",
     "geoportal-access-lib": "^3.4.6",
     "geoportal-extensions-leaflet": "^2.4.2",
+    "keycloak-angular": "^19.0.2",
+    "keycloak-js": "^26.2.0",
     "leaflet": "^1.9.4",
     "leaflet.wms": "^0.2.0",
     "proj4": "^2.15.0",
