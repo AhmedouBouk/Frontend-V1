@@ -136,6 +136,66 @@
   min-height: 0;
 }
 
+/* Auth block at bottom */
+.auth-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--border-light);
+  background-color: var(--surface-color);
+}
+
+.auth-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.auth-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.auth-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-btn {
+  margin-top: 2px;
+  background: transparent;
+  border: none;
+  color: var(--primary-600);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .sidebar-content::-webkit-scrollbar {
   width: 6px;
 }
@@ -404,3 +464,151 @@
     animation: rotate-in 0.5s ease-out;
   }
 }
+<<<<<<< HEAD
+=======
+
+@keyframes rotate-in {
+  from {
+    transform: rotate(-90deg) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+// Dark theme support
+[data-theme="dark"] {
+  .app-container {
+    background-color: var(--background-color);
+  }
+  
+  .sidebar {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+  }
+  
+  .sidebar-header {
+    background-color: var(--surface-color);
+    border-color: var(--border-light);
+  }
+
+  .auth-block {
+    background-color: var(--surface-color);
+    border-color: var(--border-light);
+  }
+  
+  .logo-button {
+    color: var(--text-primary);
+  }
+  
+  .logo-icon {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .control-button {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+    
+    &.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  }
+  
+  .property-list-container {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+  }
+  
+  .search-toggle-btn,
+  .location-btn,
+  .search-input-container,
+  .search-results {
+    background: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .search-input::placeholder {
+    color: var(--text-muted);
+  }
+  
+  .search-result-item:hover {
+    background: var(--surface-hover);
+  }
+  
+  .location-btn {
+    background: var(--success-900, #14532d);
+    border-color: var(--success-700, #15803d);
+    color: var(--success-400, #4ade80);
+    
+    &:hover {
+      background: var(--success-800, #166534);
+    }
+  }
+  
+  .fixed-logo {
+    background-color: var(--surface-color);
+    box-shadow: var(--shadow-md);
+    color: var(--text-primary);
+  }
+  
+  .mobile-toggle {
+    background-color: var(--surface-color);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  .sidebar-overlay.open {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-results::-webkit-scrollbar-track {
+  background: var(--surface-color, #ffffff);
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: var(--border-color, #e5e7eb);
+  border-radius: 3px;
+}
+
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #9ca3af);
+}
+
+/* ===== VARIABLES CSS POUR LA STABILITÉ ===== */
+:root {
+  --sidebar-width: 260px; /* Reduced from 300px */
+  --header-height: 55px; /* Slightly reduced */
+  --transition-normal: 0.3s ease;
+  --transition-fast: 0.2s ease;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.875rem; /* Slightly reduced */
+  --space-lg: 1.25rem; /* Slightly reduced */
+  --space-xl: 1.75rem; /* Slightly reduced */
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+>>>>>>> 2c80c538cf12c6c163188b065e9f2f44f29e4d9a

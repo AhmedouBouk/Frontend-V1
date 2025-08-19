@@ -1,4 +1,7 @@
-version: "3.9"
+networks:
+  forward:
+    external:
+      name: traefik_forward
 
 services:
   web:
@@ -7,6 +10,6 @@ services:
       dockerfile: Dockerfile
     image: angular-nginx-prod:latest
     container_name: angular-web
-    ports:
-      - "80:80"
+    networks:
+      - forward
     restart: unless-stopped
