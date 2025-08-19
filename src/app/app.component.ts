@@ -7,6 +7,7 @@ import { FormComponent } from "./components/form/form.component"
 import { MapService } from "./services/map.service"
 import { FormService } from "./services/form.service"
 import { MapComponent } from "./components/map/map.component"
+import { AuthService } from "./services/auth.service"
 
 interface NominatimResult {
   display_name: string
@@ -38,8 +39,11 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly formService = inject(FormService)
   private readonly http = inject(HttpClient)
   private readonly subscriptions: Subscription[] = []
+  private readonly auth = inject(AuthService)
 
   ngOnInit(): void {
+    // Initialize auth (reads forwarded headers from Traefik / oauth2-proxy)
+    this.auth.init()
     setTimeout(() => {
       window.location.reload();
     }, 300000);
@@ -55,7 +59,7 @@ export class AppComponent implements OnInit, OnDestroy {
     
     // S'abonner aux changements d'état du sidebar depuis FormService
     this.subscriptions.push(
-      this.formService.getLeftSidebarOpenObservable().subscribe(open => {
+      this.formService.getLeftSidebarOpenObservable().subscribe((open: boolean) => {
         this.sidebarOpen = open
       })
     )
@@ -130,14 +134,14 @@ export class AppComponent implements OnInit, OnDestroy {
     const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=fr&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`
     
     this.http.get<NominatimResult[]>(url).subscribe({
-      next: (results) => {
+      next: (results: NominatimResult[]) => {
         this.searchResults = results.filter(result => 
           result.display_name && result.lat && result.lon
         )
         this.showResults = this.searchResults.length > 0
         this.isSearching = false
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erreur de recherche:', error)
         this.isSearching = false
         this.searchResults = []
@@ -203,5 +207,19 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showResults = false
     this.isSearching = false
     this.isSearchOpen = false
+  }
+
+  // Auth bindings for template
+  get isAuthenticated(): boolean {
+    return this.auth.isAuthenticated()
+  }
+
+  get userName(): string {
+    const u = this.auth.user()
+    return u?.name || u?.preferred_username || 'Utilisateur'
+  }
+
+  logout(): void {
+    this.auth.logout()
   }
 }

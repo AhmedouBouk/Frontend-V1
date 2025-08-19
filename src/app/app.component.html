@@ -30,6 +30,18 @@
     <div class="sidebar-content">
       <app-form></app-form>
     </div>
+    <!-- Auth block at the bottom -->
+    <div class="auth-block" *ngIf="isAuthenticated">
+      <div class="auth-avatar avatar-fallback" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.071 0-7 2.343-7 5.25V22h14v-2.75C19 16.343 16.071 14 12 14z"/>
+        </svg>
+      </div>
+      <div class="auth-info">
+        <div class="auth-name">{{ userName }}</div>
+        <button class="logout-btn" type="button" (click)="logout()">Se déconnecter</button>
+      </div>
+    </div>
   </div>
   
   <div class="map-container" [class.blur-background]="sidebarOpen">
