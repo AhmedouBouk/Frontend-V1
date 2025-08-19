@@ -61,17 +61,17 @@ export class DpeService {
   }
 
   /**
-   * Helper method to determine if a range should be ignored for SELECT * behavior
+   * Helper method to determine if a surface range should be ignored for SELECT * behavior
    * Returns true if the range is null, empty, or contains only default/placeholder values
    * @param range The numeric range to check
    * @returns true if this range should be ignored (SELECT * behavior)
    */
-  private shouldIgnoreRange(range: [number, number] | null): boolean {
+  private shouldIgnoreSurfaceRange(range: [number, number] | null): boolean {
     if (!range || !Array.isArray(range) || range.length !== 2) {
       return true; // No range provided - SELECT * behavior
     }
     
-    // Check for common default ranges that indicate "no real filter"
+    // Check for surface filter default ranges that indicate "no real filter"
     const [min, max] = range;
     
     // Surface filter defaults: 0-10000 or larger
@@ -79,12 +79,23 @@ export class DpeService {
       return true; // Default surface range - SELECT * behavior
     }
     
-    // Consumption filter defaults: 0-1000 or larger  
-    if (min === 0 && max >= 1000) {
-      return true; // Default consumption range - SELECT * behavior
+    return false; // Valid user-provided surface range
+  }
+
+  /**
+   * Helper method to determine if a consumption range should be ignored for SELECT * behavior
+   * For consumption filters, we accept ALL user-provided ranges as valid
+   * @param range The numeric range to check
+   * @returns always false for consumption filters
+   */
+  private shouldIgnoreConsumptionRange(range: [number, number] | null): boolean {
+    if (!range || !Array.isArray(range) || range.length !== 2) {
+      return true; // No range provided - SELECT * behavior
     }
     
-    return false; // Valid user-provided range
+    // For consumption filter, accept ALL user-provided ranges as valid
+    // Don't ignore any consumption ranges since user explicitly set them
+    return false; // Valid user-provided consumption range
   }
   
   /**
@@ -107,36 +118,30 @@ export class DpeService {
     // Ajout des filtres de date si présents
     if (exactDate) {
       enhancedParams['date_exacte'] = exactDate;
-          } else if (dateRange && dateRange.length === 2) {
+    } else if (dateRange && dateRange.length === 2) {
       enhancedParams['date_min'] = dateRange[0];
       enhancedParams['date_max'] = dateRange[1];
-          } else {
-          }
+    }
 
-    // 📐 Surface filter parameters - TRUE SELECT * logic
+    // 🔥 Surface filter parameters - TRUE SELECT * logic
     if (surfaceRange && Array.isArray(surfaceRange) && surfaceRange.length === 2) {
       // Only add parameters if they contain valid, non-default values
-      if (!this.shouldIgnoreRange(surfaceRange)) {
+      if (!this.shouldIgnoreSurfaceRange(surfaceRange)) {
         enhancedParams['surface_min'] = surfaceRange[0];
         enhancedParams['surface_max'] = surfaceRange[1];
-              } else {
-              }
-    } else {
-          }
+      }
+    }
 
     // 🔥 Consumption filter parameters - TRUE SELECT * logic
-                
     if (exactConsumption !== null && exactConsumption !== undefined) {
       enhancedParams['consommation_exact'] = exactConsumption;
-          } else if (consumptionFilter && Array.isArray(consumptionFilter) && consumptionFilter.length === 2) {
+    } else if (consumptionFilter && Array.isArray(consumptionFilter) && consumptionFilter.length === 2) {
       // Only add parameters if they contain valid, non-default values
-      if (!this.shouldIgnoreRange(consumptionFilter)) {
+      if (!this.shouldIgnoreConsumptionRange(consumptionFilter)) {
         enhancedParams['consommation_min'] = consumptionFilter[0];
         enhancedParams['consommation_max'] = consumptionFilter[1];
-              } else {
-              }
-    } else {
-          }
+      }
+    }
 
     // 🏠 Type Locale filter - Fix parameter name to match backend API
     if (typeLocaleFilter && typeLocaleFilter.length > 0) {

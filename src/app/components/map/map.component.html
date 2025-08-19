@@ -26,7 +26,8 @@
 
     <!-- Map search component -->
     <app-map-search
-      [sidebarOpen]="!tableCollapsed"
+      [sidebarOpen]="leftSidebarOpen"
+      [resultsOpen]="!tableCollapsed"
       (locationSelected)="onLocationSelected($event)"
       (userLocationRequested)="onUserLocationRequested()">
     </app-map-search>

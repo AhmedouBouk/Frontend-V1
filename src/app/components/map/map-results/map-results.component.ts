@@ -17,7 +17,7 @@ export class MapResultsComponent {
   @Input() visibleDpeProperties: DpeProperty[] = []
   @Input() visibleParcelleProperties: ParcelleProperty[] = []
   @Input() selectedPropertyIndex: number | null = null
-  @Input() tableCollapsed = false
+  @Input() tableCollapsed = true
   @Input() isLoading = false
 
   @Output() propertySelected = new EventEmitter<{ index: number; property: any }>()
@@ -202,7 +202,6 @@ export class MapResultsComponent {
 
   selectDataSource(source: string): void {
     this.selectedDataSource = source
-    
   }
 
   getSelectedDataSource(): string {

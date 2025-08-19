@@ -558,10 +558,7 @@ formatDateForInput(y: number, m: number, d: number): string {
       .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(v => {
         if (this.filterForm.get('useConsumptionFilter')?.value &&
-            this.filterForm.get('consumptionMode')?.value === 'range' &&
-            v !== null && v !== '' &&
-            this.filterForm.get('maxConsumption')?.value !== null &&
-            this.filterForm.get('maxConsumption')?.value !== '') {
+            this.filterForm.get('consumptionMode')?.value === 'range') {
           this.applyConsumptionFilter(this.filterForm.value);
         }
       });
@@ -570,10 +567,7 @@ formatDateForInput(y: number, m: number, d: number): string {
       .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(v => {
         if (this.filterForm.get('useConsumptionFilter')?.value &&
-            this.filterForm.get('consumptionMode')?.value === 'range' &&
-            v !== null && v !== '' &&
-            this.filterForm.get('minConsumption')?.value !== null &&
-            this.filterForm.get('minConsumption')?.value !== '') {
+            this.filterForm.get('consumptionMode')?.value === 'range') {
           this.applyConsumptionFilter(this.filterForm.value);
         }
       });
@@ -757,9 +751,9 @@ private applySurfaceFilter(values: any): void {
         this.formService.clearConsumptionFilter()
               }
     } else {
-      // Only apply if user provided values
-      const hasMin = values.minConsumption && values.minConsumption !== '' && values.minConsumption !== null
-      const hasMax = values.maxConsumption && values.maxConsumption !== '' && values.maxConsumption !== null
+      // Only apply if user provided values (including zero)
+      const hasMin = values.minConsumption !== null && values.minConsumption !== '' && values.minConsumption !== undefined
+      const hasMax = values.maxConsumption !== null && values.maxConsumption !== '' && values.maxConsumption !== undefined
       
       if (hasMin || hasMax) {
         const min = hasMin ? Number(values.minConsumption) : 0

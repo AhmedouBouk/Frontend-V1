@@ -83,7 +83,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges
   public visibleDpeProperties: DpeProperty[] = []
   public visibleParcelleProperties: ParcelleProperty[] = []
   public selectedPropertyIndex: number | null = null
-  public tableCollapsed = false // Sidebar ouvert par défaut
+  public tableCollapsed = true // Results closed by default
   public isLoading = false
   public dateMode = "exact"
   public exactDate: string | null = null
@@ -1051,7 +1051,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       }
 
       // 2. Consumption filter (independent) 
-      if (consumptionFilterToUse || exactConsumptionToUse) {
+      if (this.isConsumptionToggleActive && (consumptionFilterToUse || exactConsumptionToUse)) {
         dpeObservables.push(
           this.dpeService.getDpePropertiesByConsumption(topLeft, bottomRight, consumptionFilterToUse, exactConsumptionToUse, typeLocaleFilter)
         );
@@ -1078,8 +1078,13 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
         );
       }
 
-      // If no specific filters, make a general request
-      if (dpeObservables.length === 0) {
+      // If no specific filters are active, make a general request
+      // But don't make a general request if consumption filter is active but has invalid values
+      const shouldMakeGeneralRequest = dpeObservables.length === 0 && 
+        !this.isConsumptionToggleActive && 
+        !this.isEnergyToggleActive;
+        
+      if (shouldMakeGeneralRequest) {
         dpeObservables.push(
           this.dpeService.getDpeProperties(topLeft, bottomRight, {}, typeLocaleFilter)
         );

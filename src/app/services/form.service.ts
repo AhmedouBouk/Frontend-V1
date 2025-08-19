@@ -113,7 +113,7 @@ export class FormService {
 
   // États de l'interface utilisateur
   private readonly leftSidebarOpenSubject = new BehaviorSubject<boolean>(true)
-  private readonly tableCollapsedSubject = new BehaviorSubject<boolean>(false)
+  private readonly tableCollapsedSubject = new BehaviorSubject<boolean>(true)
 
   private readonly dataSourceSubject = new BehaviorSubject<DataSourceType>('dvf')
 
@@ -736,7 +736,8 @@ export class FormService {
       // Restaurer les états de l'interface
       this.markersVisibleSubject.next(savedState.markersVisible)
       this.leftSidebarOpenSubject.next(savedState.leftSidebarOpen)
-      this.tableCollapsedSubject.next(savedState.tableCollapsed)
+      // Force results panel to always start closed
+      this.tableCollapsedSubject.next(true)
 
           } catch (error) {
       console.error('❌ Erreur lors de la restauration de l\'état des filtres:', error)
