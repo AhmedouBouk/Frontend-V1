@@ -6917,6 +6917,8 @@ snapshots:
       '@clr/ui': 17.11.0(@cds/core@6.16.1)
       geoportal-access-lib: 3.4.6(encoding@0.1.13)
       geoportal-extensions-leaflet: 2.4.3(encoding@0.1.13)
+      keycloak-angular: 19.0.2(@angular/common@19.2.14(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(@angular/router@19.2.14(@angular/common@19.2.14(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@19.2.14(@angular/animations@19.2.14(@angular/common@19.2.14(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@19.2.14(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@19.2.14(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2))(keycloak-js@26.2.0)
+      keycloak-js: 26.2.0
       leaflet: 1.9.4
       leaflet.wms: 0.2.0
       proj4: 2.19.10

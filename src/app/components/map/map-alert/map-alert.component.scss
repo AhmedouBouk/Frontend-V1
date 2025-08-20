@@ -128,6 +128,14 @@
 }
 
 // Responsive design
+@media (min-width: 769px) {
+  .map-alert {
+    left: calc(340px + 20px); // Start from sidebar width + padding
+    right: auto; // Remove right positioning
+    max-width: calc(100vw - 380px); // Adjust max-width to account for sidebar
+  }
+}
+
 @media (max-width: 768px) {
   .map-alert {
     top: 10px;

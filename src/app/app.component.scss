@@ -225,7 +225,9 @@
 
 /* Blur effect for mobile when sidebar is open */
 .map-container.blur-background {
-  filter: blur(0);
+  @media (max-width: 768px) {
+    filter: blur(4px);
+  }
 }
 
 /* ===== MAP CONTROLS ===== */
@@ -365,7 +367,6 @@
   }
 }
 
-
 /* ===== FIXED LOGO ===== */
 .fixed-logo {
   @include standard-button;
@@ -411,6 +412,12 @@
   backdrop-filter: blur(8px);
   z-index: 999;
   transition: var(--transition-normal);
+  
+  @media (max-width: 768px) {
+    &.open {
+      display: block;
+    }
+  }
 }
 
 .mobile-toggle {
@@ -464,8 +471,6 @@
     animation: rotate-in 0.5s ease-out;
   }
 }
-<<<<<<< HEAD
-=======
 
 @keyframes rotate-in {
   from {
@@ -570,7 +575,6 @@
     background-color: rgba(0, 0, 0, 0.6);
   }
 }
-
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -599,7 +603,7 @@
 
 /* ===== VARIABLES CSS POUR LA STABILITÉ ===== */
 :root {
-  --sidebar-width: 260px; /* Reduced from 300px */
+  --sidebar-width: 320px; /* Increased from 300px */
   --header-height: 55px; /* Slightly reduced */
   --transition-normal: 0.3s ease;
   --transition-fast: 0.2s ease;
@@ -611,4 +615,23 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 }
->>>>>>> 2c80c538cf12c6c163188b065e9f2f44f29e4d9a
+
+/* ===== MOBILE RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 340px; /* Increased from 320px */
+    z-index: 1000;
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .map-container {
+    width: 100%;
+  }
+  
+  .fixed-logo {
+    z-index: 998;
+  }
+}

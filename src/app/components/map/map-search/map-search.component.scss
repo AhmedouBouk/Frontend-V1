@@ -60,30 +60,62 @@
 
 .search-toggle-btn,
 .location-btn {
-  @include standard-button;
-  background-color: var(--surface-color);
-  box-shadow: var(--shadow-md);
-  color: var(--text-secondary);
-  
+  width: 48px;
+  height: 48px;
+  background: var(--surface-color, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary, #6b7280);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  &:hover {
+    background: var(--surface-hover, #f9fafb);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+    img {
+      transform: scale(1.05);
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.active {
+    background: linear-gradient(
+      135deg,
+      var(--primary-500, #3b82f6),
+      var(--primary-600, #2563eb)
+    );
+    border-color: var(--primary-500, #3b82f6);
+    color: white;
+    
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+
   svg {
-    width: 24px;
-    height: 24px;
     transition: transform 0.2s ease;
   }
-  
-  &:hover {
-    background-color: var(--surface-hover);
-    box-shadow: var(--shadow-lg);
-  }
-  
+
   &:hover svg {
     transform: scale(1.05);
   }
-  
-  &.active {
-    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-    color: white;
-    border-color: var(--primary-color);
+
+  img {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0);
+    transition: all 0.2s ease;
   }
 }
 
@@ -174,7 +206,61 @@
 
   .search-toggle-btn,
   .location-btn {
-    @include standard-button;
+    width: 48px;
+    height: 48px;
+    background: var(--surface-color, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary, #6b7280);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      background: var(--surface-hover, #f9fafb);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      img {
+        transform: scale(1.05);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &.active {
+      background: linear-gradient(
+        135deg,
+        var(--primary-500, #3b82f6),
+        var(--primary-600, #2563eb)
+      );
+      border-color: var(--primary-500, #3b82f6);
+      color: white;
+      
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    svg {
+      transition: transform 0.2s ease;
+    }
+
+    &:hover svg {
+      transform: scale(1.05);
+    }
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
   }
 
   .search-input {
@@ -216,8 +302,61 @@
 
   .search-toggle-btn,
   .location-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
+    background: var(--surface-color, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary, #6b7280);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      background: var(--surface-hover, #f9fafb);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      img {
+        transform: scale(1.05);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &.active {
+      background: linear-gradient(
+        135deg,
+        var(--primary-500, #3b82f6),
+        var(--primary-600, #2563eb)
+      );
+      border-color: var(--primary-500, #3b82f6);
+      color: white;
+      
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    svg {
+      transition: transform 0.2s ease;
+    }
+
+    &:hover svg {
+      transform: scale(1.05);
+    }
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
   }
 
   .search-input {
@@ -225,4 +364,3 @@
     font-size: 16px; /* always ≥16px */
   }
 }
-

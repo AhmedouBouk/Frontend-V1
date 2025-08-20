@@ -467,10 +467,16 @@ formatDateForInput(y: number, m: number, d: number): string {
       .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(v => {
         if (this.filterForm.get('usePriceFilter')?.value &&
-            this.filterForm.get('priceMode')?.value === 'range' &&
-            v !== null && v !== '' &&
-            this.filterForm.get('maxPrice')?.value !== null &&
-            this.filterForm.get('maxPrice')?.value !== '') {
+            this.filterForm.get('priceMode')?.value === 'range') {
+          this.applyPriceFilter(this.filterForm.value);
+        }
+      });
+
+    this.filterForm.get('maxPrice')?.valueChanges
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(v => {
+        if (this.filterForm.get('usePriceFilter')?.value &&
+            this.filterForm.get('priceMode')?.value === 'range') {
           this.applyPriceFilter(this.filterForm.value);
         }
       });
