@@ -58,9 +58,9 @@ export class DvfService {
     // 🏠 Type locale filter handling
     if (typeLocaleFilter && typeLocaleFilter.length > 0) {
       params.type_local = typeLocaleFilter.join(',');
-      console.log('🏠 DVF Service: Type locale filter added:', params.type_local);
+      
     } else {
-      console.log('🏠 DVF Service: No type locale filter provided');
+      
     }
 
     const apiUrl = `${environment.apiUrl}/dvf/filtrer`;

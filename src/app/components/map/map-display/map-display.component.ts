@@ -452,45 +452,60 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private addDvfMarker(property: DvfProperty): void {
     if (!property.latitude || !property.longitude || !property.valeur_fonciere) {
+      console.log('🗺️ DVF Marker SKIPPED - missing data:', {
+        hasLat: !!property.latitude,
+        hasLng: !!property.longitude,
+        hasPrice: !!property.valeur_fonciere
+      })
       return
     }
   
     const lat = property.latitude
     const lng = property.longitude
     
-    // Determine what emoji to display on the marker based on active filters
-    let markerIcon: string
-    let popupTitle: string
+    // Check if only period filter is active (should not display markers)
+    const onlyPeriodFilterActive = this.useDateFilter && 
+      !this.usePriceFilter && 
+      !this.useSurfaceFilter && 
+      !this.useEnergyFilter && 
+      !this.useConsumptionFilter
     
-    // Handle different filter combinations with appropriate markers
-    if (this.useDateFilter && this.usePriceFilter) {
-      // Both filters active - use a combined marker
-      markerIcon = "🔍"
-      popupTitle = `🔍 ${property.date_mutation || "Non spécifiée"} - ${property.valeur_fonciere.toLocaleString()} €`
-    } else if (this.useDateFilter) {
-      // Only date filter is active
-      const date = property.date_mutation || "Non spécifiée"
-      markerIcon = "📅"
-      popupTitle = `📅 ${date}`
-    } else if (this.usePriceFilter) {
-      // Only price filter is active
-      markerIcon = "💰"
-      popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
-    } else {
-      // No filters active - use default marker
-      markerIcon = ""
-      popupTitle = ``
+    console.log('🗺️ DVF Marker - Filter states:', {
+      useDateFilter: this.useDateFilter,
+      usePriceFilter: this.usePriceFilter,
+      useSurfaceFilter: this.useSurfaceFilter,
+      useEnergyFilter: this.useEnergyFilter,
+      useConsumptionFilter: this.useConsumptionFilter,
+      onlyPeriodFilterActive: onlyPeriodFilterActive
+    })
+    
+    // Don't add markers if only period filter is active
+    if (onlyPeriodFilterActive) {
+      console.log('🗺️ DVF Marker SKIPPED - only period filter active')
+      return
     }
   
-
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: "emoji-marker dvf-marker",
-        html: `<div class="emoji-marker dvf-marker">${markerIcon}</div>`,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
+        className: 'dvf-image-marker',
+        html: `<img src="assets/icons/vendu5.png" style="width: 32px; height: 32px;" alt="Vendu">`,
+        iconSize: [32, 32],        // Adjust size as needed
+        iconAnchor: [16, 32],      // Center horizontally, bottom vertically
+        popupAnchor: [0, -32]      // Popup appears above the icon
       }),
     }).addTo(this.featureGroup)
+  
+    // Determine popup title based on active filters
+    let popupTitle: string
+    if (this.usePriceFilter) {
+      if (this.useDateFilter) {
+        popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} € - ${property.date_mutation || "Non spécifiée"}`
+      } else {
+        popupTitle = `💰 ${property.valeur_fonciere.toLocaleString()} €`
+      }
+    } else {
+      popupTitle = `🏠 Propriété`
+    }
   
     marker.bindPopup(`
       <div class="property-popup">
@@ -502,6 +517,36 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
         <p><strong>Adresse:</strong> ${property.adresse_numero || ""} ${property.adresse_nom_voie || "Non spécifiée"}</p>
         <p><strong>Code postal:</strong> ${property.code_postal || "Non spécifié"}</p>
         <p><strong>Commune:</strong> ${property.nom_commune || "Non spécifiée"}</p>
+      </div>
+    `)
+  
+    this.markers.push(marker)
+  }
+  
+  private addParcelleMarker(property: ParcelleProperty): void {
+    if (!property.latitude || !property.longitude) {
+      return
+    }
+  
+    const lat = property.latitude
+    const lng = property.longitude
+  
+    const marker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'parcelle-image-marker',
+        html: `<img src="assets/icons/m22.png" style="width: 32px; height: 32px;" alt="m²">`,
+        iconSize: [32, 32],        // Adjust size as needed
+        iconAnchor: [16, 32],      // Center horizontally, bottom vertically
+        popupAnchor: [0, -32]      // Popup appears above the icon
+      }),
+    }).addTo(this.featureGroup)
+  
+    marker.bindPopup(`
+      <div class="property-popup">
+        <h3>📍 Parcelle ${property.number}</h3>
+        <p><strong>Surface:</strong> ${property.surface.toLocaleString()} m²</p>
+        <p><strong>Adresse:</strong> ${property.address}</p>
+        <p><strong>Commune:</strong> ${property.city}</p>
       </div>
     `)
   
@@ -589,35 +634,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   
   
 
-  private addParcelleMarker(property: ParcelleProperty): void {
-    if (!property.latitude || !property.longitude) {
-      return
-    }
-
-    const lat = property.latitude
-    const lng = property.longitude
-
-    const marker = L.marker([lat, lng], {
-      icon: L.divIcon({
-        className: "emoji-marker parcelle-marker",
-        html: `<div class="emoji-marker parcelle-marker">📌</div>`,
-        iconSize: [20, 20], // Fixed small size for emoji only
-        iconAnchor: [10, 10], // Center the emoji exactly on the position
-      }),
-    }).addTo(this.featureGroup)
-
-    marker.bindPopup(`
-      <div class="property-popup">
-        <h3>📌 Parcelle ${property.number}</h3>
-        <p><strong>Surface:</strong> ${property.surface.toLocaleString()} m²</p>
-        <p><strong>Adresse:</strong> ${property.address}</p>
-        <p><strong>Commune:</strong> ${property.city}</p>
-      </div>
-    `)
-
-    this.markers.push(marker)
-  }
-
+  
   /**
    * Sauvegarde l'état de la carte avec debouncing pour éviter trop d'appels
    */

@@ -1,1 +1,116 @@
+<!-- Alert: results equal 500 (backend limit reached) -->
+<div
+  class="alert-container"
+  *ngIf="resultCount >= maxResults && !isManuallyHidden"
+  role="alert"
+  aria-live="assertive"
+>
+  <div class="alert-content">
+    <div class="alert-text">
+      <div class="alert-main-message">
+        Il y a plus de {{ maxResults }} emplacements répondant à votre recherche.
+        <span class="alert-second-part">
+          Zoomez pour limiter la zone de recherche ou affinez vos critères.
+        </span>
+      </div>
+    </div>
 
+    <!-- Close button -->
+    <button
+      type="button"
+      class="alert-close-btn"
+      (click)="closeAlert()"
+      aria-label="Fermer l'alerte"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M18 6L6 18M6 6L18 18"
+              stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Map type control buttons -->
+<div class="map-controls">
+  <button class="control-button" [class.active]="mapType === 'street'" title="Vue plan" type="button" (click)="setMapType('street')">
+    <img src="assets/icons/vue_satellite.png" alt="Vue plan" width="32" height="32">
+    <span class="sr-only">Vue plan</span>
+  </button>
+  
+  <button class="control-button" [class.active]="mapType === 'satellite'" title="Vue satellite" type="button" (click)="setMapType('satellite')">
+    <img src="assets/icons/plan.png" alt="Vue satellite" width="32" height="32">
+    <span class="sr-only">Vue satellite</span>
+  </button>
+  
+  <button class="control-button" [class.active]="mapType === 'cadastre'" title="Vue cadastre" type="button" (click)="setMapType('cadastre')">
+    <img src="assets/icons/vue_cadastre.png" alt="Vue cadastre" width="32" height="32">
+    <span class="sr-only">Vue cadastre</span>
+  </button>
+</div>
+
+<!-- Map search component -->
+<div class="map-search-container" [class.with-sidebar]="sidebarOpen" [class.results-open]="resultsOpen">
+  <!-- Boutons de contrôle - alignés avec le toggle sidebar -->
+  <div class="search-controls">
+    <!-- Bouton de géolocalisation (maintenant en premier) -->
+    <button 
+      class="location-btn"
+      (click)="requestUserLocation()"
+      title="Ma position">
+      <img src="assets/icons/location.png" alt="Location" width="24" height="24">
+    </button>
+
+    <!-- Bouton de recherche (maintenant en second) -->
+    <button 
+      class="search-toggle-btn"
+      (click)="toggleSearch()"
+      [class.active]="isSearchOpen"
+      title="Rechercher une ville">
+      <img src="assets/icons/search.png" alt="Search" width="24" height="24">
+    </button>
+  </div>
+
+  <!-- Barre de recherche slide -->
+  <div class="search-bar" [class.open]="isSearchOpen">
+    <div class="search-input-container">
+      <!-- Résultats de recherche - maintenant au-dessus de l'input -->
+      <div class="search-results search-results-top" *ngIf="showResults && searchResults.length > 0">
+        <div 
+          class="search-result-item"
+          *ngFor="let result of searchResults; trackBy: trackByResult"
+          (click)="selectLocation(result)"
+          (keydown.enter)="selectLocation(result)"
+          tabindex="0"
+          role="button">
+          <div class="result-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 5.02944 7.02944 1 12 1C16.9706 1 21 5.02944 21 10Z" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="result-text">
+            {{ result.display_name }}
+          </div>
+        </div>
+      </div>
+
+      <input 
+        type="text"
+        class="search-input"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (keydown.enter)="onSearchSubmit()"
+        (focus)="onSearchFocus()"
+        placeholder="Rechercher une ville en France..."
+        autocomplete="off">
+      
+      <div class="search-spinner" *ngIf="isSearching">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>

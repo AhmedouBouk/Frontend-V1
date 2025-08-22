@@ -2,24 +2,22 @@ import { Component, AfterViewInit, OnDestroy, ViewChild, inject, OnInit, ChangeD
 import { CommonModule } from "@angular/common"
 import { HttpClient } from "@angular/common/http"
 import { forkJoin , Observable, Subscription } from "rxjs"
-import { DvfProperty } from "../../models/dvf-property.model"
-import { DpeProperty } from "../../models/dpe.model"
-import { ParcelleProperty } from "../../models/parcelle.model"
-import { MapService } from "../../services/map.service"
-import { FormService } from "../../services/form.service"
-import { DvfService } from "../../services/dvf.service"
-import { DpeService } from "../../services/dpe.service"
-import { ParcelleService } from "../../services/parcelle.service"
-import { MapDisplayComponent } from "./map-display/map-display.component"
-import { MapControlsComponent } from "./map-controls/map-controls.component"
-import { MapResultsComponent } from "./map-results/map-results.component"
-import { MapAlertComponent } from "./map-alert/map-alert.component"
-import { MapSearchComponent } from "./map-search/map-search.component"
+import { DvfProperty } from "../../../models/dvf-property.model"
+import { DpeProperty } from "../../../models/dpe.model"
+import { ParcelleProperty } from "../../../models/parcelle.model"
+import { MapService } from "../../../services/map.service"
+import { FormService } from "../../../services/form.service"
+import { DvfService } from "../../../services/dvf.service"
+import { DpeService } from "../../../services/dpe.service"
+import { ParcelleService } from "../../../services/parcelle.service"
+import { MapDisplayComponent } from "../map-display/map-display.component"
+import { MapControlsComponent } from "../map-controls/map-controls.component"
+import { MapResultsComponent } from "../map-results/map-results.component"
 
 @Component({
   selector: "app-map",
   standalone: true,
-  imports: [CommonModule, MapDisplayComponent, MapControlsComponent, MapResultsComponent, MapAlertComponent, MapSearchComponent],
+  imports: [CommonModule, MapDisplayComponent, MapControlsComponent, MapResultsComponent],
   styleUrls: ["./map.component.scss"],
   templateUrl: "./map.component.html",
 })
@@ -451,7 +449,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
         this.isPriceToggleActive = active
         // Set usePriceFilter based on toggle state
         this.usePriceFilter = active;
-        console.log(`💰 Price filter toggle ${active ? 'activated' : 'deactivated'} - usePriceFilter set to ${this.usePriceFilter}`);
+        
         
         if (active) {
           if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
@@ -472,7 +470,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
         this.isDateToggleActive = active
         // Set useDateFilter based on toggle state
         this.useDateFilter = active;
-        console.log(`📅 Date filter toggle ${active ? 'activated' : 'deactivated'} - useDateFilter set to ${this.useDateFilter}`);
+        
         
         if (active) {
           if (this.fetchDataTimeout) clearTimeout(this.fetchDataTimeout)
@@ -803,12 +801,18 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // Déterminer quelles sources de données charger selon les filtres actifs
       const sourcesToLoad: string[] = []
       
-      // Utilisez directement les propriétés de classe maintenues à jour par les subscriptions
-     
+      console.log('🔍 DEBUG: Toggle states for activeDataSources calculation:', {
+        isPriceToggleActive: this.isPriceToggleActive,
+        isDateToggleActive: this.isDateToggleActive,
+        isEnergyToggleActive: this.isEnergyToggleActive,
+        isConsumptionToggleActive: this.isConsumptionToggleActive,
+        isSurfaceToggleActive: this.isSurfaceToggleActive
+      })
       
       // DVF si filtres prix ou date actifs (ou leurs toggles)
       if (this.isPriceToggleActive || this.isDateToggleActive) {
         sourcesToLoad.push('dvf')
+        console.log('🔍 DEBUG: Adding DVF to sourcesToLoad')
       }
       
       // DPE si filtre énergie ou consommation actif
@@ -816,19 +820,24 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // Il doit seulement ajouter le filtrage par date aux sources déjà actives
       if (this.isEnergyToggleActive || this.isConsumptionToggleActive) {
         sourcesToLoad.push('dpe')
+        console.log('🔍 DEBUG: Adding DPE to sourcesToLoad')
       }
       
       // Parcelles si filtre surface actif
       if (this.isSurfaceToggleActive) {
         sourcesToLoad.push('parcelles')
+        console.log('🔍 DEBUG: Adding Parcelles to sourcesToLoad')
       }
       
       // Si aucun filtre actif, charger selon currentDataSource pour compatibilité
       if (sourcesToLoad.length === 0) {
         sourcesToLoad.push(this.currentDataSource)
+        console.log('🔍 DEBUG: No filters active, using currentDataSource:', this.currentDataSource)
       }
       
+      console.log('🔍 DEBUG: Final sourcesToLoad:', sourcesToLoad)
       this.activeDataSources = sourcesToLoad
+      console.log('🔍 DEBUG: Set activeDataSources to:', this.activeDataSources)
       
       
       // Charger toutes les sources nécessaires en parallèle
@@ -875,9 +884,10 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
 
   private async loadDvfDataAsync(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // DVF should ONLY load if price OR date filter is active
+      // DVF should ONLY load if price filter is active
+      // Period filter should not load DVF data for display but should be included in requests when other filters are active
       // Type Locale filter should work as "join filter" only when price/date are already active
-      if (!this.isPriceToggleActive && !this.isDateToggleActive) {
+      if (!this.isPriceToggleActive) {
         this.visibleDvfProperties = []
         this.alertMessages['dvf'] = { count: 0, show: false }
         // Force marker update when clearing data
@@ -939,6 +949,15 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             count: properties.length, 
             show: properties.length >= this.maxResults 
           }
+          console.log('🚨 DEBUG DVF Alert Set:', {
+            count: properties.length,
+            maxResults: this.maxResults,
+            show: properties.length >= this.maxResults,
+            exceedsThreshold: properties.length >= this.maxResults
+          })
+          
+          // Recalculate activeDataSources to include DVF now that data is loaded
+          this.recalculateActiveDataSources()
           
           // Force immediate marker update after data is received
           console.log('💰 Calling cdr.detectChanges() and forceUpdateMarkers()')
@@ -1079,12 +1098,11 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       }
 
       // If no specific filters are active, make a general request
-      // But don't make a general request if consumption filter is active but has invalid values
-      const shouldMakeGeneralRequest = dpeObservables.length === 0 && 
-        !this.isConsumptionToggleActive && 
-        !this.isEnergyToggleActive;
+      // Also make general request if toggles are active but no valid parameters are provided
+      const shouldMakeGeneralRequest = dpeObservables.length === 0;
         
       if (shouldMakeGeneralRequest) {
+        console.log('🔥 Making general DPE request (no specific filters or invalid parameters)')
         dpeObservables.push(
           this.dpeService.getDpeProperties(topLeft, bottomRight, {}, typeLocaleFilter)
         );
@@ -1099,6 +1117,25 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
           this.alertMessages['dpe'] = {
             count: this.visibleDpeProperties.length,
             show: this.visibleDpeProperties.length >= this.maxResults
+          }
+          console.log('🚨 DEBUG DPE Alert Set:', {
+            count: this.visibleDpeProperties.length,
+            maxResults: this.maxResults,
+            show: this.visibleDpeProperties.length >= this.maxResults,
+            exceedsThreshold: this.visibleDpeProperties.length >= this.maxResults
+          })
+
+          // Recalculate activeDataSources to include DPE now that data is loaded
+          this.recalculateActiveDataSources()
+          
+          // Force immediate marker update after DPE data is received
+          console.log('🔥 DPE: Calling cdr.detectChanges() and forceUpdateMarkers()')
+          this.cdr.detectChanges()
+          if (this.mapDisplay) {
+            this.mapDisplay.forceUpdateMarkers()
+            console.log('🔥 DPE: forceUpdateMarkers() called successfully')
+          } else {
+            console.error('🔥 DPE: mapDisplay is null/undefined!')
           }
 
           resolve()
@@ -1176,6 +1213,25 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             count: properties.length,
             show: properties.length >= this.maxResults
           }
+          console.log('🚨 DEBUG Parcelles Alert Set:', {
+            count: properties.length,
+            maxResults: this.maxResults,
+            show: properties.length >= this.maxResults,
+            exceedsThreshold: properties.length >= this.maxResults
+          })
+          
+          // Recalculate activeDataSources to include Parcelles now that data is loaded
+          this.recalculateActiveDataSources()
+          
+          // Force immediate marker update after Parcelles data is received
+          console.log('📏 Parcelles: Calling cdr.detectChanges() and forceUpdateMarkers()')
+          this.cdr.detectChanges()
+          if (this.mapDisplay) {
+            this.mapDisplay.forceUpdateMarkers()
+            console.log('📏 Parcelles: forceUpdateMarkers() called successfully')
+          } else {
+            console.error('📏 Parcelles: mapDisplay is null/undefined!')
+          }
           
           resolve()
         },
@@ -1195,11 +1251,35 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
     let hasAlert = false
     let alertSources: string[] = []
 
+    // Check if only period filter is active (should not show alerts when >500 results)
+    const onlyPeriodFilterActive = this.useDateFilter && 
+      !this.usePriceFilter && 
+      !this.useSurfaceFilter && 
+      !this.useEnergyFilter && 
+      !this.isConsumptionToggleActive
+
+    console.log('🚨 DEBUG Alert Logic - Filter States:', {
+      useDateFilter: this.useDateFilter,
+      usePriceFilter: this.usePriceFilter,
+      useSurfaceFilter: this.useSurfaceFilter,
+      useEnergyFilter: this.useEnergyFilter,
+      isConsumptionToggleActive: this.isConsumptionToggleActive,
+      onlyPeriodFilterActive: onlyPeriodFilterActive,
+      activeDataSources: this.activeDataSources,
+      maxResults: this.maxResults
+    })
+
     // Vérifier chaque source active
     for (const source of this.activeDataSources) {
       const alert = this.alertMessages[source]
       if (alert) {
         totalCount += alert.count
+        console.log(`🚨 DEBUG Alert - Source ${source}:`, {
+          count: alert.count,
+          show: alert.show,
+          exceedsMax: alert.count >= this.maxResults
+        })
+        // Show alert if conditions are met
         if (alert.show) {
           hasAlert = true
           alertSources.push(source.toUpperCase())
@@ -1207,13 +1287,68 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       }
     }
 
+    // Suppress alert display only if period filter is the only active filter
+    if (onlyPeriodFilterActive) {
+      console.log('🚨 DEBUG Alert - Suppressing alert because only period filter is active')
+      hasAlert = false
+    }
+
     // Mettre à jour les propriétés globales pour l'alerte
     this.resultCount = totalCount
     this.showAlert = hasAlert
+
+    console.log('🚨 DEBUG Alert - Final State:', {
+      totalCount: totalCount,
+      hasAlert: hasAlert,
+      showAlert: this.showAlert,
+      resultCount: this.resultCount,
+      alertSources: alertSources
+    })
     
     if (hasAlert) {
       
     }
+  }
+
+  /**
+   * Recalculate activeDataSources based on current toggle states and loaded data
+   */
+  private recalculateActiveDataSources(): void {
+    const newActiveDataSources: string[] = []
+    
+    // Add DVF if price/date toggle is active AND we have DVF data
+    if ((this.isPriceToggleActive || this.isDateToggleActive) && this.visibleDvfProperties.length > 0) {
+      newActiveDataSources.push('dvf')
+    }
+    
+    // Add DPE if energy/consumption toggle is active AND we have DPE data
+    if ((this.isEnergyToggleActive || this.isConsumptionToggleActive) && this.visibleDpeProperties.length > 0) {
+      newActiveDataSources.push('dpe')
+    }
+    
+    // Add Parcelles if surface toggle is active AND we have Parcelles data
+    if (this.isSurfaceToggleActive && this.visibleParcelleProperties.length > 0) {
+      newActiveDataSources.push('parcelles')
+    }
+    
+    console.log('🔄 Recalculating activeDataSources:', {
+      old: this.activeDataSources,
+      new: newActiveDataSources,
+      toggleStates: {
+        isPriceToggleActive: this.isPriceToggleActive,
+        isDateToggleActive: this.isDateToggleActive,
+        isEnergyToggleActive: this.isEnergyToggleActive,
+        isConsumptionToggleActive: this.isConsumptionToggleActive,
+        isSurfaceToggleActive: this.isSurfaceToggleActive
+      },
+      dataLengths: {
+        dvf: this.visibleDvfProperties.length,
+        dpe: this.visibleDpeProperties.length,
+        parcelles: this.visibleParcelleProperties.length
+      }
+    })
+    
+    this.activeDataSources = newActiveDataSources
   }
 
   /**
@@ -1246,7 +1381,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
 
   /** Debug helper for consumption filter logs */
 private logConsumption(tag: string, payload: any) {
-  console.log(`🔎 [Consumption:${tag}]`, payload);
+  
 }
 
 }

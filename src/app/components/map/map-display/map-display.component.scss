@@ -10,7 +10,39 @@
   z-index: 1;
 }
 
-/* ===== COMPACT MARKER STYLES ===== */
+/* ===== IMAGE MARKER STYLES ===== */
+.dvf-image-marker {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dvf-image-marker:hover {
+  transform: scale(1.1);
+  z-index: 1000;
+}
+
+.parcelle-image-marker {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.parcelle-image-marker:hover {
+  transform: scale(1.1);
+  z-index: 1000;
+}
+
+/* ===== DPE CHIP MARKERS ===== */
+.leaflet-dpe-chip {
+  background: none !important;
+  border: none !important;
+  cursor: pointer;
+}
+
+.leaflet-dpe-chip:hover {
+  z-index: 1000;
+}
+
+/* ===== USER LOCATION MARKER ===== */
 .compact-marker {
   background: white !important;
   border: 1px solid #ddd !important;
@@ -37,131 +69,6 @@
   border-color: #9ca3af;
 }
 
-/* ===== DVF MARKERS ===== */
-.dvf-marker {
-  border-color: #3b82f6;
-  color: #1d4ed8;
-}
-
-.dvf-marker:hover {
-  border-color: #1d4ed8;
-  background: #eff6ff;
-}
-
-/* ===== DPE MARKERS ===== */
-.dpe-marker {
-  border-color: #10b981;
-  color: #059669;
-}
-
-.dpe-marker:hover {
-  border-color: #059669;
-  background: #ecfdf5;
-}
-
-/* ===== BEAUTIFUL ENERGY CLASS LETTER MARKERS ===== */
-.dpe-marker.energy-letter {
-  min-width: 28px !important;
-  height: 28px !important;
-  padding: 0 !important;
-  font-size: 16px !important;
-  font-weight: 800 !important;
-  border-radius: 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15) !important;
-  border: 2px solid !important;
-  user-select: none !important;
-  transition: all 0.2s ease !important;
-}
-
-.dpe-marker.energy-letter:hover {
-  transform: scale(1.15) !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
-  z-index: 1000 !important;
-}
-
-/* Energy Class A - Excellent (Dark Green) */
-.dpe-marker.energy-a {
-  background: linear-gradient(135deg, #00a651, #059669) !important;
-  border-color: #065f46 !important;
-  color: white !important;
-}
-
-/* Energy Class B - Very Good (Green) */
-.dpe-marker.energy-b {
-  background: linear-gradient(135deg, #50b848, #22c55e) !important;
-  border-color: #166534 !important;
-  color: white !important;
-}
-
-/* Energy Class C - Good (Light Green) */
-.dpe-marker.energy-c {
-  background: linear-gradient(135deg, #aed136, #84cc16) !important;
-  border-color: #365314 !important;
-  color: white !important;
-}
-
-/* Energy Class D - Fair (Yellow) */
-.dpe-marker.energy-d {
-  background: linear-gradient(135deg, #fff200, #eab308) !important;
-  border-color: #a16207 !important;
-  color: #92400e !important;
-}
-
-/* Energy Class E - Poor (Orange) */
-.dpe-marker.energy-e {
-  background: linear-gradient(135deg, #fdb913, #f59e0b) !important;
-  border-color: #c2410c !important;
-  color: white !important;
-}
-
-/* Energy Class F - Very Poor (Red-Orange) */
-.dpe-marker.energy-f {
-  background: linear-gradient(135deg, #f37021, #ea580c) !important;
-  border-color: #9a3412 !important;
-  color: white !important;
-}
-
-/* Energy Class G - Terrible (Red) */
-.dpe-marker.energy-g {
-  background: linear-gradient(135deg, #ed1c24, #dc2626) !important;
-  border-color: #991b1b !important;
-  color: white !important;
-}
-
-/* ===== PERIOD-BASED ADDITIONAL STYLING ===== */
-.dpe-marker.period-historic {
-  border-style: dotted !important;
-}
-
-.dpe-marker.period-postwar {
-  border-style: dashed !important;
-}
-
-.dpe-marker.period-modern {
-  border-style: solid !important;
-}
-
-.dpe-marker.period-recent {
-  border-style: double !important;
-  border-width: 3px !important;
-}
-
-/* ===== PARCELLE MARKERS ===== */
-.parcelle-marker {
-  border-color: #f59e0b;
-  color: #d97706;
-}
-
-.parcelle-marker:hover {
-  border-color: #d97706;
-  background: #fffbeb;
-}
-
-/* ===== USER LOCATION MARKER ===== */
 .user-marker {
   border-color: #8b5cf6;
   color: #7c3aed;
@@ -192,7 +99,7 @@
 /* ===== POPUP STYLES ===== */
 .leaflet-popup-content-wrapper {
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   background: white;
   border: 1px solid #e5e7eb;
   padding: 0;
@@ -205,22 +112,25 @@
 }
 
 .property-popup {
-  padding: 12px;
+  padding: 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-width: 200px;
 }
 
 .property-popup h3 {
-  margin: 0 0 8px 0;
-  font-size: 1rem;
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #1f2937;
+  border-bottom: 2px solid #f3f4f6;
+  padding-bottom: 8px;
 }
 
 .property-popup p {
-  margin: 0 0 6px 0;
-  font-size: 0.8rem;
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
   color: #6b7280;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .property-popup p:last-child {
@@ -230,6 +140,8 @@
 .property-popup strong {
   color: #374151;
   font-weight: 600;
+  min-width: 80px;
+  display: inline-block;
 }
 
 /* ===== LEAFLET CUSTOMIZATION ===== */
@@ -272,6 +184,7 @@
 
 [data-theme="dark"] .property-popup h3 {
   color: #f9fafb;
+  border-bottom-color: #4b5563;
 }
 
 [data-theme="dark"] .property-popup p {
@@ -299,21 +212,22 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-  .compact-marker {
-    font-size: 11px;
-    padding: 2px 5px;
-  }
-  
   .property-popup {
-    padding: 10px;
+    padding: 12px;
+    min-width: 180px;
   }
   
   .property-popup h3 {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
   
   .property-popup p {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .compact-marker {
+    font-size: 11px;
+    padding: 2px 5px;
   }
 }
 
@@ -329,110 +243,7 @@
   }
 }
 
-.compact-marker {
-  animation: markerAppear 0.2s ease-out;
-}
-
-.emoji-marker.dpe-marker {
-  min-width: 26px;
-  height: 32px;
-  padding: 0 8px;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  user-select: none;
-  transition: transform 0.2s;
-}
-
-.emoji-marker.dpe-marker:hover {
-  transform: scale(1.2);
-  z-index: 1000;
-}
-
-/* ===== UPDATED SMALL DPE CHIP MARKERS (Half Size) ===== */
-.dpe-icon-wrapper {
-  /* keep wrapper empty so Leaflet positioning stays simple */
-}
-
-.dpe-chip {
-  width: 12px !important;  /* Half of original 24px */
-  height: 12px !important; /* Half of original 24px */
-  border-radius: 3px !important;  /* Half of original 6px */
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  user-select: none;
-
-  /* crisp text */
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-
-  /* smaller, softer shadows for the smaller size */
-  box-shadow:
-    0 0 0 1.5px rgba(59, 130, 246, 0.25),   /* smaller outer blue glow */
-    0 1px 2px rgba(0, 0, 0, 0.25),          /* smaller drop shadow */
-    inset 0 1px 0 rgba(255, 255, 255, 0.2); /* subtle inner highlight */
-
-  border: 1px solid rgba(0,0,0,0.1);        /* thinner border for smaller size */
-}
-
-.dpe-chip span {
-  font-size: 6px !important;     /* Half of original 12px letter size */
-  transform: translateY(0.25px); /* smaller optical alignment */
-}
-
-/* --- Updated palette/gradients per energy class (A → G) for smaller markers --- */
-.dpe-chip.energy-a {
-  background: linear-gradient(145deg, #11c26a 0%, #0ea85f 60%, #0a8f54 100%);
-  color: #ffffff;
-}
-
-.dpe-chip.energy-b {
-  background: linear-gradient(145deg, #3dc375 0%, #31ac65 60%, #2b985b 100%);
-  color: #ffffff;
-}
-
-.dpe-chip.energy-c {
-  background: linear-gradient(145deg, #a0c63a 0%, #91b431 60%, #7a9b29 100%);
-  color: #ffffff; /* Changed to white for better visibility at small size */
-}
-
-.dpe-chip.energy-d {
-  background: linear-gradient(145deg, #ffe23d 0%, #ffd21f 60%, #f2c212 100%);
-  color: #202124;
-}
-
-.dpe-chip.energy-e {
-  background: linear-gradient(145deg, #ffb63d 0%, #ffa41f 60%, #f29012 100%);
-  color: #202124;
-}
-
-.dpe-chip.energy-f {
-  background: linear-gradient(145deg, #ff7a38 0%, #ff6a1f 60%, #ef5a15 100%);
-  color: #ffffff;
-}
-
-.dpe-chip.energy-g {
-  background: linear-gradient(145deg, #ff4747 0%, #ff2d2d 60%, #e51f1f 100%);
-  color: #ffffff;
-}
-
-/* Optional: a subtle hover pulse for mouse users - smaller scale for smaller markers */
-.leaflet-marker-icon .dpe-chip {
-  transition: transform .08s ease;
-}
-.leaflet-marker-icon:hover .dpe-chip {
-  transform: scale(1.3) !important; /* Slightly larger hover effect for small markers */
-}
-
-/* If you keep a consumption variant, you can style it slightly differently */
-.dpe-chip.is-consumption span {
-  font-size: 7px !important;       /* Half of original 13px - bolt reads better a tick larger */
+.dvf-image-marker,
+.parcelle-image-marker {
+  animation: markerAppear 0.3s ease-out;
 }

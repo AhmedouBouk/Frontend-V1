@@ -1,0 +1,19 @@
+.map-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.map-inner-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Responsive adjustments for map component */
+@media (max-width: 768px) {
+  .map-wrapper {
+    height: 100vh;
+  }
+}

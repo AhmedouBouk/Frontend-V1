@@ -47,27 +47,7 @@
   </div>
   
   <div class="map-container" [class.blur-background]="sidebarOpen">
-    <div class="map-controls">
-      
-      <button class="control-button" [class.active]="mapType === 'street'" title="Vue plan" type="button" (click)="setMapType('street')">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 7L9 4L15 7L21 4V17L15 20L9 17L3 20V7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M9 4V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M15 7V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="sr-only">Vue plan</span>
-      </button>
-      
-      <button class="control-button" [class.active]="mapType === 'satellite'" title="Vue satellite" type="button" (click)="setMapType('satellite')">
-        <img src="assets/icons/vue_satellite.png" alt="Vue satellite" width="32" height="32">
-        <span class="sr-only">Vue satellite</span>
-      </button>
-      
-      <button class="control-button" [class.active]="mapType === 'cadastre'" title="Vue cadastre" type="button" (click)="setMapType('cadastre')">
-        <img src="assets/icons/vue_cadastre.png" alt="Vue cadastre" width="32" height="32">
-        <span class="sr-only">Vue cadastre</span>
-      </button>
-    </div>
+    
   
     <!-- Composant map -->
     <app-map [leftSidebarOpen]="sidebarOpen"></app-map>

@@ -38,14 +38,7 @@
   flex-shrink: 0;
 }
 
-/* Header layout - three columns with better centering */
-.header-left {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
+/* Header layout - center and right columns */
 .header-center {
   flex: 0 0 auto; /* Don't grow or shrink, just use content width */
   display: flex;
@@ -65,21 +58,6 @@
   align-items: center;
 }
 
-.property-list-header h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.property-count {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
 .results-actions {
   display: flex;
   align-items: center;
@@ -94,17 +72,7 @@
   transform: rotate(180deg);
 }
 
-/* ===== SIMPLIFIED INLINE NAVBAR (IN HEADER) ===== */
-.results-navbar-inline {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xs);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
+/* ===== INLINE NAVBAR TABS ===== */
 .navbar-tab-inline {
   display: flex;
   align-items: center;
@@ -173,84 +141,7 @@
   color: white;
 }
 
-/* ===== EXPORT DROPDOWN ===== */
-.export-dropdown {
-  position: relative;
-}
-
-.export-btn {
-  background: linear-gradient(135deg, var(--success-500), var(--success-600));
-  color: white;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: none;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.export-btn:hover {
-  background: linear-gradient(135deg, var(--success-600), #047857);
-}
-
-.export-menu {
-  position: absolute;
-  top: calc(100% + var(--space-sm));
-  right: 0;
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  min-width: 140px;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all var(--transition-fast);
-  overflow: hidden;
-}
-
-.export-dropdown.open .export-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.export-option {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  width: 100%;
-  padding: var(--space-md) var(--space-lg);
-  border: none;
-  background: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: var(--transition-fast);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.export-option:hover {
-  background-color: var(--surface-hover);
-}
-
-.export-option:first-child {
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-
-.export-option:last-child {
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-}
-
+/* ===== PROPERTY TABLE ===== */
 .property-list {
   overflow-y: auto;
   flex: 1;
@@ -295,6 +186,7 @@
   background: linear-gradient(135deg, var(--surface-hover), var(--surface-color));
 }
 
+/* ===== NO RESULTS STATE ===== */
 .no-results {
   display: flex;
   flex-direction: column;
@@ -333,7 +225,7 @@
   color: var(--text-muted);
 }
 
-/* Energy rating styles for table */
+/* ===== ENERGY RATING STYLES ===== */
 .energy-rating {
   display: inline-flex;
   align-items: center;
@@ -378,7 +270,19 @@
   background-color: #ed1c24;
 }
 
-/* Responsive adjustments */
+/* ===== CONSUMPTION VALUE STYLING ===== */
+.consumption-value {
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  display: inline-block;
+  border: 1px solid var(--primary-color-alpha);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 768px) {
   .property-list-container {
     max-height: 50vh; /* Adjust for mobile */
@@ -405,20 +309,6 @@
     min-height: 60px;
   }
   
-  .header-left {
-    flex: 0 1 auto;
-    min-width: 0;
-  }
-  
-  .header-left h3 {
-    font-size: 0.85rem;
-    gap: var(--space-xs);
-  }
-  
-  .property-count {
-    font-size: 0.75rem;
-  }
-  
   .header-center {
     flex: 1;
     min-width: 0;
@@ -430,15 +320,6 @@
   
   .header-right {
     flex: 0 0 auto;
-  }
-  
-  .results-navbar-inline {
-    padding: 4px;
-    gap: 4px;
-    border-radius: var(--radius-md);
-    background: rgba(59, 130, 246, 0.08);
-    width: 100%;
-    justify-content: center;
   }
   
   .navbar-tab-inline {
@@ -465,16 +346,6 @@
     min-width: 18px;
   }
   
-  .export-btn {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: 0.7rem;
-    gap: var(--space-xs);
-  }
-  
-  .export-btn span {
-    display: none; /* Hide "Exporter" text on mobile */
-  }
-  
   .property-table th,
   .property-table td {
     padding: var(--space-md);
@@ -490,10 +361,6 @@
   .property-list-header {
     padding: var(--space-sm);
     min-height: 55px;
-  }
-  
-  .header-left h3 {
-    font-size: 0.8rem;
   }
   
   .navbar-tab-inline {
@@ -514,40 +381,4 @@
   .navbar-tab-inline .tab-icon {
     font-size: 0.8rem;
   }
-  
-  .export-btn {
-    padding: 6px;
-    width: 32px;
-    height: 32px;
-  }
-  
-  .export-btn svg:first-child {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .export-btn svg:last-child {
-    display: none;
-  }
-}
-
-/* Remove the old navbar styles since we're now using inline navbar */
-.results-navbar {
-  display: none;
-}
-
-.navbar-tab {
-  display: none;
-}
-
-/* Consumption value styling for DPE results */
-.consumption-value {
-  font-weight: 600;
-  color: var(--primary-color);
-  background-color: var(--primary-light);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  display: inline-block;
-  border: 1px solid var(--primary-color-alpha);
 }

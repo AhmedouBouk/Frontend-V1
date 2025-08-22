@@ -1,10 +1,4 @@
 <div class="map-wrapper">
-  <!-- Alert component for results > 500 -->
-  <app-map-alert 
-    [resultCount]="resultCount" 
-    [maxResults]="maxResults"
-    [activeFilters]="activeFilters">
-  </app-map-alert>
   <!-- Map display component -->
   <div class="map-inner-container">
     <app-map-display
@@ -24,19 +18,18 @@
       (propertySelected)="onPropertySelected($event)">
     </app-map-display>
 
-    <!-- Map search component -->
-    <app-map-search
+    <!-- Map controls component (now includes search and alert) -->
+    <app-map-controls 
+      [isLoading]="isLoading"
       [sidebarOpen]="leftSidebarOpen"
       [resultsOpen]="!tableCollapsed"
+      [resultCount]="resultCount"
+      [maxResults]="maxResults"
+      [activeFilters]="activeFilters"
+      (locateUser)="onLocateUser()"
+      (toggleSidebar)="onToggleSidebar()"
       (locationSelected)="onLocationSelected($event)"
       (userLocationRequested)="onUserLocationRequested()">
-    </app-map-search>
-
-    <!-- Map controls component -->
-    <app-map-controls
-      [isLoading]="isLoading"
-      (locateUser)="onLocateUser()"
-      (toggleSidebar)="onToggleSidebar()">
     </app-map-controls>
   </div>
 

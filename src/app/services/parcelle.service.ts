@@ -122,9 +122,9 @@ export class ParcelleService {
     // Add Type Locale filter if provided
     if (typeLocaleFilter && typeLocaleFilter.length > 0) {
       params = params.set('type_local', typeLocaleFilter.join(','));
-      console.log('🏠 Parcelle Service: Type locale filter added:', typeLocaleFilter.join(','));
+      
     } else {
-      console.log('🏠 Parcelle Service: No type locale filter provided');
+      
     }
 
     // Construction de l'URL de l'API pour les parcelles

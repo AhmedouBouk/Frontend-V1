@@ -70,7 +70,7 @@ export class FilterStateService {
       };
       
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(stateWithVersion));
-      console.log('🔄 Filter state saved to localStorage:', state);
+      
     } catch (error) {
       console.error('❌ Error saving filter state:', error);
     }
@@ -83,7 +83,7 @@ export class FilterStateService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) {
-        console.log('📝 No saved filter state found');
+        
         return null;
       }
 
@@ -91,7 +91,7 @@ export class FilterStateService {
       
       // Vérifier la version pour éviter les incompatibilités
       if (parsed.version !== this.STORAGE_VERSION) {
-        console.log('⚠️ Filter state version mismatch, clearing old state');
+        
         this.clearFilterState();
         return null;
       }
@@ -99,12 +99,12 @@ export class FilterStateService {
       // Vérifier que l'état n'est pas trop ancien (7 jours)
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 jours en millisecondes
       if (Date.now() - parsed.timestamp > maxAge) {
-        console.log('⏰ Filter state too old, clearing');
+        
         this.clearFilterState();
         return null;
       }
 
-      console.log('✅ Filter state restored from localStorage:', parsed);
+      
       return parsed as FilterState;
     } catch (error) {
       console.error('❌ Error loading filter state:', error);
@@ -119,7 +119,7 @@ export class FilterStateService {
   clearFilterState(): void {
     try {
       localStorage.removeItem(this.STORAGE_KEY);
-      console.log('🗑️ Filter state cleared from localStorage');
+      
     } catch (error) {
       console.error('❌ Error clearing filter state:', error);
     }

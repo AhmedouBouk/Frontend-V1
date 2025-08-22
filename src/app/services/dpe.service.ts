@@ -146,9 +146,9 @@ export class DpeService {
     // 🏠 Type Locale filter - Fix parameter name to match backend API
     if (typeLocaleFilter && typeLocaleFilter.length > 0) {
       enhancedParams['type_local'] = typeLocaleFilter.join(',');
-      console.log('🏠 DPE Service: Type locale filter added:', typeLocaleFilter.join(','));
+      
     } else {
-      console.log('🏠 DPE Service: No type locale filter provided');
+      
     }
 
     return enhancedParams;
@@ -215,10 +215,10 @@ export class DpeService {
   const apiUrl = `${environment.apiUrl}/dpe`;
 
   // ✅ DEBUG LOG — FULL API REQUEST INCLUDING TYPE LOCALE FILTER
-  console.log('📡 DPE API Request:');
-  console.log('URL:', apiUrl);
-  console.log('Parameters:', enhancedParams);
-  console.log('Type Locale Filter:', typeLocaleFilter);
+  
+  
+  
+  
 
   // Optional: Build a preview full GET URL
   const urlWithParams = new URL(apiUrl);
@@ -227,7 +227,7 @@ export class DpeService {
       urlWithParams.searchParams.append(key, enhancedParams[key]);
     }
   });
-  console.log('Full GET URL:', urlWithParams.toString());
+  
 
   return this.http.get<any[]>(apiUrl, { params: enhancedParams }).pipe(
     map(response => this.mapResponseToProperties(response)),

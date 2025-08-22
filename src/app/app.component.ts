@@ -6,7 +6,7 @@ import { Subscription } from "rxjs"
 import { FormComponent } from "./components/form/form.component"
 import { MapService } from "./services/map.service"
 import { FormService } from "./services/form.service"
-import { MapComponent } from "./components/map/map.component"
+import { MapComponent } from "./components/map/map/map.component"
 import { KeycloakAuthService } from "./services/keycloak-auth.service"
 
 interface NominatimResult {
