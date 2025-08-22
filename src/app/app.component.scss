@@ -280,8 +280,52 @@
     }
   }
   
+  /* Loading spinner overlay */
+  .loading-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(2px);
+    border-radius: var(--radius-xl);
+    pointer-events: none;
+    
+    .spinner {
+      color: #294857;
+      opacity: 0.8;
+      animation: spin 1.5s linear infinite;
+    }
+  }
+  
+  /* Add subtle animation when loading */
+  &.loading {
+    .logo-icon-container {
+      opacity: 0.6;
+    }
+  }
+  
   &:hover {
     transform: scale(1.05);
+    
+    &.loading {
+      /* Reduce hover effect when loading to avoid interference */
+      transform: scale(1.02);
+    }
+  }
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -420,6 +464,14 @@
     background-color: var(--surface-color);
     box-shadow: var(--shadow-md);
     color: var(--text-primary);
+    
+    .loading-spinner {
+      background-color: rgba(0, 0, 0, 0.15);
+      
+      .spinner {
+        color: var(--text-primary);
+      }
+    }
   }
 
   .sidebar-overlay.open {

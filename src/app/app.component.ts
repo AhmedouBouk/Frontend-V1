@@ -34,6 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isSearching = false
   searchResults: NominatimResult[] = []
   showResults = false
+  isLoading = false
 
   private readonly mapService = inject(MapService)
   private readonly formService = inject(FormService)
@@ -57,12 +58,43 @@ export class AppComponent implements OnInit, OnDestroy {
     // Restaurer l'état des filtres et synchroniser le sidebar
     this.formService.restoreFilterState()
     
-    // S'abonner aux changements d'état du sidebar depuis FormService
-    this.subscriptions.push(
-      this.formService.getLeftSidebarOpenObservable().subscribe((open: boolean) => {
-        this.sidebarOpen = open
-      })
-    )
+    // Instead of getGlobalLoadingObservable, subscribe to each one
+this.subscriptions.push(
+  this.formService.getPriceLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
+this.subscriptions.push(
+  this.formService.getDateLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
+this.subscriptions.push(
+  this.formService.getSurfaceLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
+this.subscriptions.push(
+  this.formService.getEnergyLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
+this.subscriptions.push(
+  this.formService.getConsumptionLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
+this.subscriptions.push(
+  this.formService.getTypeLocaleLoadingObservable().subscribe((loading: boolean) => {
+    this.isLoading = loading && !this.sidebarOpen
+  })
+)
+
   }
 
   ngOnDestroy(): void {

@@ -579,3 +579,73 @@ select {
     align-items: flex-start;
   }
 }
+
+/* ===== FORM CONTROLS (AVEC FIX iOS) ===== */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  /* FIX iOS: font-size minimum 16px pour éviter le zoom automatique */
+  font-size: 16px;
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* Pour les petits écrans, on peut légèrement réduire mais rester au-dessus de 16px */
+@media (max-width: 480px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    font-size: 16px; /* Garder 16px même sur mobile */
+    padding: var(--space-xs) var(--space-sm); /* Réduire le padding à la place */
+  }
+}
+
+/* ===== CUSTOM DATE PICKER (AVEC FIX iOS) ===== */
+.date-field {
+  position: relative;
+  overflow: visible;
+
+  .custom-date-input {
+    padding: var(--space-sm) var(--space-md);
+    /* FIX iOS: font-size minimum 16px */
+    font-size: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+
+/* Ajustement des labels pour compenser la plus grande font-size */
+.form-group label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: 0.875rem; /* 14px - peut rester plus petit pour les labels */
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+}

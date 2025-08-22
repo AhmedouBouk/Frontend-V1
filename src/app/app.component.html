@@ -53,10 +53,21 @@
     <app-map [leftSidebarOpen]="sidebarOpen"></app-map>
   
     <!-- Logo fixe qui reste visible quand la sidebar est cachée -->
-    <button class="fixed-logo" type="button" (click)="toggleSidebar()" (keydown.enter)="toggleSidebar()" *ngIf="!sidebarOpen">
+    <button class="fixed-logo" type="button" (click)="toggleSidebar()" (keydown.enter)="toggleSidebar()" *ngIf="!sidebarOpen" [class.loading]="isLoading">
       <div class="logo-icon-container">
         <img src="assets/icons/logo.png" alt="Logo" width="20" height="20">
       </div>
+      
+      <!-- Loading spinner overlay -->
+      <div class="loading-spinner" *ngIf="isLoading">
+        <svg class="spinner" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="31.4" stroke-dashoffset="31.4">
+            <animate attributeName="stroke-dasharray" dur="2s" values="0 31.4;15.7 15.7;0 31.4" repeatCount="indefinite"/>
+            <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.7;-31.4" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      
       <span class="sr-only">Afficher le menu</span>
     </button>
   </div>
