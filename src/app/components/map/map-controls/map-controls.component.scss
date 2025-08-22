@@ -86,13 +86,12 @@
     right: 5px;
     left: auto;
     transform: none;
-    max-width: calc(100vw - 80px); /* Leave space for the 48px logo button + margins */
-    z-index: 999; /* Below the logo button's z-index of 998 but above map */
+    max-width: calc(100vw - 80px);
+    z-index: 999;
   }
 }
 
 .alert-content {
-  /* Yellow background like your map-alert */
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   border: 1px solid #f59e0b;
   border-radius: 8px;
@@ -113,7 +112,6 @@
   flex: 1;
 }
 
-/* Close button styles */
 .alert-close-btn {
   background: none;
   border: none;
@@ -144,7 +142,6 @@
   }
 }
 
-/* Desktop view - single line layout */
 .alert-main-message {
   display: flex;
   align-items: center;
@@ -173,24 +170,23 @@
   }
   
   .alert-text {
-    font-size: 0.6rem; /* Much smaller for mobile */
-    line-height: 1.1; /* Even tighter line height */
-  }
-  
-  .alert-content {
-    padding: 6px 12px; /* Reduced padding */
-  }
-}
-
-/* Extra small screens (iPhone SE, etc.) */
-@media (max-width: 480px) {
-  .alert-text {
-    font-size: 0.55rem; /* Very small for tiny screens */
+    font-size: 0.6rem;
     line-height: 1.1;
   }
   
   .alert-content {
-    padding: 5px 10px; /* Even more reduced padding */
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .alert-text {
+    font-size: 0.55rem;
+    line-height: 1.1;
+  }
+  
+  .alert-content {
+    padding: 5px 10px;
   }
 }
 
@@ -205,7 +201,6 @@
   }
 }
 
-/* Mobile slideDown animation adjustment */
 @media (max-width: 768px) {
   @keyframes slideDown {
     from {
@@ -419,7 +414,6 @@
   }
 }
 
-/* Screen reader only class */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -444,11 +438,12 @@
       bottom: 70px;
     }
     
+    /* FIXED: Move search controls higher when results are open */
     &.results-open {
-      bottom: calc(50vh - 45px);
+      bottom: calc(50vh + 13px); /* Reduced by 10% from 14px */
       
       &.with-sidebar {
-        bottom: calc(40vh - 45px);
+        bottom: calc(40vh + 9px); /* Reduced by 10% from 10px */
       }
     }
 
@@ -482,11 +477,12 @@
       bottom: 65px;
     }
     
+    /* FIXED: Move search controls higher when results are open */
     &.results-open {
-      bottom: calc(50vh - 60px);
+      bottom: calc(50vh + 15px); /* Reduced by 10% from 17px */
       
       &.with-sidebar {
-        bottom: calc(40vh - 60px);
+        bottom: calc(40vh + 12px); /* Reduced by 10% from 13px */
       }
     }
   }
@@ -507,7 +503,7 @@
   }
 }
 
-// Dark theme support
+/* Dark theme support */
 [data-theme="dark"] {
   .control-button {
     background-color: var(--surface-color);
