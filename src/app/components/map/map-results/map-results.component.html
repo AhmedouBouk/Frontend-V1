@@ -4,39 +4,46 @@
    
 
     <!-- Navbar pour basculer entre les sources de données - maintenant au centre -->
-    <div class="header-center">
-      
-        <button 
-          class="navbar-tab-inline" 
-          [class.active]="selectedDataSource === 'dvf'"
-          [class.disabled]="visibleDvfProperties.length === 0"
-          (click)="selectDataSource('dvf'); $event.stopPropagation()"
-          >
-          <span class="tab-icon">🏠</span>
-          <span class="tab-label">DVF</span>
-          <span class="tab-count">({{visibleDvfProperties.length}})</span>
-        </button>
-        
-        <button 
-          class="navbar-tab-inline" 
-          [class.active]="selectedDataSource === 'dpe'"
-          [class.disabled]="visibleDpeProperties.length === 0"
-          (click)="selectDataSource('dpe'); $event.stopPropagation()">
-          <span class="tab-icon">⚡</span>
-          <span class="tab-label">DPE</span>
-          <span class="tab-count">({{visibleDpeProperties.length}})</span>
-        </button>
-        
-        <button 
-          class="navbar-tab-inline" 
-          [class.active]="selectedDataSource === 'parcelles'"
-          [class.disabled]="visibleParcelleProperties.length === 0"
-          (click)="selectDataSource('parcelles'); $event.stopPropagation()">
-          <span class="tab-icon">📐</span>
-          <span class="tab-label">Parcelles</span>
-          <span class="tab-count">({{visibleParcelleProperties.length}})</span>
-        </button>
-      </div>
+<!-- Navbar pour basculer entre les sources de données - maintenant au centre -->
+<div class="header-center">
+  
+  <button 
+    class="navbar-tab-inline" 
+    [class.active]="selectedDataSource === 'dvf'"
+    [class.disabled]="visibleDvfProperties.length === 0"
+    (click)="selectDataSource('dvf'); $event.stopPropagation()"
+    >
+    <span class="tab-icon">
+      <img src="assets/icons/house-plus.png" alt="DVF" style="width: 16px; height: 16px; vertical-align: middle;">
+    </span>
+    <span class="tab-label">DVF</span>
+    <span class="tab-count">({{visibleDvfProperties.length}})</span>
+  </button>
+  
+  <button 
+    class="navbar-tab-inline" 
+    [class.active]="selectedDataSource === 'dpe'"
+    [class.disabled]="visibleDpeProperties.length === 0"
+    (click)="selectDataSource('dpe'); $event.stopPropagation()">
+    <span class="tab-icon">
+      <img src="assets/icons/energy-class-icon.png" alt="DPE" style="width: 16px; height: 16px; vertical-align: middle;">
+    </span>
+    <span class="tab-label">DPE</span>
+    <span class="tab-count">({{visibleDpeProperties.length}})</span>
+  </button>
+  
+  <button 
+    class="navbar-tab-inline" 
+    [class.active]="selectedDataSource === 'parcelles'"
+    [class.disabled]="visibleParcelleProperties.length === 0"
+    (click)="selectDataSource('parcelles'); $event.stopPropagation()">
+    <span class="tab-icon">
+      <img src="assets/icons/m2-icon.png" alt="Parcelles" style="width: 16px; height: 16px; vertical-align: middle;">
+    </span>
+    <span class="tab-label">Parcelles</span>
+    <span class="tab-count">({{visibleParcelleProperties.length}})</span>
+  </button>
+</div>
     
 
     <div class="header-right">

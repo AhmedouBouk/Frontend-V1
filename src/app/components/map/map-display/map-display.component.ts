@@ -218,8 +218,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
           height: finalRect.height
         })
 
-        // Add debug control to map
-        this.addDebugControl()
+        
       }, 500)
 
       // Set up event listeners for map movement and zoom with state saving
@@ -561,34 +560,17 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     const energyClass = (property.energyClass || 'G').toUpperCase();
   
     const isConsumption = this.useConsumptionFilter;
-    const iconChar = isConsumption ? '⚡' : energyClass;
-  
-    // pick gradient for A..G
-    const { bg } = this.getEnergyPalette(energyClass);
-  
-    // inline-styled chip (12x12 - half the original size), no blue halo, white text
-    const html = `
-      <div style="
-        width:12px;height:12px;border-radius:3px;
-        display:grid;place-items:center;
-        font-weight:800;letter-spacing:.02em;line-height:1;
-        border:1px solid rgba(0,0,0,.15);
-        box-shadow:
-          0 1px 2px rgba(0,0,0,.25),
-          inset 0 1px 0 rgba(255,255,255,.25);
-        background:${bg};
-        color:#ffffff;
-        user-select:none;
-      ">
-        <span style="font-size:${isConsumption ? '7px' : '6px'};transform:translateY(.25px)">${iconChar}</span>
-      </div>`;
-  
+    
+    // Use the appropriate PNG image based on energy class
+    const iconUrl = `assets/icons/${energyClass}.png`;
+    
     const marker = L.marker([lat, lng], {
       icon: L.divIcon({
-        className: `leaflet-dpe-chip energy-${energyClass.toLowerCase()} ${isConsumption ? 'is-consumption' : ''}`,
-        html,
-        iconSize: [13, 13], // Half of original 26x26
-        iconAnchor: [6.5, 6.5], // Half of original 13x13
+        className: `dpe-image-marker energy-${energyClass.toLowerCase()} ${isConsumption ? 'is-consumption' : ''}`,
+        html: `<img src="${iconUrl}" style="width: 120px; height: 120px;" alt="Classe ${energyClass}">`,
+        iconSize: [120, 120],      // 5x bigger than original 24px
+        iconAnchor: [60, 60],      // Center the icon (half of iconSize)
+        popupAnchor: [0, -60]      // Popup appears above the icon
       }),
     }).addTo(this.featureGroup);
   
@@ -612,25 +594,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     this.markers.push(marker);
   }
   
-  private getEnergyPalette(letter: string): { bg: string } {
-    switch (letter) {
-      case 'A':
-        return { bg: 'linear-gradient(145deg,#11c26a 0%,#0ea85f 60%,#0a8f54 100%)' };
-      case 'B':
-        return { bg: 'linear-gradient(145deg,#3dc375 0%,#31ac65 60%,#2b985b 100%)' };
-      case 'C':
-        return { bg: 'linear-gradient(145deg,#a0c63a 0%,#91b431 60%,#7a9b29 100%)' };
-      case 'D':
-        return { bg: 'linear-gradient(145deg,#ffe23d 0%,#ffd21f 60%,#f2c212 100%)' };
-      case 'E':
-        return { bg: 'linear-gradient(145deg,#ffb63d 0%,#ffa41f 60%,#f29012 100%)' };
-      case 'F':
-        return { bg: 'linear-gradient(145deg,#ff7a38 0%,#ff6a1f 60%,#ef5a15 100%)' };
-      case 'G':
-      default:
-        return { bg: 'linear-gradient(145deg,#ff4747 0%,#ff2d2d 60%,#e51f1f 100%)' };
-    }
-  }
+  
   
   
 
@@ -674,32 +638,5 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
     this.mapStateService.saveMapState(mapState)
   }
 
-  private addDebugControl(): void {
-    const debugControl = L.control({
-      position: "bottomright",
-    }) as any
-    debugControl.onAdd = () => {
-      const div = L.DomUtil.create("div", "leaflet-control-debug")
-      div.innerHTML = `
-        <button id="debug-toggle-map-bounds">Toggle Map Bounds</button>
-        <button id="debug-toggle-map-state">Toggle Map State</button>
-      `
-      return div
-    }
-    debugControl.addTo(this.map)
-
-    const debugToggleMapBoundsButton = document.getElementById("debug-toggle-map-bounds")
-    if (debugToggleMapBoundsButton) {
-      debugToggleMapBoundsButton.addEventListener("click", () => {
-        console.log('🗺️ DEBUG: Map bounds:', this.map.getBounds())
-      })
-    }
-
-    const debugToggleMapStateButton = document.getElementById("debug-toggle-map-state")
-    if (debugToggleMapStateButton) {
-      debugToggleMapStateButton.addEventListener("click", () => {
-        console.log('🗺️ DEBUG: Map state:', this.mapStateService.getMapState())
-      })
-    }
-  }
+  
 }
