@@ -237,4 +237,6 @@ export class MapResultsComponent {
 
     return this.selectedDataSource
   }
+
+  // Tutorial method
 }

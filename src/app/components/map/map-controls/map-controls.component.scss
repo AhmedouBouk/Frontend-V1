@@ -520,3 +520,178 @@
     }
   }
 }
+
+/* Ajouter dans map-controls.component.scss */
+
+// Styles spécifiques pour le bouton tutoriel
+.tutorial-btn {
+  position: relative;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover {
+    svg {
+      transform: scale(1.1);
+    }
+    
+    // Animation subtile pour attirer l'attention
+    &::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 2px solid var(--primary-500);
+      border-radius: 10px;
+      opacity: 0.3;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+// Style pour mettre en évidence pendant le tutoriel
+.shepherd-target-highlighted {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid var(--primary-500);
+    border-radius: 12px;
+    animation: highlight-pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+@keyframes highlight-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.02);
+  }
+}
+
+// Ajustement pour mobile - bouton d'aide plus petit
+@media (max-width: 768px) {
+  .tutorial-btn {
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+// Ajouter ces styles à votre map-controls.component.scss existant
+
+/* ===== TUTORIAL BUTTON STYLES ===== */
+.tutorial-btn {
+  position: relative;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease;
+  }
+  
+  &:hover {
+    svg {
+      transform: scale(1.1);
+    }
+    
+    // Animation subtile pour attirer l'attention
+    &::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 2px solid var(--primary-500, #3b82f6);
+      border-radius: 10px;
+      opacity: 0.3;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+// Style pour mettre en évidence pendant le tutoriel
+.shepherd-target-highlighted {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid var(--primary-500, #3b82f6);
+    border-radius: 12px;
+    animation: highlight-pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+@keyframes highlight-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.02);
+  }
+}
+
+// Ajustement pour mobile - bouton d'aide plus petit
+@media (max-width: 768px) {
+  .tutorial-btn {
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

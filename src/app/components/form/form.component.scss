@@ -46,6 +46,56 @@
   backface-visibility: hidden;
 }
 
+/* ===== FORM TUTORIAL HEADER ===== */
+.form-tutorial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-light);
+  
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .form-tutorial-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-50);
+    border: 1px solid var(--primary-500);
+    color: var(--primary-500);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    
+    &:hover {
+      background: var(--primary-500);
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    &:focus {
+      outline: 2px solid var(--primary-300);
+      outline-offset: 2px;
+    }
+    
+    svg {
+      transition: transform var(--transition-fast);
+    }
+  }
+}
+
 /* ===== FORM SECTIONS ===== */
 .form-section {
   margin-bottom: var(--space-md);

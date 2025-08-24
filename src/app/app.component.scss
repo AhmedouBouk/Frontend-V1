@@ -359,7 +359,7 @@
   justify-content: center;
   cursor: pointer;
   position: absolute;
-  right: 0;
+  right: 60px; /* Moved left to make space for tutorial button */
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -408,6 +408,45 @@
   to {
     transform: rotate(0) scale(1);
     opacity: 1;
+  }
+}
+
+/* Tutorial Toggle Button */
+.tutorial-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  color: var(--text-primary);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--primary-500);
+    transform: translateY(-50%) scale(1.05);
+  }
+  
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--primary-300);
+    outline-offset: 2px;
+  }
+  
+  svg {
+    transition: transform var(--transition-normal);
   }
 }
 

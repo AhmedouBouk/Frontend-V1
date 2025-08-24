@@ -5,6 +5,7 @@ import {
   Output,
   type OnInit,
   type OnChanges,
+  type OnDestroy,
   SimpleChanges,
   inject,
 } from "@angular/core";
@@ -12,6 +13,7 @@ import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 import { MapService } from "../../../services/map.service";
+import { TutorialService } from "../../../services/tutorial.service";
 
 interface NominatimResult {
   display_name: string;
@@ -28,7 +30,7 @@ interface NominatimResult {
   templateUrl: "./map-controls.component.html",
   styleUrls: ["./map-controls.component.scss"],
 })
-export class MapControlsComponent implements OnInit, OnChanges {
+export class MapControlsComponent implements OnInit, OnChanges, OnDestroy {
   // Original map-controls inputs
   @Input() isLoading = false;
 
@@ -47,6 +49,9 @@ export class MapControlsComponent implements OnInit, OnChanges {
   // NEW: Add zoom level input to detect zoom changes
   @Input() currentZoom?: number;
 
+  // Tutorial control
+  @Input() showTutorialButton = true;
+
   // Original map-controls outputs
   @Output() locateUser = new EventEmitter<void>();
   @Output() toggleSidebar = new EventEmitter<void>();
@@ -57,6 +62,9 @@ export class MapControlsComponent implements OnInit, OnChanges {
 
   // Map type outputs
   @Output() mapTypeChanged = new EventEmitter<"street" | "satellite" | "cadastre">();
+
+  // Tutorial output
+  @Output() tutorialCompleted = new EventEmitter<void>();
 
   // Search component properties
   isSearchOpen = false;
@@ -72,26 +80,25 @@ export class MapControlsComponent implements OnInit, OnChanges {
   private previousFilters: string[] = [];
   private previousZoom?: number;
 
+  // Services injection
   private readonly http = inject(HttpClient);
   private readonly mapService = inject(MapService);
+  private readonly tutorialService = inject(TutorialService);
 
   ngOnInit() {
     // Store initial states
     this.previousFilters = [...this.activeFilters];
     this.previousZoom = this.currentZoom;
     
-    
+    // Optionnel : Démarrer automatiquement le tutoriel pour les nouveaux utilisateurs
+    this.checkForFirstVisit();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    
-    
     // Reset manual hide when result count drops below threshold
     if (changes["resultCount"]) {
       const currentValue = changes["resultCount"].currentValue;
       const previousValue = changes["resultCount"].previousValue;
-      
-      
       
       // Only reset when going from >= 500 to < 500
       if (currentValue < this.maxResults && this.isManuallyHidden) {
@@ -102,8 +109,6 @@ export class MapControlsComponent implements OnInit, OnChanges {
     // Check for REAL filter changes (not just array reference changes)
     if (changes["activeFilters"]) {
       const reallyChanged = this.hasFiltersReallyChanged();
-      
-      
       
       if (reallyChanged) {
         this.isManuallyHidden = false;
@@ -118,8 +123,6 @@ export class MapControlsComponent implements OnInit, OnChanges {
       const currentZoom = changes["currentZoom"].currentValue;
       const previousZoom = changes["currentZoom"].previousValue;
       
-      
-      
       // Reset manual hide when zoom changes AND we still have >= maxResults
       if (currentZoom !== previousZoom && 
           this.isManuallyHidden && 
@@ -130,8 +133,11 @@ export class MapControlsComponent implements OnInit, OnChanges {
       // Update previous zoom
       this.previousZoom = currentZoom;
     }
-    
-    
+  }
+
+  ngOnDestroy() {
+    // Nettoyer le tutoriel si le component est détruit
+    this.tutorialService.stopTutorial();
   }
 
   private hasFiltersReallyChanged(): boolean {
@@ -155,20 +161,13 @@ export class MapControlsComponent implements OnInit, OnChanges {
 
   // -------- Alert methods --------
   closeAlert(): void {
-    
-    
     this.isManuallyHidden = true;
-    
-    
   }
 
   // NEW: Method to manually trigger alert reset (for testing or manual triggers)
   resetAlert(): void {
-    
     this.isManuallyHidden = false;
   }
-
-  
 
   // -------- Original map-controls methods --------
   onLocateUser(): void {
@@ -186,6 +185,41 @@ export class MapControlsComponent implements OnInit, OnChanges {
     this.mapType = type;
     this.mapService.setMapType(type);
     this.mapTypeChanged.emit(type);
+  }
+
+  // -------- Tutorial methods --------
+  startTutorial(): void {
+    this.tutorialService.startMapControlsTutorial();
+  }
+
+  startQuickTour(): void {
+    this.tutorialService.startQuickTour();
+  }
+
+  private checkForFirstVisit(): void {
+    const hasSeenTutorial = localStorage.getItem('hasSeenMapControlsTutorial');
+    
+    if (!hasSeenTutorial) {
+      // Attendre un peu que l'interface soit prête
+      setTimeout(() => {
+        this.startQuickTour();
+        localStorage.setItem('hasSeenMapControlsTutorial', 'true');
+        this.tutorialCompleted.emit();
+      }, 1000);
+    }
+  }
+
+  resetTutorialFlag(): void {
+    localStorage.removeItem('hasSeenMapControlsTutorial');
+  }
+
+  // Méthode pour déclencher le tutoriel depuis le parent
+  triggerTutorial(type: 'quick' | 'full' = 'full'): void {
+    if (type === 'quick') {
+      this.startQuickTour();
+    } else {
+      this.startTutorial();
+    }
   }
 
   // -------- Map-search methods --------

@@ -270,6 +270,16 @@
   background-color: #ed1c24;
 }
 
+/* ===== ID TEXT STYLING ===== */
+.id-text {
+  font-family: monospace;
+  font-size: 0.85rem;
+  background-color: var(--surface-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
 /* ===== CONSUMPTION VALUE STYLING ===== */
 .consumption-value {
   font-weight: 600;

@@ -3,6 +3,7 @@ import { FormBuilder, type FormGroup, ReactiveFormsModule } from "@angular/forms
 import { CommonModule } from "@angular/common"
 import { FormService } from "../../services/form.service"
 import { MapService } from "../../services/map.service"
+import { TutorialService } from "../../services/tutorial.service"
 import { Subject, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
@@ -21,6 +22,7 @@ export class FormComponent implements OnInit , OnDestroy {
   private readonly fb = inject(FormBuilder)
   private readonly formService = inject(FormService)
   private readonly mapService = inject(MapService)
+  private readonly tutorialService = inject(TutorialService)
 
   // Filter toggle states
   allPriceSelected = false
@@ -1500,6 +1502,11 @@ private setupAutoToggleActivation(): void {
       }
     });
   });
+}
+
+// Tutorial method
+startFormTutorial(): void {
+  this.tutorialService.startFormTutorial();
 }
 
 }

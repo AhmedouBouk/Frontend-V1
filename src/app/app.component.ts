@@ -8,6 +8,7 @@ import { MapService } from "./services/map.service"
 import { FormService } from "./services/form.service"
 import { MapComponent } from "./components/map/map/map.component"
 import { KeycloakAuthService } from "./services/keycloak-auth.service"
+import { TutorialService } from "./services/tutorial.service"
 
 interface NominatimResult {
   display_name: string
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient)
   private readonly subscriptions: Subscription[] = []
   private readonly kcAuth = inject(KeycloakAuthService)
+  private readonly tutorialService = inject(TutorialService)
 
   ngOnInit(): void {
     // Initialize Keycloak auth (direct integration)
@@ -253,5 +255,18 @@ this.subscriptions.push(
 
   logout(): void {
     this.kcAuth.logout()
+  }
+
+  // Tutorial methods
+  startTutorial(): void {
+    this.tutorialService.startFullApplicationTutorial()
+  }
+
+  startFormTutorial(): void {
+    this.tutorialService.startFormTutorial()
+  }
+
+  startResultsTutorial(): void {
+    this.tutorialService.startResultsTutorial()
   }
 }
