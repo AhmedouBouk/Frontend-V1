@@ -801,18 +801,12 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // Déterminer quelles sources de données charger selon les filtres actifs
       const sourcesToLoad: string[] = []
       
-      console.log('🔍 DEBUG: Toggle states for activeDataSources calculation:', {
-        isPriceToggleActive: this.isPriceToggleActive,
-        isDateToggleActive: this.isDateToggleActive,
-        isEnergyToggleActive: this.isEnergyToggleActive,
-        isConsumptionToggleActive: this.isConsumptionToggleActive,
-        isSurfaceToggleActive: this.isSurfaceToggleActive
-      })
+      
       
       // DVF si filtres prix ou date actifs (ou leurs toggles)
       if (this.isPriceToggleActive || this.isDateToggleActive) {
         sourcesToLoad.push('dvf')
-        console.log('🔍 DEBUG: Adding DVF to sourcesToLoad')
+        
       }
       
       // DPE si filtre énergie ou consommation actif
@@ -820,24 +814,24 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // Il doit seulement ajouter le filtrage par date aux sources déjà actives
       if (this.isEnergyToggleActive || this.isConsumptionToggleActive) {
         sourcesToLoad.push('dpe')
-        console.log('🔍 DEBUG: Adding DPE to sourcesToLoad')
+        
       }
       
       // Parcelles si filtre surface actif
       if (this.isSurfaceToggleActive) {
         sourcesToLoad.push('parcelles')
-        console.log('🔍 DEBUG: Adding Parcelles to sourcesToLoad')
+        
       }
       
       // Si aucun filtre actif, charger selon currentDataSource pour compatibilité
       if (sourcesToLoad.length === 0) {
         sourcesToLoad.push(this.currentDataSource)
-        console.log('🔍 DEBUG: No filters active, using currentDataSource:', this.currentDataSource)
+        
       }
       
-      console.log('🔍 DEBUG: Final sourcesToLoad:', sourcesToLoad)
+      
       this.activeDataSources = sourcesToLoad
-      console.log('🔍 DEBUG: Set activeDataSources to:', this.activeDataSources)
+      
       
       
       // Charger toutes les sources nécessaires en parallèle
@@ -917,7 +911,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
           exactPrice = this.exactPrice
         } else if (this.priceMode === 'range') {
           priceRange = [this.minPrice, this.maxPrice]
-          console.log('💰 DVF price range applied:', priceRange)
+          
         }
       }
 
@@ -935,36 +929,31 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       let typeLocaleFilter: string[] | null = null
       if (this.isTypeLocaleToggleActive && this.selectedTypeLocales && this.selectedTypeLocales.length > 0) {
         typeLocaleFilter = this.selectedTypeLocales
-        console.log('🏠 DVF - Type Locale filter applied:', typeLocaleFilter)
+        
       } else {
-        console.log('🏠 DVF - No Type Locale filter applied (toggle inactive or no selection)')
+        
         typeLocaleFilter = null  // Explicitly set to null when toggle is inactive
       }
 
       this.dvfService.getDvfProperties(topLeft, bottomRight, priceRange, exactPrice, dateRange, typeLocaleFilter, exactDate).subscribe({
         next: (properties: DvfProperty[]) => {
-          console.log('💰 DVF Data received:', properties.length, 'properties')
+          
           this.visibleDvfProperties = properties
           this.alertMessages['dvf'] = { 
             count: properties.length, 
             show: properties.length >= this.maxResults 
           }
-          console.log('🚨 DEBUG DVF Alert Set:', {
-            count: properties.length,
-            maxResults: this.maxResults,
-            show: properties.length >= this.maxResults,
-            exceedsThreshold: properties.length >= this.maxResults
-          })
+          
           
           // Recalculate activeDataSources to include DVF now that data is loaded
           this.recalculateActiveDataSources()
           
           // Force immediate marker update after data is received
-          console.log('💰 Calling cdr.detectChanges() and forceUpdateMarkers()')
+          
           this.cdr.detectChanges()
           if (this.mapDisplay) {
             this.mapDisplay.forceUpdateMarkers()
-            console.log('💰 forceUpdateMarkers() called successfully')
+            
           } else {
             console.error('💰 mapDisplay is null/undefined!')
           }
@@ -1043,19 +1032,15 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       const consumptionFilterToUse = this.consumptionFilter && Array.isArray(this.consumptionFilter) && this.consumptionFilter.length === 2 ? this.consumptionFilter : null;
       const exactConsumptionToUse = this.exactConsumption !== null && this.exactConsumption !== undefined ? this.exactConsumption : null;
 
-      console.log('🔥 MapComponent - Consumption parameters being sent to DPE service:', {
-        consumptionFilter: consumptionFilterToUse,
-        exactConsumption: exactConsumptionToUse,
-        isConsumptionToggleActive: this.isConsumptionToggleActive
-      });
+      
 
       // 🏠 Type Locale filter parameters
       let typeLocaleFilter: string[] | null = null
       if (this.isTypeLocaleToggleActive && this.selectedTypeLocales && this.selectedTypeLocales.length > 0) {
         typeLocaleFilter = this.selectedTypeLocales
-        console.log('🏠 DPE - Type Locale filter applied:', typeLocaleFilter)
+        
       } else {
-        console.log('🏠 DPE - No Type Locale filter applied (toggle inactive or no selection)')
+        
         typeLocaleFilter = null  // Explicitly set to null when toggle is inactive
       }
 
@@ -1065,14 +1050,14 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       // 1. Classe Energie filter (independent)
       if (energyFilter && Array.isArray(energyFilter) && energyFilter.length > 0 && filterMode === 'class') {
         dpeObservables.push(
-          this.dpeService.getDpePropertiesByClasse(topLeft, bottomRight, energyFilter, typeLocaleFilter)
+          this.dpeService.getDpePropertiesByClasse(topLeft, bottomRight, energyFilter)
         );
       }
 
       // 2. Consumption filter (independent) 
       if (this.isConsumptionToggleActive && (consumptionFilterToUse || exactConsumptionToUse)) {
         dpeObservables.push(
-          this.dpeService.getDpePropertiesByConsumption(topLeft, bottomRight, consumptionFilterToUse, exactConsumptionToUse, typeLocaleFilter)
+          this.dpeService.getDpePropertiesByConsumption(topLeft, bottomRight, consumptionFilterToUse, exactConsumptionToUse)
         );
       }
 
@@ -1093,7 +1078,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
         const exactValeur = typeof energyFilter === 'number' ? energyFilter : null;
         
         dpeObservables.push(
-          this.dpeService.getDpePropertiesByValeur(topLeft, bottomRight, valeurFilter, exactValeur, typeLocaleFilter)
+          this.dpeService.getDpePropertiesByValeur(topLeft, bottomRight, valeurFilter, exactValeur)
         );
       }
 
@@ -1102,9 +1087,9 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       const shouldMakeGeneralRequest = dpeObservables.length === 0;
         
       if (shouldMakeGeneralRequest) {
-        console.log('🔥 Making general DPE request (no specific filters or invalid parameters)')
+        
         dpeObservables.push(
-          this.dpeService.getDpeProperties(topLeft, bottomRight, {}, typeLocaleFilter)
+          this.dpeService.getDpeProperties(topLeft, bottomRight, {})
         );
       }
 
@@ -1118,22 +1103,17 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             count: this.visibleDpeProperties.length,
             show: this.visibleDpeProperties.length >= this.maxResults
           }
-          console.log('🚨 DEBUG DPE Alert Set:', {
-            count: this.visibleDpeProperties.length,
-            maxResults: this.maxResults,
-            show: this.visibleDpeProperties.length >= this.maxResults,
-            exceedsThreshold: this.visibleDpeProperties.length >= this.maxResults
-          })
+          
 
           // Recalculate activeDataSources to include DPE now that data is loaded
           this.recalculateActiveDataSources()
           
           // Force immediate marker update after DPE data is received
-          console.log('🔥 DPE: Calling cdr.detectChanges() and forceUpdateMarkers()')
+          
           this.cdr.detectChanges()
           if (this.mapDisplay) {
             this.mapDisplay.forceUpdateMarkers()
-            console.log('🔥 DPE: forceUpdateMarkers() called successfully')
+            
           } else {
             console.error('🔥 DPE: mapDisplay is null/undefined!')
           }
@@ -1188,9 +1168,9 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       let typeLocaleFilter: string[] | null = null
       if (this.isTypeLocaleToggleActive && this.selectedTypeLocales && this.selectedTypeLocales.length > 0) {
         typeLocaleFilter = this.selectedTypeLocales
-        console.log('🏠 Parcelle - Type Locale filter applied:', typeLocaleFilter)
+        
       } else {
-        console.log('🏠 Parcelle - No Type Locale filter applied (toggle inactive or no selection)')
+        
         typeLocaleFilter = null  // Explicitly set to null when toggle is inactive
       }
 
@@ -1199,12 +1179,12 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
           console.error('Invalid Type Locale filter:', typeLocaleFilter)
           typeLocaleFilter = null
         } else if (typeLocaleFilter.length === 0) {
-          console.log('Empty Type Locale filter, ignoring')
+          
           typeLocaleFilter = null
         }
       }
 
-      this.parcelleService.getParcelleProperties(topLeft, bottomRight, surfaceParam, typeLocaleFilter).subscribe({
+      this.parcelleService.getParcelleProperties(topLeft, bottomRight, surfaceParam).subscribe({
         next: (properties: ParcelleProperty[]) => {
           this.visibleParcelleProperties = properties
           
@@ -1213,22 +1193,17 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
             count: properties.length,
             show: properties.length >= this.maxResults
           }
-          console.log('🚨 DEBUG Parcelles Alert Set:', {
-            count: properties.length,
-            maxResults: this.maxResults,
-            show: properties.length >= this.maxResults,
-            exceedsThreshold: properties.length >= this.maxResults
-          })
+         
           
           // Recalculate activeDataSources to include Parcelles now that data is loaded
           this.recalculateActiveDataSources()
           
           // Force immediate marker update after Parcelles data is received
-          console.log('📏 Parcelles: Calling cdr.detectChanges() and forceUpdateMarkers()')
+          
           this.cdr.detectChanges()
           if (this.mapDisplay) {
             this.mapDisplay.forceUpdateMarkers()
-            console.log('📏 Parcelles: forceUpdateMarkers() called successfully')
+            
           } else {
             console.error('📏 Parcelles: mapDisplay is null/undefined!')
           }
@@ -1258,27 +1233,14 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       !this.useEnergyFilter && 
       !this.isConsumptionToggleActive
 
-    console.log('🚨 DEBUG Alert Logic - Filter States:', {
-      useDateFilter: this.useDateFilter,
-      usePriceFilter: this.usePriceFilter,
-      useSurfaceFilter: this.useSurfaceFilter,
-      useEnergyFilter: this.useEnergyFilter,
-      isConsumptionToggleActive: this.isConsumptionToggleActive,
-      onlyPeriodFilterActive: onlyPeriodFilterActive,
-      activeDataSources: this.activeDataSources,
-      maxResults: this.maxResults
-    })
+   
 
     // Vérifier chaque source active
     for (const source of this.activeDataSources) {
       const alert = this.alertMessages[source]
       if (alert) {
         totalCount += alert.count
-        console.log(`🚨 DEBUG Alert - Source ${source}:`, {
-          count: alert.count,
-          show: alert.show,
-          exceedsMax: alert.count >= this.maxResults
-        })
+       
         // Show alert if conditions are met
         if (alert.show) {
           hasAlert = true
@@ -1289,7 +1251,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
 
     // Suppress alert display only if period filter is the only active filter
     if (onlyPeriodFilterActive) {
-      console.log('🚨 DEBUG Alert - Suppressing alert because only period filter is active')
+      
       hasAlert = false
     }
 
@@ -1297,17 +1259,9 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
     this.resultCount = totalCount
     this.showAlert = hasAlert
 
-    console.log('🚨 DEBUG Alert - Final State:', {
-      totalCount: totalCount,
-      hasAlert: hasAlert,
-      showAlert: this.showAlert,
-      resultCount: this.resultCount,
-      alertSources: alertSources
-    })
+   
     
-    if (hasAlert) {
-      
-    }
+   
   }
 
   /**
@@ -1331,22 +1285,7 @@ this.formService.getSurfaceModeObservable().subscribe(mode => {
       newActiveDataSources.push('parcelles')
     }
     
-    console.log('🔄 Recalculating activeDataSources:', {
-      old: this.activeDataSources,
-      new: newActiveDataSources,
-      toggleStates: {
-        isPriceToggleActive: this.isPriceToggleActive,
-        isDateToggleActive: this.isDateToggleActive,
-        isEnergyToggleActive: this.isEnergyToggleActive,
-        isConsumptionToggleActive: this.isConsumptionToggleActive,
-        isSurfaceToggleActive: this.isSurfaceToggleActive
-      },
-      dataLengths: {
-        dvf: this.visibleDvfProperties.length,
-        dpe: this.visibleDpeProperties.length,
-        parcelles: this.visibleParcelleProperties.length
-      }
-    })
+   
     
     this.activeDataSources = newActiveDataSources
   }

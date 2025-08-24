@@ -14,6 +14,7 @@ import { FormsModule } from "@angular/forms";
 import { HttpClient } from "@angular/common/http";
 import { MapService } from "../../../services/map.service";
 import { TutorialService } from "../../../services/tutorial.service";
+import { KeycloakAuthService } from "../../../services/keycloak-auth.service";
 
 interface NominatimResult {
   display_name: string;
@@ -84,6 +85,10 @@ export class MapControlsComponent implements OnInit, OnChanges, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly mapService = inject(MapService);
   private readonly tutorialService = inject(TutorialService);
+  private readonly kcAuth = inject(KeycloakAuthService);
+
+  // Auth panel state
+  authExpanded = false;
 
   ngOnInit() {
     // Store initial states
@@ -330,16 +335,7 @@ export class MapControlsComponent implements OnInit, OnChanges, OnDestroy {
     this.searchResults = uniqueResults.slice(0, 3);
   }
 
-  selectLocation(result: NominatimResult): void {
-    this.locationSelected.emit({
-      lat: Number.parseFloat(result.lat),
-      lon: Number.parseFloat(result.lon),
-      name: result.display_name,
-    });
-
-    this.clearSearch();
-  }
-
+  
   requestUserLocation(): void {
     if (!navigator.geolocation) {
       alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
@@ -378,15 +374,61 @@ export class MapControlsComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
-  trackByResult(index: number, result: NominatimResult): string {
-    return result.display_name;
-  }
 
-  private clearSearch(): void {
-    this.searchQuery = "";
-    this.searchResults = [];
-    this.showResults = false;
-    this.isSearching = false;
-    this.isSearchOpen = false;
-  }
+ 
+
+selectLocation(result: NominatimResult): void {
+this.locationSelected.emit({
+  lat: Number.parseFloat(result.lat),
+  lon: Number.parseFloat(result.lon),
+  name: result.display_name,
+});
+
+this.clearSearch();
 }
+
+
+
+trackByResult(index: number, result: NominatimResult): string {
+return result.display_name;
+}
+
+private clearSearch(): void {
+this.searchQuery = "";
+this.searchResults = [];
+this.showResults = false;
+this.isSearching = false;
+this.isSearchOpen = false;
+}
+
+// ===== Auth helpers & actions =====
+get isAuthenticated(): boolean {
+try {
+  return this.kcAuth.isAuthenticated();
+} catch {
+  return false;
+}
+}
+
+get userName(): string {
+try {
+  const u = this.kcAuth.user();
+  return (u?.name || u?.preferred_username || 'Utilisateur') ?? 'Utilisateur';
+} catch {
+  return 'Utilisateur';
+}
+}
+
+toggleAuthPanel(): void {
+this.authExpanded = !this.authExpanded;
+}
+
+login(): void {
+this.kcAuth.login();
+}
+
+logout(): void {
+this.kcAuth.logout();
+}
+}
+

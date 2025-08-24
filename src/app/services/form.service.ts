@@ -331,7 +331,7 @@ export class FormService {
   // ✅ Auto-reload trigger method
   triggerReload(): void {
     const currentCount = this.reloadTriggerSubject.value
-    console.log('🔄 FormService: triggerReload() called, incrementing count from', currentCount, 'to', currentCount + 1)
+    
     this.reloadTriggerSubject.next(currentCount + 1)
   }
 
@@ -394,13 +394,13 @@ export class FormService {
   setTypeLocaleFilter(typeLocales: string[]): void {
     this.selectedTypeLocalesSubject.next(typeLocales)
     this.saveCurrentState()
-    this.triggerReload()
+    // Disabled: this.triggerReload() - Type locale filter excluded from API requests
   }
 
   setSelectedTypeLocales(typeLocales: string[]): void {
     this.selectedTypeLocalesSubject.next(typeLocales)
     this.saveCurrentState()
-    this.triggerReload()
+    // Disabled: this.triggerReload() - Type locale filter excluded from API requests
   }
 
   setSelectedEnergyClasses(energyClasses: string[]): void {
@@ -478,9 +478,7 @@ export class FormService {
   setTypeLocaleToggle(active: boolean): void {
     this.typeLocaleToggleSubject.next(active)
     this.saveCurrentState()
-    // Trigger reload when type locale filter is toggled (regardless of value)
-    // This ensures true SELECT * behavior when activating the filter
-        this.triggerReload()
+    // Disabled: this.triggerReload() - Type locale filter excluded from API requests
   }
 
   // Setters pour les états d'expansion des chevrons
@@ -610,7 +608,7 @@ export class FormService {
   clearTypeLocaleFilter(): void {
     this.selectedTypeLocalesSubject.next(null)
     this.saveCurrentState()
-    this.triggerReload()
+    // Disabled: this.triggerReload() - Type locale filter excluded from API requests
   }
 
 

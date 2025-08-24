@@ -9,18 +9,33 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid var(--border-color, #e5e7eb);
-  
+  color: var(--text-secondary, #6b7280);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
   &:hover {
+    // Keep same background to avoid visible white/grey square effect
+    background: var(--surface-color, #ffffff);
     transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+    img {
+      transform: scale(1.05);
+    }
   }
   
   &:active {
     transform: translateY(0);
   }
-  
+
+  // Accessibility: custom focus ring without default outline
   &:focus {
-    outline: 2px solid var(--primary-300);
-    outline-offset: 2px;
+    outline: none;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -33,13 +48,51 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  /* Shared row height for auth panel and buttons (tuned across browsers) */
+  --auth-row-h: 44px; /* panel/message container height */
+  --auth-btn-h: 32px; /* button height (smaller than panel) */
 }
 
+/* Generic control button styling */
 .control-button {
   @include standard-button;
-  background-color: var(--surface-color);
-  box-shadow: var(--shadow-md);
+  background: var(--surface-color, #ffffff);
+  color: var(--text-secondary, #6b7280);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  -webkit-tap-highlight-color: transparent;
+  
+  img, svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  
+  &:hover {
+    // Keep same background to avoid visible white/grey square effect
+    background: var(--surface-color, #ffffff);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
+    border-color: var(--primary-500, #3b82f6);
+    color: #fff;
+    
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+/* ===== AUTH CONTROL ===== */
+.auth-container {
+  position: relative;
   color: var(--text-secondary);
+  background: transparent; /* prevent wrapper background */
+  box-shadow: none; /* prevent wrapper shadow */
+  border: none;
+  padding: 0;
+  margin: 0;
   
   svg {
     width: 32px;
@@ -50,17 +103,128 @@
     width: 32px;
     height: 32px;
     object-fit: contain;
+    background: transparent; /* avoid icon white box */
+    display: block;
   }
   
-  &:hover {
-    background-color: var(--surface-hover);
-    box-shadow: var(--shadow-lg);
+  /* Keep wrapper transparent on interactions */
+  &:hover,
+  &:focus,
+  &:focus-within,
+  &:active {
+    background: transparent;
+    box-shadow: none;
   }
   
   &.active {
     background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
     color: white;
     border-color: var(--primary-color);
+  }
+}
+
+/* Auth dropdown panel */
+.auth-panel {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px);
+  width: max-content;
+  min-width: 220px;
+  max-width: 360px;
+  background: var(--surface-color, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0 12px; /* comfortable side padding */
+  box-sizing: border-box;
+  height: var(--auth-row-h);
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1002;
+  /* Ensure the panel sizes to content but doesn't overflow viewport */
+  overflow: hidden;
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  
+  .auth-content {
+    display: flex;
+    align-items: center; /* center button vertically within taller panel */
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap; /* always single line */
+    white-space: nowrap; /* prevent wrapping */
+    height: var(--auth-row-h);
+
+    .user-name {
+      font-weight: 600;
+      color: var(--text-color, #374151);
+      font-size: 0.875rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1 1 auto;
+      min-width: 0; /* allow truncation */
+      height: 100%; /* fill panel height */
+      display: flex; /* reliable vertical centering across browsers */
+      align-items: center;
+    }
+  }
+}
+
+/* Mobile adjustments: keep single line, constrain width, still truncate */
+@media (max-width: 480px) {
+  .auth-panel {
+    max-width: calc(100vw - 40px);
+    right: calc(100% + 6px);
+  }
+  .auth-panel .auth-content {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+
+.login-btn {
+  @include standard-button;
+  width: auto;
+  height: var(--auth-btn-h);
+  padding: 0 12px;
+  background: var(--primary-600, #2563eb);
+  border-color: var(--primary-700, #1d4ed8);
+  color: #ffffff;
+  flex-shrink: 0;
+  box-sizing: border-box; /* ensure border included in sizing */
+
+  &:hover {
+    background: var(--primary-700, #1d4ed8);
+  }
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.logout-btn {
+  @include standard-button;
+  width: auto;
+  height: var(--auth-btn-h);
+  padding: 0 12px;
+  background: var(--danger-600, #ef4444);
+  border-color: var(--danger-700, #b91c1c);
+  color: #ffffff;
+  flex-shrink: 0;
+  box-sizing: border-box; /* ensure border included in sizing */
+
+  &:hover {
+    background: var(--danger-700, #b91c1c);
+  }
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 }
 
@@ -247,6 +411,7 @@
 
 .search-toggle-btn,
 .location-btn {
+  @include standard-button;
   width: 48px;
   height: 48px;
   background: var(--surface-color, #ffffff);
@@ -260,9 +425,10 @@
   color: var(--text-secondary, #6b7280);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
-    background: var(--surface-hover, #f9fafb);
+    background: var(--surface-color, #ffffff);
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
       0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -288,6 +454,14 @@
     img {
       filter: brightness(0) invert(1);
     }
+  }
+
+  &:focus {
+    outline: none;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   svg {
@@ -581,93 +755,6 @@
     right: -4px;
     bottom: -4px;
     border: 3px solid var(--primary-500);
-    border-radius: 12px;
-    animation: highlight-pulse 1.5s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 1;
-  }
-}
-
-@keyframes highlight-pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scale(1.02);
-  }
-}
-
-// Ajustement pour mobile - bouton d'aide plus petit
-@media (max-width: 768px) {
-  .tutorial-btn {
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-}
-// Ajouter ces styles à votre map-controls.component.scss existant
-
-/* ===== TUTORIAL BUTTON STYLES ===== */
-.tutorial-btn {
-  position: relative;
-  
-  svg {
-    width: 24px;
-    height: 24px;
-    transition: transform 0.2s ease;
-  }
-  
-  &:hover {
-    svg {
-      transform: scale(1.1);
-    }
-    
-    // Animation subtile pour attirer l'attention
-    &::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border: 2px solid var(--primary-500, #3b82f6);
-      border-radius: 10px;
-      opacity: 0.3;
-      animation: pulse 2s infinite;
-    }
-  }
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.1;
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-}
-
-// Style pour mettre en évidence pendant le tutoriel
-.shepherd-target-highlighted {
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border: 3px solid var(--primary-500, #3b82f6);
     border-radius: 12px;
     animation: highlight-pulse 1.5s ease-in-out infinite;
     pointer-events: none;

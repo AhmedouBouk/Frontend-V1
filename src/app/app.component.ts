@@ -43,6 +43,12 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly subscriptions: Subscription[] = []
   private readonly kcAuth = inject(KeycloakAuthService)
   private readonly tutorialService = inject(TutorialService)
+  private readonly closeSidebarHandler = (event: Event) => {
+    if (this.sidebarOpen) {
+      this.sidebarOpen = false
+      this.formService.setLeftSidebarOpen(false)
+    }
+  }
 
   ngOnInit(): void {
     // Initialize Keycloak auth (direct integration)
@@ -59,6 +65,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Restaurer l'état des filtres et synchroniser le sidebar
     this.formService.restoreFilterState()
+    // Sync local sidebar state with persisted value
+    this.subscriptions.push(
+      this.formService.getLeftSidebarOpenObservable().subscribe((open: boolean) => {
+        this.sidebarOpen = open
+      })
+    )
+    // Global hook to force-close sidebar (used by tutorial)
+    window.addEventListener('closeSidebar', this.closeSidebarHandler)
     
     // Instead of getGlobalLoadingObservable, subscribe to each one
 this.subscriptions.push(
@@ -101,6 +115,7 @@ this.subscriptions.push(
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe())
+    window.removeEventListener('closeSidebar', this.closeSidebarHandler)
   }
 
   toggleSidebar(): void {

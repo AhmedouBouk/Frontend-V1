@@ -110,9 +110,8 @@ export class DpeService {
     dateRange?: [string, string] | null;
     consumptionFilter?: [number, number] | null;
     exactConsumption?: number | null;
-    typeLocaleFilter?: string[] | null;
   }): Record<string, any> {
-    const { surfaceRange, exactDate, dateRange, consumptionFilter, exactConsumption, typeLocaleFilter } = options;
+    const { surfaceRange, exactDate, dateRange, consumptionFilter, exactConsumption } = options;
     const enhancedParams = { ...params };
     
     // Ajout des filtres de date si présents
@@ -141,14 +140,6 @@ export class DpeService {
         enhancedParams['consommation_min'] = consumptionFilter[0];
         enhancedParams['consommation_max'] = consumptionFilter[1];
       }
-    }
-
-    // 🏠 Type Locale filter - Fix parameter name to match backend API
-    if (typeLocaleFilter && typeLocaleFilter.length > 0) {
-      enhancedParams['type_local'] = typeLocaleFilter.join(',');
-      
-    } else {
-      
     }
 
     return enhancedParams;
@@ -208,8 +199,7 @@ export class DpeService {
     exactDate,
     dateRange,
     consumptionFilter,
-    exactConsumption,
-    typeLocaleFilter
+    exactConsumption
   });
 
   const apiUrl = `${environment.apiUrl}/dpe`;

@@ -62,7 +62,7 @@ export class ParcelleService {
     topLeft: [number, number],
     bottomRight: [number, number],
     surfaceFilter: [number, number] | number | string | null = null,
-    typeLocaleFilter: string[] | null = null
+    
   ): Observable<ParcelleProperty[]> {
 
     // -- 1. Conversion des coordonnees lat/lon vers coordonnees projetees ----
@@ -119,13 +119,7 @@ export class ParcelleService {
       }
     }
     
-    // Add Type Locale filter if provided
-    if (typeLocaleFilter && typeLocaleFilter.length > 0) {
-      params = params.set('type_local', typeLocaleFilter.join(','));
-      
-    } else {
-      
-    }
+    
 
     // Construction de l'URL de l'API pour les parcelles
     const apiUrl = `${environment.apiUrl}/parcelles`;

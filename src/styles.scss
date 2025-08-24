@@ -320,11 +320,51 @@ body {
       }
     }
   }
+
+  /* Mobile tweaks for centered steps */
+  .shepherd-element.centered-step {
+    max-width: calc(100vw - 40px);
+    .shepherd-text {
+      font-size: 0.95rem;
+    }
+    .shepherd-footer {
+      flex-wrap: wrap;
+      .shepherd-button {
+        width: 100%;
+      }
+    }
+  }
 }
 
 .shepherd-arrow:before {
   background: var(--surface-color, #ffffff);
   border: 1px solid var(--border-color, #e5e7eb);
+}
+
+/* Centered steps (intro and finish) */
+.shepherd-element.centered-step {
+  max-width: 560px;
+  margin: 0 auto;
+  /* In case of body-centered attach, remove the arrow */
+  .shepherd-arrow {
+    display: none;
+  }
+
+  .shepherd-header {
+    text-align: center;
+  }
+
+  .shepherd-content {
+    text-align: center;
+  }
+
+  .shepherd-text {
+    text-align: left; /* keep paragraphs easy to read */
+  }
+
+  .shepherd-footer {
+    justify-content: center;
+  }
 }
 
 /* Responsive */

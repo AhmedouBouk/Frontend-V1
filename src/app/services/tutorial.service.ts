@@ -57,6 +57,9 @@ export class TutorialService {
       },
     });
 
+    // Responsive handling
+    const isMobile = window.innerWidth <= 768;
+
     // Journaux simples du cycle de vie du tour
     try {
       this.tour.on?.('start', () => console.debug('[Shepherd] Tour started'));
@@ -69,6 +72,7 @@ export class TutorialService {
     this.tour.addStep({
       id: 'step-intro',
       title: '🏠 Bienvenue dans votre assistant immobilier',
+      classes: 'centered-step',
       text: `
         <div style="text-align: left;">
           <p>Cette visite guidée complète vous expliquera comment utiliser tous les outils de recherche et de visualisation disponibles.</p>
@@ -113,7 +117,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.fixed-logo',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -148,7 +152,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.sidebar',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       when: {
         show: () => {
@@ -192,7 +196,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-type .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -228,7 +232,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-ventes .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -262,7 +266,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-surface .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -300,7 +304,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-dpe .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -332,7 +336,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-consumption .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -368,7 +372,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '#section-periode .section-header',
-        on: 'right'
+        on: isMobile ? 'bottom' : 'right'
       },
       buttons: [
         {
@@ -378,7 +382,25 @@ export class TutorialService {
         },
         {
           text: 'Suivant - Contrôles carte',
-          action: () => this.tour.next(),
+          action: () => {
+            // Close sidebar before moving to map controls
+            try {
+              const sidebar = document.querySelector('.sidebar');
+              if (sidebar && sidebar.classList.contains('open')) {
+                // Prefer clicking the overlay which sits above and closes the sidebar
+                const overlay = document.querySelector('.sidebar-overlay') as HTMLElement | null;
+                if (overlay) {
+                  overlay.click();
+                } else {
+                  // Fallback: click the in-sidebar close button
+                  const closeBtn = document.querySelector('.site-logo-btn') as HTMLElement | null;
+                  closeBtn?.click();
+                }
+              }
+            } catch {}
+            // Wait a short time for the close animation/state to settle before advancing
+            setTimeout(() => this.tour.next(), 300);
+          },
           classes: 'btn btn-primary'
         }
       ]
@@ -402,7 +424,28 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.map-controls',
-        on: 'left'
+        on: isMobile ? 'bottom' : 'left'
+      },
+      when: {
+        show: () => {
+          // Ensure sidebar is closed when entering map controls step
+          try {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && sidebar.classList.contains('open')) {
+              // Prefer clicking the overlay which sits above and closes the sidebar
+              const overlay = document.querySelector('.sidebar-overlay') as HTMLElement | null;
+              if (overlay) {
+                overlay.click();
+              } else {
+                // Fallback: click the in-sidebar close button
+                const closeBtn = document.querySelector('.site-logo-btn') as HTMLElement | null;
+                closeBtn?.click();
+              }
+              // Give the DOM a moment to update the state
+              setTimeout(() => {}, 200);
+            }
+          } catch {}
+        }
       },
       buttons: [
         {
@@ -436,7 +479,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.search-controls',
-        on: 'top'
+        on: isMobile ? 'bottom' : 'top'
       },
       buttons: [
         {
@@ -478,7 +521,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.search-input',
-        on: 'top'
+        on: isMobile ? 'bottom' : 'top'
       },
       when: {
         show: () => {
@@ -521,7 +564,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.toggle-icon',
-        on: 'top'
+        on: isMobile ? 'bottom' : 'top'
       },
       buttons: [
         {
@@ -555,7 +598,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.header-center',
-        on: 'top'
+        on: isMobile ? 'bottom' : 'top'
       },
       buttons: [
         {
@@ -589,7 +632,7 @@ export class TutorialService {
       `,
       attachTo: {
         element: '.property-table',
-        on: 'top'
+        on: isMobile ? 'bottom' : 'top'
       },
       buttons: [
         {
@@ -647,6 +690,7 @@ export class TutorialService {
     this.tour.addStep({
       id: 'step-finish',
       title: '🎉 Félicitations !',
+      classes: 'centered-step',
       text: `
         <div style="text-align: left;">
           <p><strong>Vous maîtrisez maintenant votre assistant immobilier !</strong></p>

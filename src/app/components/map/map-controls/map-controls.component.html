@@ -32,8 +32,34 @@
   </div>
 </div>
 
-<!-- Map type control buttons -->
+<!-- Map type control buttons + Auth -->
 <div class="map-controls">
+  <!-- Auth control -->
+  <div class="auth-container">
+    <button
+      type="button"
+      class="control-button auth-toggle"
+      (click)="toggleAuthPanel()"
+      [attr.aria-expanded]="authExpanded"
+      title="Compte utilisateur">
+      <img src="assets/icons/connection.png" alt="Connexion" width="32" height="32">
+      <span class="sr-only">Compte utilisateur</span>
+    </button>
+
+    <div class="auth-panel" [class.open]="authExpanded" role="region" aria-label="Panneau utilisateur">
+      <div class="auth-content" *ngIf="isAuthenticated; else loggedOut">
+        <div class="user-name" [attr.title]="userName">{{ userName }}</div>
+        <button type="button" class="logout-btn" (click)="logout()">Se déconnecter</button>
+      </div>
+      <ng-template #loggedOut>
+        <div class="auth-content">
+          <div class="user-name">Vous n'êtes pas connecté</div>
+          <button type="button" class="login-btn" (click)="login()">Se connecter</button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
   <button class="control-button" [class.active]="mapType === 'street'" title="Vue plan" type="button" (click)="setMapType('street')">
     <img src="assets/icons/vue_satellite.png" alt="Vue plan" width="32" height="32">
     <span class="sr-only">Vue plan</span>

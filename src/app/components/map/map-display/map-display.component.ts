@@ -109,24 +109,14 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       // Debug: Check container dimensions
       const containerElement = this.mapContainer.nativeElement
       const containerRect = containerElement.getBoundingClientRect()
-      console.log('🗺️ DEBUG: Map container dimensions:', {
-        width: containerRect.width,
-        height: containerRect.height,
-        visible: containerRect.width > 0 && containerRect.height > 0
-      })
+      
 
       // Récupérer l'état sauvegardé ou utiliser l'état par défaut
       const savedState = this.mapStateService.getMapState()
       const defaultState = this.mapStateService.getDefaultMapState()
       const mapState = savedState || defaultState
 
-      // Debug: Log map state being used
-      console.log('🗺️ DEBUG: Map state:', {
-        center: mapState.center,
-        zoom: mapState.zoom,
-        mapType: mapState.mapType,
-        isDefault: !savedState
-      })
+      
 
       // Create the map with restored state
       this.map = L.map(this.mapContainer.nativeElement, {
@@ -137,7 +127,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       })
 
       // Debug: Log map creation
-      console.log('🗺️ DEBUG: Map created with center:', this.map.getCenter(), 'zoom:', this.map.getZoom())
+      
 
       // Add attribution control
       const attributionControl = L.control({
@@ -176,10 +166,10 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       // Debug: Add tile loading event listeners
       const streetLayer = this.baseLayers.street
       streetLayer.on('loading', () => {
-        console.log('🗺️ DEBUG: Street tiles loading started')
+        
       })
       streetLayer.on('load', () => {
-        console.log('🗺️ DEBUG: Street tiles loading completed')
+        
       })
       streetLayer.on('tileerror', (e: any) => {
         console.error('🗺️ DEBUG: Street tile loading error:', e)
@@ -194,7 +184,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       this.currentLayer = this.baseLayers[layerType].addTo(this.map)
 
       // Debug: Log active layer
-      console.log('🗺️ DEBUG: Active layer type:', layerType)
+      
 
       // Force a map resize to ensure it displays correctly
       this.map.invalidateSize(true)
@@ -202,21 +192,11 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       // Debug: Log map bounds after initialization
       setTimeout(() => {
         const bounds = this.map.getBounds()
-        console.log('🗺️ DEBUG: Map bounds after init:', {
-          north: bounds.getNorth(),
-          south: bounds.getSouth(),
-          east: bounds.getEast(),
-          west: bounds.getWest(),
-          center: this.map.getCenter(),
-          zoom: this.map.getZoom()
-        })
+        
 
         // Check if map container is properly sized
         const finalRect = containerElement.getBoundingClientRect()
-        console.log('🗺️ DEBUG: Final container dimensions:', {
-          width: finalRect.width,
-          height: finalRect.height
-        })
+        
 
         
       }, 500)
@@ -399,33 +379,33 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private updateMarkers(): void {
-    console.log('🗺️ MapDisplay: updateMarkers() called')
-    console.log('🗺️ MapDisplay: visibleDvfProperties:', this.visibleDvfProperties.length)
-    console.log('🗺️ MapDisplay: visibleDpeProperties:', this.visibleDpeProperties.length)
-    console.log('🗺️ MapDisplay: visibleParcelleProperties:', this.visibleParcelleProperties.length)
-    console.log('🗺️ MapDisplay: activeDataSources:', this.activeDataSources)
-    console.log('🗺️ MapDisplay: currentDataSource:', this.currentDataSource)
+    
+    
+    
+    
+    
+    
     
     this.clearMarkers()
 
     // Déterminer quelles sources afficher
     const sourcesToShow = this.activeDataSources.length > 0 ? this.activeDataSources : [this.currentDataSource]
     
-    console.log('🗺️ MapDisplay: sourcesToShow:', sourcesToShow)
+    
 
     // Afficher les marqueurs DVF si la source est active
     if (sourcesToShow.includes('dvf') && this.visibleDvfProperties.length > 0) {
-      console.log('🗺️ MapDisplay: Adding', this.visibleDvfProperties.length, 'DVF markers')
+      
       this.visibleDvfProperties.forEach((property) => {
         this.addDvfMarker(property)
       })
     } else {
-      console.log('🗺️ MapDisplay: Not adding DVF markers - sourcesToShow includes dvf:', sourcesToShow.includes('dvf'), 'visibleDvfProperties.length:', this.visibleDvfProperties.length)
+      
     }
 
     // Afficher les marqueurs DPE si la source est active
     if (sourcesToShow.includes('dpe') && this.visibleDpeProperties.length > 0) {
-      console.log('🗺️ MapDisplay: Adding', this.visibleDpeProperties.length, 'DPE markers')
+      
       this.visibleDpeProperties.forEach((property) => {
         this.addDpeMarker(property)
       })
@@ -433,13 +413,13 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
     // Afficher les marqueurs Parcelles si la source est active
     if (sourcesToShow.includes('parcelles') && this.visibleParcelleProperties.length > 0) {
-      console.log('🗺️ MapDisplay: Adding', this.visibleParcelleProperties.length, 'Parcelle markers')
+      
       this.visibleParcelleProperties.forEach((property) => {
         this.addParcelleMarker(property)
       })
     }
     
-    console.log('🗺️ MapDisplay: Total markers after update:', this.markers.length)
+    
   }
 
   private clearMarkers(): void {
@@ -451,11 +431,7 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private addDvfMarker(property: DvfProperty): void {
     if (!property.latitude || !property.longitude || !property.valeur_fonciere) {
-      console.log('🗺️ DVF Marker SKIPPED - missing data:', {
-        hasLat: !!property.latitude,
-        hasLng: !!property.longitude,
-        hasPrice: !!property.valeur_fonciere
-      })
+     
       return
     }
   
@@ -469,18 +445,11 @@ export class MapDisplayComponent implements AfterViewInit, OnDestroy, OnInit {
       !this.useEnergyFilter && 
       !this.useConsumptionFilter
     
-    console.log('🗺️ DVF Marker - Filter states:', {
-      useDateFilter: this.useDateFilter,
-      usePriceFilter: this.usePriceFilter,
-      useSurfaceFilter: this.useSurfaceFilter,
-      useEnergyFilter: this.useEnergyFilter,
-      useConsumptionFilter: this.useConsumptionFilter,
-      onlyPeriodFilterActive: onlyPeriodFilterActive
-    })
+    
     
     // Don't add markers if only period filter is active
     if (onlyPeriodFilterActive) {
-      console.log('🗺️ DVF Marker SKIPPED - only period filter active')
+      
       return
     }
   
